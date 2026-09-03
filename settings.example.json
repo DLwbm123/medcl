@@ -1,0 +1,24 @@
+{
+  "benchmarks": [
+    {
+      "id": "local-segmentation",
+      "title": "本地分割测试协议",
+      "kind": "segmentation",
+      "incremental": "domain",
+      "version": "operator-reviewed-v1",
+      "synthetic": false,
+      "description": "管理员确认测试集、病例边界与类别后接入；路径未配置时不开放评测。",
+      "source": "请填写有权使用的数据来源和固定测试划分版本",
+      "metric": "Foreground Dice",
+      "direction": "higher",
+      "unit": "fraction",
+      "allow_unseen": false,
+      "output_semantics": "shared-binary-head",
+      "preprocessing": "HDF5 HWN 转 NHW float32；无额外标准化",
+      "label_rule": "非负插值标签 astype(int64)；背景 0，前景 1",
+      "tasks": [
+        {"id": "T1", "name": "测试域 1", "format": "h5", "path": "/absolute/path/to/domain1.h5", "classes": [1], "all_classes": [0, 1]}
+      ]
+    }
+  ]
+}

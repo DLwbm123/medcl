@@ -1,0 +1,53 @@
+"""A runnable UI regression: upload, queue, result, exports and visible errors."""
+
+import os
+from pathlib import Path
+import tempfile
+import unittest
+from unittest.mock import patch
+
+from streamlit.testing.v1 import AppTest
+
+from medcl.benchmarks import demo_protocol
+from medcl.examples import baseline_predictions, pack_predictions
+from medcl.storage import heartbeat, initialize, list_jobs
+from medcl.worker import run_worker
+
+
+class BrowserAppCheck(unittest.TestCase):
+    def test_upload_result_navigation_and_invalid_file(self):
+        with tempfile.TemporaryDirectory(prefix="medcl-ui-test-") as directory:
+            root = initialize(Path(directory))
+            with patch.dict(os.environ, {"MEDCL_STATE_DIR": str(root), "MEDCL_CONFIG": str(root / "no-assets.json")}):
+                heartbeat(root)
+                app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
+                self.assertFalse(app.exception)
+                app.sidebar.radio[0].set_value("新建评测").run()
+                app.selectbox[0].set_value("demo-classification").run()
+                app.text_input[0].set_value("UI synthetic acceptance").run()
+                data = pack_predictions(baseline_predictions(demo_protocol("classification"), ["T1", "T2", "T3"]), True)
+                app.file_uploader[0].set_value(("final.json", data, "application/json")).run()
+                heartbeat(root)
+                next(button for button in app.button if button.label == "提交并开始评测").click().run()
+                self.assertFalse(app.exception)
+                self.assertEqual(len(list_jobs(root)), 1)
+                run_worker(root, once=True)
+                app.sidebar.radio[0].set_value("评测记录").run()
+                self.assertFalse(app.exception)
+                self.assertEqual(len(app.download_button), 3)
+                self.assertIn("—", [metric.value for metric in app.metric])
+                app.sidebar.radio[0].set_value("方法比较").run()
+                self.assertTrue(any("至少需要两条" in notice.value for notice in app.info))
+                app.sidebar.radio[0].set_value("新建评测").run()
+                app.selectbox[0].set_value("demo-classification").run()
+                app.text_input[0].set_value("invalid upload check").run()
+                app.file_uploader[0].set_value(("bad.json", b"not-json", "application/json")).run()
+                heartbeat(root)
+                next(button for button in app.button if button.label == "提交并开始评测").click().run()
+                self.assertFalse(app.exception)
+                self.assertTrue(any("JSON 文件无效" in error.value for error in app.error))
+                self.assertEqual(len(list_jobs(root)), 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

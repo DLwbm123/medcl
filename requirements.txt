@@ -1,0 +1,4 @@
+streamlit==1.63.0
+numpy>=1.26,<3
+h5py>=3.10,<4
+safetensors>=0.5,<1

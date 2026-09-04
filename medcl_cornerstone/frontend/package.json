@@ -1,0 +1,24 @@
+{
+  "name": "medcl-cornerstone-frontend",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cornerstonejs/core": "5.8.2",
+    "@cornerstonejs/tools": "5.8.2",
+    "@streamlit/component-v2-lib": "0.2.0",
+    "events": "3.3.0",
+    "url": "0.11.4"
+  },
+  "devDependencies": {
+    "@types/node": "24.5.2",
+    "typescript": "5.9.2",
+    "vite": "7.1.7",
+    "vitest": "3.2.4"
+  }
+}

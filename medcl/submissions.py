@@ -12,7 +12,8 @@ import zipfile
 
 import numpy as np
 
-from medcl.benchmarks import freeze_assets, public_protocol, readiness
+from medcl import EVALUATOR_VERSION, VIEWER_SCHEMA_VERSION
+from medcl.benchmarks import allowed_output_heads, freeze_assets, public_protocol, readiness
 from medcl.storage import create_job
 
 MAX_FILE = 128 * 1024 * 1024
@@ -99,18 +100,20 @@ def validate_prediction_json(doc: object) -> dict:
     return doc
 
 
-def validate_archive(data: bytes) -> None:
+def validate_archive(data: bytes, *, allow_registration_volumes: bool = False) -> None:
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
             entries = archive.infolist()
-            if not 2 <= len(entries) <= 24 or len({e.filename for e in entries}) != len(entries):
+            if not 2 <= len(entries) <= 48 or len({e.filename for e in entries}) != len(entries):
                 raise ValueError("NPZ 必须有 1–12 个任务的成对数组，且不可重复")
             if sum(e.file_size for e in entries) > MAX_EXPANDED:
                 raise ValueError("NPZ 解压后超过 512 MiB 上限")
             for entry in entries:
                 path = PurePosixPath(entry.filename)
-                if path.is_absolute() or len(path.parts) != 1 or not re.fullmatch(r"[A-Za-z0-9-]+__(ids|pred)\.npy", entry.filename):
-                    raise ValueError("ZIP 路径非法：只允许 task__ids.npy 和 task__pred.npy")
+                match = re.fullmatch(r"([A-Za-z0-9][A-Za-z0-9-]{0,63})__(ids|pred|registered|warped_prediction)\.npy", entry.filename)
+                if (path.is_absolute() or len(path.parts) != 1 or match is None
+                        or (match.group(2) in ("registered", "warped_prediction") and not allow_registration_volumes)):
+                    raise ValueError("ZIP 路径非法或包含当前协议不允许的数组")
                 if (entry.external_attr >> 16) & 0o170000 == 0o120000 or entry.flag_bits & 1:
                     raise ValueError("不接受符号链接或加密 ZIP")
                 if entry.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
@@ -123,12 +126,21 @@ def validate_archive(data: bytes) -> None:
                         shape, fortran, dtype = np.lib.format.read_array_header_2_0(handle, max_header_size=10000)
                     else:
                         raise ValueError("仅支持 NPY v1/v2")
-                    if dtype.hasobject or dtype.kind not in "biufUS" or len(shape) > 5:
+                    field = match.group(2)
+                    if (dtype.hasobject or dtype.kind not in "biufUS" or len(shape) > 5
+                            or (field == "ids" and (dtype.kind not in "US" or len(shape) != 1))
+                            or (field in ("pred", "registered") and dtype.kind not in "iuf")
+                            or (field == "warped_prediction" and (dtype.kind not in "iu" or len(shape) != 4))
+                            or (field == "registered" and len(shape) != 4)):
                         raise ValueError("不接受 Pickle、对象或结构化数组")
                     if not shape or any(d <= 0 for d in shape) or math.prod(shape) * dtype.itemsize > MAX_EXPANDED:
                         raise ValueError("数组维度为空或超过资源上限")
                     if handle.tell() + math.prod(shape) * dtype.itemsize != entry.file_size:
                         raise ValueError("数组声明大小与文件内容不符")
+            names = {entry.filename[:-4] for entry in entries}
+            tasks = {name.split("__", 1)[0] for name in names}
+            if not 1 <= len(tasks) <= 12 or any({f"{task}__ids", f"{task}__pred"} - names for task in tasks):
+                raise ValueError("每个任务需同时提供 ids 和 pred 数组")
     except (zipfile.BadZipFile, EOFError, OSError, OverflowError):
         raise ValueError("NPZ/ZIP 内容损坏") from None
 
@@ -168,7 +180,8 @@ def validate_weights(data: bytes, architecture: str) -> None:
         raise ValueError("权重数据截断或存在多余内容")
 
 
-def inspect_upload(name: str, data: bytes, mode: str, architecture: str | None = None):
+def inspect_upload(name: str, data: bytes, mode: str, architecture: str | None = None,
+                   *, allow_registration_volumes: bool = False):
     if not isinstance(data, bytes) or not 0 < len(data) <= MAX_FILE:
         raise ValueError("每个文件需为 1 byte–128 MiB")
     suffix = Path(name).suffix.lower()
@@ -182,7 +195,7 @@ def inspect_upload(name: str, data: bytes, mode: str, architecture: str | None =
     if mode != "predictions":
         raise ValueError("提交模式无效")
     if suffix in (".npz", ".zip"):
-        validate_archive(data)
+        validate_archive(data, allow_registration_volumes=allow_registration_volumes)
         return None
     if suffix == ".json":
         if len(data) > MAX_JSON:
@@ -198,17 +211,21 @@ def required_tasks(config: dict, stage: int) -> list[str]:
 
 def load_predictions(path: Path) -> dict[str, dict]:
     data = path.read_bytes()
-    doc = inspect_upload(path.name, data, "predictions")
+    doc = inspect_upload(path.name, data, "predictions", allow_registration_volumes=True)
     if path.suffix == ".json":
         result = {}
         for key, value in doc["tasks"].items():
             result[key] = {"ids": np.asarray(value["sample_ids"]), "pred": np.asarray(value["predictions"])}
         return result
     with np.load(io.BytesIO(data), allow_pickle=False) as archive:
-        task_ids = {key.split("__")[0] for key in archive.files}
-        if set(archive.files) != {f"{t}__{field}" for t in task_ids for field in ("ids", "pred")}:
-            raise ValueError("每个任务需同时提供 ids 和 pred 数组")
-        return {t: {"ids": np.array(archive[f"{t}__ids"]), "pred": np.array(archive[f"{t}__pred"])} for t in task_ids}
+        task_ids = {key.split("__", 1)[0] for key in archive.files}
+        result = {}
+        for task in task_ids:
+            fields = {key.split("__", 1)[1] for key in archive.files if key.startswith(f"{task}__")}
+            if not {"ids", "pred"} <= fields or not fields <= {"ids", "pred", "registered", "warped_prediction"}:
+                raise ValueError("每个任务需同时提供 ids 和 pred 数组")
+            result[task] = {field: np.array(archive[f"{task}__{field}"]) for field in fields}
+        return result
 
 
 def align_predictions(entry: dict, sample_ids: np.ndarray, expected_shape: tuple,
@@ -228,6 +245,27 @@ def align_predictions(entry: dict, sample_ids: np.ndarray, expected_shape: tuple
     return pred[[positions[str(sample)] for sample in sample_ids]]
 
 
+def align_registration_volumes(entry: dict, sample_ids: np.ndarray, volume_shape: tuple[int, ...]) -> dict[str, np.ndarray]:
+    """Align optional qualitative registration volumes with the already checked IDs."""
+    ids = entry["ids"].astype("U") if entry["ids"].dtype.kind == "S" else entry["ids"]
+    positions = {str(value): index for index, value in enumerate(ids)}
+    order = [positions[str(sample)] for sample in sample_ids]
+    result = {}
+    for name in ("registered", "warped_prediction"):
+        if name not in entry:
+            continue
+        array = entry[name]
+        if array.shape != volume_shape:
+            raise ValueError("配准后体数据必须与 fixed display grid 完全同形")
+        if name == "registered":
+            if array.dtype.kind not in "iuf" or not np.isfinite(array).all():
+                raise ValueError("配准后体数据必须是有限数值 scalar volume")
+        elif (array.dtype.kind not in "iu" or np.any(array < 0) or array.max(initial=0) > 65535):
+            raise ValueError("warped prediction 必须是 uint16 范围内的整数 labelmap")
+        result[name] = array[order]
+    return result
+
+
 def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict],
            mode: str, architecture: str | None, clients: int, evaluate_unseen: bool,
            output_head: str = "shared", training_supervision: str | None = None,
@@ -242,8 +280,8 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
         raise ValueError("任务顺序必须包含全部任务 ID，且不能重复")
     if mode not in ("model", "predictions") or type(clients) is not int or clients not in (1, 2, 3, 4):
         raise ValueError("提交模式或客户端数量无效")
-    if output_head not in ("shared", "task-specific"):
-        raise ValueError("输出头条件无效")
+    if output_head not in allowed_output_heads(benchmark):
+        raise ValueError("输出头不在该协议允许范围内")
     supervision = training_supervision or ("not-declared" if benchmark["kind"] == "segmentation" else "not-applicable")
     if benchmark["kind"] == "segmentation":
         if supervision not in ("full", "weak", "not-declared"):
@@ -275,13 +313,19 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
             raise ValueError("所选模型结构或输出头尚未审核")
         if not sandbox_available():
             raise ValueError("本机尚未通过模型隔离检查，请改为上传预测")
+        if any(task["format"] == "registration-volume" for task in benchmark["tasks"]):
+            raise ValueError("registration-volume 第一版只接受预测文件")
+    allow_volumes = any(task["format"] == "registration-volume" for task in benchmark["tasks"])
     for item in uploads:
-        inspect_upload(item["name"], item["data"], mode, architecture)
+        inspect_upload(item["name"], item["data"], mode, architecture,
+                       allow_registration_volumes=allow_volumes)
     assets = freeze_assets(benchmark)
     by_path = {a["path"]: a for a in assets}
     from medcl.benchmarks import asset_paths
     config = {
-        "schema_version": 2, "benchmark": public_protocol(benchmark), "method": method.strip(),
+        "schema_version": 2, "evaluator_version": EVALUATOR_VERSION,
+        "viewer_schema_version": VIEWER_SCHEMA_VERSION,
+        "benchmark": public_protocol(benchmark), "method": method.strip(),
         "order": list(order), "stages": sorted(stages), "mode": mode, "architecture": architecture,
         "clients": clients, "evaluate_unseen": bool(evaluate_unseen), "output_head": output_head,
         "training_supervision": supervision,

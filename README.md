@@ -1,6 +1,6 @@
 # MedCL
 
-本地医学影像持续学习**评测**工作台。顶部导航和纵向任务层级、中文 Streamlit 界面、SQLite 队列、一个独立评分 worker；不训练、不调参、不聚合权重、不要求训练日志。
+本地医学影像持续学习**评测**工作台。顶部导航和纵向任务层级、中文 Streamlit 界面、SQLite 队列、一个独立评分 worker，以及内嵌的只读 Cornerstone3D 单病例查看器；不训练、不调参、不聚合权重、不要求训练日志。
 
 ## 启动与使用
 
@@ -13,6 +13,8 @@ python3 -m pip install -r requirements.txt
 python3 run.py
 ```
 
+仓库已提交构建后的前端静态文件，生产启动不需要 Node.js。只有修改 `medcl_cornerstone/frontend/src` 后才需在该目录运行 `npm ci && npm run typecheck && npm test -- --run && npm run build`，并一同提交 `build/`。
+
 使用 Python 3.12；已存在的环境即可，不需要 Torch 或 GPU。macOS 启动器优先复用 `/opt/miniconda3/bin/python`，也可用 `MEDCL_PYTHON` 指定现有解释器。不要向公网绑定端口。
 
 网页操作：顶部任务中心 → 分割 / 分类 / 配准 → 域 / 类 / 任务增量 → 具体协议 → 上传模型或预测 → 查看矩阵、病例可视化与报告。分割在选协议前记录“全监督 / 弱监督”的提交者声明；两者都用冻结完整测试标注评分。更改顺序或监督条件需新建评测。
@@ -24,12 +26,12 @@ python3 run.py
 | 范围 | 已实现 | 边界 |
 |---|---|---|
 | 分类 | 任务级 Accuracy、类别增量、类别语义名称、全局编码、逻辑客户端联邦评分模拟 | 不发布逐样本正误/ID或隐藏标签频数；没有联邦训练或通信 |
-| 分割 | HDF5 固定测试集、全/弱监督声明、病例体积前景 Dice、原图/预测叠加图 | 可视化不带隐藏真值；不根据二维切片臆造 HD95 毫米值 |
-| 配准 | 对应标志点 TRE、移动点/预测点可视化、坐标/单位检查、任务增量 | 当前只有合成可视化；真实点对尚未接入，不支持任意位移场或 SAMCL 模型 |
+| 分割 | HDF5 固定测试集、全/弱监督声明、病例体积前景 Dice、三正交切面与预测 labelmap 三维显示 | 查看器不带隐藏真值，只用于论文范围内的只读单病例展示，不替代 ITK-SNAP；不根据二维切片臆造 HD95 毫米值 |
+| 配准 | 对应标志点 TRE；fixed / moving / registered / 融合 / 可选 warped 三正交切面；预测三维体显示 | registered/warped 必须由提交者在外部生成并对齐 fixed 网格；平台不执行配准、重采样或形变场推理；隐藏 fixed points 与 fixed 真值分割不进入浏览器 |
 | 阶段 | 单个最终输入、多个或缺失阶段、自定义顺序 | 不推断缺失阶段，不把最后可见阶段当作最终阶段 |
 | 客户端 | 固定病例轮转划分，分类按图像；全局/各客户端矩阵、宏平均、加权分类准确率、最差与差异 | 仅逻辑客户端评分模拟，不代表真实跨医院联邦部署 |
 | 模型 | 三种已审核纯数值结构，float32 safetensors | 未接入 UNet / EfficientNet / SAMCL 或任意上传代码；这些方法可提交预测 |
-| 输出 | 任务主指标、Final average / BWT / Forgetting / FWT / BWTR、分割/配准病例可视化、三类报告 | 条件不足显示不可计算；分类仅给任务和客户端聚合结果 |
+| 输出 | 任务主指标、Final average / BWT / Forgetting / FWT / BWTR、分割/配准三维病例可视化、三类报告 | 条件不足显示不可计算；分类仅给任务和客户端聚合结果；报告/公开聚合不嵌入医学体数据 |
 
 客户端版本为 `case-round-robin-v1-cN`：每个任务的匿名病例序号 `mod N`，不会拆分同一病例。分类没有患者标识时按该任务图像列表轮转。它是平台新定义的测试划分，不是原论文的客户端划分。
 
@@ -45,6 +47,8 @@ python3 run.py
 
 上例只说明结构，不是完整测试提交。NPZ/ZIP 内每个任务必须成对包含 `T1__ids.npy`、`T1__pred.npy`；禁止目录、符号链接、Pickle 和对象数组。不在磁盘解压 ZIP。样本 ID 必须完整且唯一，平台按 ID 对齐；分类/分割预测必须是合法整数标签。默认每阶段覆盖已见任务，只有协议和输出头允许时才可选择未见任务。
 
+体数据配准任务的 `T1__pred.npy` 仍是用于 TRE 的预测标志点；可选提交 `T1__registered.npy`（已配准图像）和 `T1__warped_prediction.npy`（已变形的预测标签）。二者必须与管理员提供的 fixed 体数据逐病例同形；它们只驱动查看器，不改变 TRE。平台拒绝在浏览器内或评分器内替用户做配准/重采样。
+
 页面提供无需终端的完整合成预测与未训练权重下载。开发者也可生成多阶段示例（输出在私有状态目录，默认不覆盖已有文件）：
 
 ```sh
@@ -57,14 +61,14 @@ python3 -m medcl.examples --benchmark demo-registration
 
 ## 存储与安全
 
-- 默认私有状态目录：`~/.local/state/medcl`；可用 `MEDCL_STATE_DIR` 改为独立目录。内含 SQLite、上传、冻结配置、结果、最多 6 个/任务的私有预览和错误日志；隐藏真值不进入预览。
+- 默认私有状态目录：`~/.local/state/medcl`；可用 `MEDCL_STATE_DIR` 改为独立目录。内含 SQLite、上传、冻结配置、结果、最多 3 个/任务的私有三维预览和错误日志；隐藏真值不进入预览。
 - `MEDCL_CONFIG` 可指定管理员配置文件；网页不接受任意本地路径。集中 schema 会拒绝合成/真实格式混标、非法指标组合、类别/坐标约定和缺失资产字段。测试资产只读、不复制入源码；提交时记录大小/修改时间，并在每个任务读取前检查。该轻量记录不是内容摘要：同大小且恢复原修改时间的替换仍可能漏检；按当前运维策略，无具体异常时不主动计算全量哈希。
 - 每文件 128 MiB、每次合计 256 MiB；JSON 单独限制为 16 MiB、200 万个预测数值和 100 万个样本 ID，超出时使用 NPZ。NPZ 展开后最多 512 MiB、最多 12 个任务。严格校验 JSON、数组和 safetensors 的内容、大小、映射。
 - 模型在原生 macOS 沙箱中运行：不提供标签，清空继承环境，禁止网络、其他用户文件和子进程；推理 120 秒墙钟/90 秒 CPU、2 GiB RSS 轮询限制。评分任务另有 10 分钟墙钟/4 GiB RSS 轮询上限。内存轮询不是瞬时硬配额。
 - 必须先通过实际隔离探针；不支持该沙箱的环境只开放预测评分，不降级执行模型。只测试了 macOS/Python 3.12；Linux 模型隔离未实现，Windows worker 不支持。
 - 这是本机单用户工具，不是公网多租户服务或临床系统。状态目录/任务目录使用 0700，数据库、上传、私有配置、结果、预览和日志使用 0600；旧分类结果会在数据库 schema 迁移时删除逐样本字段。没有身份认证、实例磁盘配额、自动保留清理或公开托管；请勿上传个人信息或敏感元数据。
 
-实现路径：`app.py` 界面；`medcl/benchmarks.py` 只读资产适配；`submissions.py` / `storage.py` 提交与冻结；`worker.py` / `runner.py` 独立评分；`sandbox.py` / `infer.py` 受限推理；`metrics.py` 指标；`reports.py` 导出。未引入额外数据库、Web 后端或训练服务。
+实现路径：`app.py` 界面；`medcl_cornerstone/` 为 Python 数据信封与预构建 TypeScript/Cornerstone3D 查看器；`medcl/benchmarks.py` 只读资产适配；`submissions.py` / `storage.py` 提交与冻结；`worker.py` / `runner.py` 独立评分；`sandbox.py` / `infer.py` 受限推理；`metrics.py` 指标；`reports.py` 导出。未引入额外数据库、Web 后端或训练服务。
 
 ## 验收与资产状态
 
@@ -72,7 +76,7 @@ python3 -m medcl.examples --benchmark demo-registration
 python3 -m unittest discover -s tests -v
 ```
 
-检查包括可手算指标、分类查询 oracle 消除、协议 schema、严格病例边界、无日志最终输入、自定义顺序、缺失阶段、空客户端、监督条件比较门、损坏/旧预览降级、权限、公开聚合白名单、真实沙箱与页面提交。真实数据工程验收及浏览器记录见 [测试报告](docs/TEST_REPORT.md)，全局聚合发布候选见 [acceptance_summary_v2.json](docs/acceptance_summary_v2.json)。
+检查包括可手算指标、分类逐样本正误与隐藏标签频数直接泄漏的消除、协议 schema、严格病例边界、输出头 allow-list、体数据几何/标签约束、注册体可选数组、三维预览上限与隐私键、损坏/旧预览降级、无日志最终输入、自定义顺序、缺失阶段、空客户端、监督条件比较门、权限、公开聚合白名单、真实沙箱与页面提交。当前仍是可信操作者控制的本地单用户平台，不提供面向无限次自适应提交的公开挑战防护。浏览器和真实数据链路验收见 [测试报告](docs/TEST_REPORT.md)，资产边界见 [资产说明](docs/ASSETS.md)。
 
 需要公开聚合报告时，管理员可明确选取已完成的评测：`python3 -m medcl.reports JOB_ID --output aggregate.json`。v2 导出以白名单重建，只保留安全 run 标识、公开协议标识和全局聚合；不默认发布方法自由文本、管理员说明、病例/客户端明细或资产元数据，且仍保留发布前人工复核提示。不会自动发布本地数据库或网页下载的完整报告。
 

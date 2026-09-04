@@ -24,13 +24,14 @@ _METRICS = {
 _FORMATS = {
     "classification": {"synthetic", "npy", "medmnist"},
     "segmentation": {"synthetic", "h5"},
-    "registration": {"synthetic", "landmarks"},
+    "registration": {"synthetic", "landmarks", "registration-volume"},
 }
 _PATH_FIELDS = {
     "npy": ("images_path", "labels_path"),
     "medmnist": ("path",),
     "h5": ("path",),
     "landmarks": ("path",),
+    "registration-volume": ("path",),
 }
 
 
@@ -63,9 +64,9 @@ def _integer_list(value, name: str, *, nonempty: bool = False) -> list[int]:
     return value
 
 
-def _spacing(value, name: str) -> list[float]:
-    if not isinstance(value, list) or not value:
-        raise ValueError(f"{name} 必须是非空正数列表")
+def _spacing(value, name: str, length: int | None = None) -> list[float]:
+    if not isinstance(value, list) or not value or (length is not None and len(value) != length):
+        raise ValueError(f"{name} 必须是{'恰好 ' + str(length) + ' 个' if length else '非空'}正数列表")
     for item in value:
         try:
             valid = not isinstance(item, bool) and isinstance(item, (int, float)) and math.isfinite(item) and item > 0
@@ -74,6 +75,32 @@ def _spacing(value, name: str) -> list[float]:
         if not valid:
             raise ValueError(f"{name} 必须是有限正数")
     return value
+
+
+def _finite_vector(value, name: str, length: int) -> list[float]:
+    try:
+        valid = (isinstance(value, list) and len(value) == length and all(
+            not isinstance(item, bool) and isinstance(item, (int, float)) and math.isfinite(item) for item in value))
+    except OverflowError:
+        valid = False
+    if not valid:
+        raise ValueError(f"{name} 必须是恰好 {length} 个有限数值")
+    return value
+
+
+def allowed_output_heads(benchmark: dict) -> list[str]:
+    """Return the validated protocol head choices, including legacy defaults."""
+    configured = benchmark.get("allowed_output_heads")
+    if configured is not None:
+        if (not isinstance(configured, list) or not configured or len(configured) != len(set(configured))
+                or any(head not in ("shared", "task-specific") for head in configured)):
+            raise ValueError("allowed_output_heads 只能由 shared / task-specific 构成")
+        return configured
+    if benchmark.get("kind") == "segmentation" and benchmark.get("incremental") == "task":
+        spaces = [(task.get("classes"), task.get("all_classes")) for task in benchmark.get("tasks", [])]
+        if spaces and any(space != spaces[0] for space in spaces[1:]):
+            return ["task-specific"]
+    return ["shared", "task-specific"] if benchmark.get("kind") == "segmentation" else ["shared"]
 
 
 def validate_task(benchmark: dict, task: dict) -> None:
@@ -86,7 +113,8 @@ def validate_task(benchmark: dict, task: dict) -> None:
     kind = benchmark["kind"]
     if fmt not in _FORMATS[kind]:
         raise ValueError("任务资产格式与大任务类型不匹配")
-    if (fmt == "synthetic") != benchmark["synthetic"]:
+    generated_volume = benchmark["synthetic"] and kind == "registration" and fmt == "registration-volume"
+    if (fmt == "synthetic" and not benchmark["synthetic"]) or (benchmark["synthetic"] and fmt != "synthetic" and not generated_volume):
         raise ValueError("synthetic 标志与任务资产格式不一致")
     for key in _PATH_FIELDS.get(fmt, ()):
         value = _text(task.get(key), f"任务 {task['id']} 的 {key}")
@@ -106,16 +134,34 @@ def validate_task(benchmark: dict, task: dict) -> None:
             shift = task.get("label_shift", 0)
             if type(shift) is not int or shift < 0:
                 raise ValueError("label_shift 必须是非负整数")
+            if any(label > 65535 for label in all_classes):
+                raise ValueError("分割类别 ID 必须在 uint16 可视化范围内")
+            if "voxel_spacing_zyx" in task:
+                _spacing(task["voxel_spacing_zyx"], "voxel_spacing_zyx", 3)
     elif any(key in task for key in ("classes", "all_classes", "label_shift")):
         raise ValueError("配准任务不得使用分类或分割类别字段")
 
     if kind == "registration":
-        spacing = _spacing(task.get("spacing"), "spacing")
         coordinate_system = _text(task.get("coordinate_system"), "coordinate_system")
+        if fmt == "synthetic":
+            spacing = _spacing(task.get("spacing"), "spacing", 2)
+        elif fmt == "landmarks":
+            spacing = _spacing(task.get("spacing"), "spacing", 3)
+        else:
+            spacing = task.get("spacing", [1, 1, 1])
+            if spacing != [1, 1, 1]:
+                raise ValueError("registration-volume 点坐标已为 mm，spacing 必须省略或为 [1,1,1]")
+            _spacing(task.get("voxel_spacing_zyx", [1, 1, 1]), "voxel_spacing_zyx", 3)
+            if "origin_xyz" in task:
+                _finite_vector(task["origin_xyz"], "origin_xyz", 3)
+            if "direction_xyz" in task:
+                _finite_vector(task["direction_xyz"], "direction_xyz", 9)
         if fmt == "synthetic" and (coordinate_system != "fixed-space xy, mm" or spacing != [1, 1]):
             raise ValueError("合成配准协议固定使用 fixed-space xy, mm 且 spacing=[1,1]")
         if fmt == "landmarks" and (coordinate_system != "fixed-space xyz, mm" or spacing != [1, 1, 1]):
             raise ValueError("真实配准 v1 仅接受 fixed-space xyz, mm 且 spacing=[1,1,1]")
+        if fmt == "registration-volume" and coordinate_system != "fixed-display-grid xyz, mm":
+            raise ValueError("registration-volume 只接受 fixed-display-grid xyz, mm")
 
 
 def validate_benchmark(benchmark: dict) -> dict:
@@ -151,17 +197,22 @@ def validate_benchmark(benchmark: dict) -> dict:
     if len(task_ids) != len(set(task_ids)):
         raise ValueError("管理员任务 ID 必须唯一")
     formats = {task["format"] for task in tasks}
-    if benchmark["synthetic"] and formats != {"synthetic"}:
+    generated_registration = kind == "registration" and formats == {"registration-volume"}
+    if benchmark["synthetic"] and formats != {"synthetic"} and not generated_registration:
         raise ValueError("合成协议不得混入真实资产任务")
     if not benchmark["synthetic"] and "synthetic" in formats:
         raise ValueError("真实协议不得包含合成任务")
+    heads = allowed_output_heads(benchmark)
     if benchmark.get("pending"):
         return benchmark
 
-    if kind in ("classification", "segmentation"):
+    if kind in ("classification", "segmentation") and incremental in ("domain", "class"):
         all_classes = tasks[0]["all_classes"]
         if any(task["all_classes"] != all_classes for task in tasks[1:]):
             raise ValueError("同一协议各任务必须登记一致的 all_classes 顺序")
+    if incremental == "domain":
+        if any(task["classes"] != tasks[0]["classes"] for task in tasks[1:]):
+            raise ValueError("域增量任务必须登记一致的 classes 顺序")
     if kind == "classification":
         names = benchmark.get("class_names")
         if not isinstance(names, dict) or set(names) != {str(label) for label in all_classes}:
@@ -178,6 +229,10 @@ def validate_benchmark(benchmark: dict) -> dict:
         expected = set(all_classes) - ({0} if kind == "segmentation" else set())
         if seen != expected:
             raise ValueError("类别增量任务集合必须完整覆盖全局前景类别")
+    if kind == "segmentation" and incremental == "task":
+        spaces = [(task["classes"], task["all_classes"]) for task in tasks]
+        if any(space != spaces[0] for space in spaces[1:]) and "shared" in heads:
+            raise ValueError("标签空间不一致的任务增量分割只允许 task-specific 输出头")
     return benchmark
 
 
@@ -200,6 +255,7 @@ def demo_protocol(kind: str) -> dict:
         "direction": "lower" if kind == "registration" else "higher",
         "unit": "mm" if kind == "registration" else "fraction",
         "allow_unseen": kind == "segmentation",
+        "allowed_output_heads": ["shared", "task-specific"] if kind == "segmentation" else ["shared"],
         "output_semantics": "shared-global-labels" if kind != "registration" else "fixed-space-corresponding-landmarks",
         "tasks": [{"id": f"T{i + 1}", "name": f"合成任务 {i + 1}", "format": "synthetic",
                    **({"classes": [1], "all_classes": [0, 1]} if kind == "segmentation" else
@@ -225,7 +281,7 @@ def pending_protocols() -> list[dict]:
              "source": "待管理员确认", "tasks": [], "pending": True,
              "metric": "TRE" if kind == "registration" else "Accuracy" if kind == "classification" else "Foreground Dice",
              "direction": "lower" if kind == "registration" else "higher", "unit": "mm" if kind == "registration" else "fraction",
-             "allow_unseen": False, "output_semantics": "pending"}
+            "allow_unseen": False, "output_semantics": "pending", "allowed_output_heads": ["shared"]}
             for bid, title, kind, inc, desc in entries]
 
 
@@ -272,7 +328,9 @@ def public_protocol(benchmark: dict) -> dict:
     keys = ("id", "title", "public_title", "kind", "incremental", "version", "synthetic", "description", "source", "class_names",
             "metric", "direction", "unit", "allow_unseen", "output_semantics", "preprocessing", "label_rule")
     out = {k: benchmark[k] for k in keys if k in benchmark}
-    task_keys = ("id", "name", "classes", "all_classes", "coordinate_system", "spacing", "source", "label_shift")
+    out["allowed_output_heads"] = allowed_output_heads(benchmark)
+    task_keys = ("id", "name", "classes", "all_classes", "coordinate_system", "spacing", "voxel_spacing_zyx",
+                 "origin_xyz", "direction_xyz", "source", "label_shift")
     out["tasks"] = [{k: t[k] for k in task_keys if k in t} for t in benchmark["tasks"]]
     return out
 
@@ -374,12 +432,27 @@ def read_task(benchmark: dict, task: dict, *, include_targets: bool = True) -> d
         images = np.asarray(images[original_indices])
         labels = raw_labels[original_indices].astype(np.int64) if include_targets else None
         ranges = [(i, i + 1) for i in range(len(images))]
-    elif fmt == "landmarks":
+    elif fmt in ("landmarks", "registration-volume"):
         with np.load(task["path"], allow_pickle=False) as f:
+            expected = {"moving_points", "fixed_points"} if fmt == "landmarks" else {
+                "fixed_volumes", "moving_volumes", "moving_points", "fixed_points"}
+            if set(f.files) != expected:
+                raise ValueError("配准测试资产键不符合已登记格式")
             images = np.asarray(f["moving_points"], dtype=np.float64)
             labels = np.asarray(f["fixed_points"], dtype=np.float64) if include_targets else None
-        if task.get("coordinate_system") != "fixed-space xyz, mm" or task.get("spacing") != [1, 1, 1]:
+            if fmt == "registration-volume":
+                fixed_volumes = np.asarray(f["fixed_volumes"])
+                moving_volumes = np.asarray(f["moving_volumes"])
+        if fmt == "landmarks" and (task.get("coordinate_system") != "fixed-space xyz, mm" or task.get("spacing") != [1, 1, 1]):
             raise ValueError("真实配准 v1 仅接受固定空间 xyz 毫米坐标")
+        if (images.ndim != 3 or images.shape[-1] != 3
+                or labels is not None and (labels.shape != images.shape or not np.isfinite(labels).all())):
+            raise ValueError("配准点必须为同形 [N,K,3] 数组")
+        if fmt == "registration-volume":
+            if (fixed_volumes.ndim != 4 or fixed_volumes.shape != moving_volumes.shape
+                    or fixed_volumes.shape[0] != images.shape[0] or 0 in fixed_volumes.shape
+                    or not np.isfinite(fixed_volumes).all() or not np.isfinite(moving_volumes).all()):
+                raise ValueError("配准体数据必须为同形有限 [N,Z,Y,X] 固定显示网格")
         ranges = [(i, i + 1) for i in range(len(images))]
         original_indices = np.arange(len(images))
     else:
@@ -387,8 +460,12 @@ def read_task(benchmark: dict, task: dict, *, include_targets: bool = True) -> d
     if not len(images) or not np.isfinite(images).all():
         raise ValueError("测试输入为空或包含非有限值")
     if include_targets and kind != "registration":
-        if not np.isin(labels, task["all_classes"]).all():
+        allowed_labels = ({0} | set(task["classes"])) if kind == "segmentation" else set(task["all_classes"])
+        if not np.isin(labels, list(allowed_labels)).all():
             raise ValueError("测试标签不符合已登记类别集合")
-    return {"images": images, "target": labels if include_targets else None, "ranges": ranges,
+    result = {"images": images, "target": labels if include_targets else None, "ranges": ranges,
             "sample_ids": np.asarray([f"{task['id']}-s{int(i):06d}" for i in original_indices]),
             "case_ids": [f"{task['id']}-c{i:04d}" for i in range(len(ranges))]}
+    if fmt == "registration-volume":
+        result.update(fixed_volumes=fixed_volumes, moving_volumes=moving_volumes)
+    return result

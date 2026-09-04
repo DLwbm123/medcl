@@ -14,16 +14,17 @@
       "direction": "higher",
       "unit": "fraction",
       "allow_unseen": true,
+      "allowed_output_heads": ["shared"],
       "output_semantics": "shared-binary-head",
       "preprocessing": "HDF5 HWN 转 NHW float32；无额外标准化",
       "label_rule": "背景 0，前景 1；插值标签按协议确定的 int64 语义转换",
       "tasks": [
-        {"id": "A", "name": "中心 A", "format": "h5", "path": "/absolute/path/to/center-a.h5", "classes": [1], "all_classes": [0, 1]},
-        {"id": "B", "name": "中心 B", "format": "h5", "path": "/absolute/path/to/center-b.h5", "classes": [1], "all_classes": [0, 1]},
-        {"id": "C", "name": "中心 C", "format": "h5", "path": "/absolute/path/to/center-c.h5", "classes": [1], "all_classes": [0, 1]},
-        {"id": "D", "name": "中心 D", "format": "h5", "path": "/absolute/path/to/center-d.h5", "classes": [1], "all_classes": [0, 1]},
-        {"id": "E", "name": "中心 E", "format": "h5", "path": "/absolute/path/to/center-e.h5", "classes": [1], "all_classes": [0, 1]},
-        {"id": "F", "name": "中心 F", "format": "h5", "path": "/absolute/path/to/center-f.h5", "classes": [1], "all_classes": [0, 1]}
+        {"id": "A", "name": "中心 A", "format": "h5", "path": "/absolute/path/to/center-a.h5", "classes": [1], "all_classes": [0, 1], "voxel_spacing_zyx": [1.0, 1.0, 1.0]},
+        {"id": "B", "name": "中心 B", "format": "h5", "path": "/absolute/path/to/center-b.h5", "classes": [1], "all_classes": [0, 1], "voxel_spacing_zyx": [1.0, 1.0, 1.0]},
+        {"id": "C", "name": "中心 C", "format": "h5", "path": "/absolute/path/to/center-c.h5", "classes": [1], "all_classes": [0, 1], "voxel_spacing_zyx": [1.0, 1.0, 1.0]},
+        {"id": "D", "name": "中心 D", "format": "h5", "path": "/absolute/path/to/center-d.h5", "classes": [1], "all_classes": [0, 1], "voxel_spacing_zyx": [1.0, 1.0, 1.0]},
+        {"id": "E", "name": "中心 E", "format": "h5", "path": "/absolute/path/to/center-e.h5", "classes": [1], "all_classes": [0, 1], "voxel_spacing_zyx": [1.0, 1.0, 1.0]},
+        {"id": "F", "name": "中心 F", "format": "h5", "path": "/absolute/path/to/center-f.h5", "classes": [1], "all_classes": [0, 1], "voxel_spacing_zyx": [1.0, 1.0, 1.0]}
       ]
     },
     {
@@ -40,6 +41,7 @@
       "direction": "higher",
       "unit": "fraction",
       "allow_unseen": false,
+      "allowed_output_heads": ["shared"],
       "output_semantics": "shared-nine-class-head-seen-label-mask",
       "class_names": {"0": "class 0", "1": "class 1", "2": "class 2", "3": "class 3", "4": "class 4", "5": "class 5", "6": "class 6", "7": "class 7", "8": "class 8"},
       "tasks": [
@@ -62,10 +64,40 @@
       "direction": "lower",
       "unit": "mm",
       "allow_unseen": false,
+      "allowed_output_heads": ["shared"],
       "output_semantics": "fixed-space-corresponding-landmarks",
       "tasks": [
         {"id": "R1", "name": "配准任务 1", "format": "landmarks", "path": "/absolute/path/to/task-1-landmarks.npz", "coordinate_system": "fixed-space xyz, mm", "spacing": [1, 1, 1]},
         {"id": "R2", "name": "配准任务 2", "format": "landmarks", "path": "/absolute/path/to/task-2-landmarks.npz", "coordinate_system": "fixed-space xyz, mm", "spacing": [1, 1, 1]}
+      ]
+    },
+    {
+      "id": "registration-volume-example",
+      "title": "配准体数据 · 单任务示例",
+      "public_title": "配准体数据 · 单任务示例",
+      "kind": "registration",
+      "incremental": "task",
+      "version": "example-registration-volume-v1",
+      "synthetic": false,
+      "description": "提交者可附带已在可信环境重采样到 fixed grid 的 registered volume。",
+      "source": "请填写有权使用的数据来源和固定测试划分版本",
+      "metric": "TRE",
+      "direction": "lower",
+      "unit": "mm",
+      "allow_unseen": false,
+      "allowed_output_heads": ["shared"],
+      "output_semantics": "fixed-display-grid-landmarks",
+      "tasks": [
+        {
+          "id": "RV1",
+          "name": "配准体数据任务 1",
+          "format": "registration-volume",
+          "path": "/absolute/path/to/task-1-registration-volume.npz",
+          "coordinate_system": "fixed-display-grid xyz, mm",
+          "voxel_spacing_zyx": [1.0, 1.0, 1.0],
+          "origin_xyz": [0.0, 0.0, 0.0],
+          "direction_xyz": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        }
       ]
     }
   ]

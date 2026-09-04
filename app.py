@@ -3,10 +3,12 @@
 from html import escape
 
 import altair as alt
+import numpy as np
 import pandas as pd
 import streamlit as st
 
-from medcl.benchmarks import INCREMENTS, KINDS, catalog, config_path, readiness
+from medcl.benchmarks import INCREMENTS, KINDS, allowed_output_heads, catalog, config_path, readiness
+from medcl_cornerstone import envelope_from_preview, render as render_volume
 from medcl.examples import baseline_predictions, example_weights, pack_predictions, sample_manifest
 from medcl.reports import compatible_result, compatibility, report_csv, report_html, report_json
 from medcl.runner import load_preview
@@ -115,9 +117,9 @@ def task_center():
     if selected_kind not in KINDS:
         st.subheader("一级 / 选择三类大任务")
         cards = {
-            "segmentation": ("🧩", "医学影像分割", "优先完善：域增量、类增量、任务增量；全监督 / 弱监督；病例 Dice 与预测叠加图。"),
+            "segmentation": ("🧩", "医学影像分割", "优先完善：域增量、类增量、任务增量；全监督 / 弱监督；病例 Dice 与预测三维体。"),
             "classification": ("🧬", "医学影像分类", "类别增量；显示类别语义名称；支持固定逻辑客户端的联邦评分模拟。"),
-            "registration": ("🗺️", "医学影像配准", "任务增量；展示移动点与预测配准点；服务端计算 TRE。"),
+            "registration": ("🗺️", "医学影像配准", "任务增量；展示 fixed / moving / registered 体数据与辅助点；服务端计算 TRE。"),
         }
         for kind, (icon, name, detail) in cards.items():
             with st.container(border=True):
@@ -204,7 +206,8 @@ def new_evaluation(benchmark_id, training_supervision=None):
     clients = st.selectbox("固定逻辑客户端数", [2, 3, 4], index=1) if scenario != "集中式" else 1
     if clients > 1:
         st.info(f"按匿名病例索引固定轮转到 {clients} 个逻辑客户端；分类无病例标识时按图像划分。仅评分汇总，不训练或聚合权重。划分版本将随配置保存。")
-    head = st.selectbox("输出头与任务信息条件", ["shared", "task-specific"], format_func=lambda x: "共享输出头 / 全局类别编码" if x == "shared" else "任务指定输出头 / 已知任务 ID")
+    heads = allowed_output_heads(b)
+    head = st.selectbox("输出头与任务信息条件", heads, format_func=lambda x: "共享输出头 / 全局类别编码" if x == "shared" else "任务指定输出头 / 已知任务 ID")
     unseen_key = f"evaluate-unseen-{benchmark_id}"
     unseen_enabled = b["allow_unseen"] and head == "shared"
     if unseen_key not in st.session_state or not unseen_enabled:
@@ -214,7 +217,9 @@ def new_evaluation(benchmark_id, training_supervision=None):
         st.caption("当前协议不允许对未见任务评分；不会补造前向迁移曲线。")
     st.subheader("02 / 模型或预测")
     method = st.text_input("方法 / 本次评测名称", value="", placeholder="例如：方法名称 · final / seed42", max_chars=80)
-    mode_label = st.radio("提交类型", ["预测文件", "已支持结构的模型权重"], horizontal=True)
+    registration_volume = b["kind"] == "registration" and any(t.get("format") == "registration-volume" for t in b["tasks"])
+    mode_options = ["预测文件"] if registration_volume else ["预测文件", "已支持结构的模型权重"]
+    mode_label = st.radio("提交类型", mode_options, horizontal=True)
     mode = "predictions" if mode_label == "预测文件" else "model"
     if b["synthetic"]:
         provenance = "synthetic"
@@ -242,6 +247,8 @@ def new_evaluation(benchmark_id, training_supervision=None):
             st.warning("本机未满足模型隔离条件，模型提交关闭；预测评分仍可使用。")
     else:
         st.caption("JSON 或 NPZ/ZIP。数组包使用 task__ids.npy 与 task__pred.npy；客户端由平台固定映射，无需单独上传客户端文件。")
+        if registration_volume:
+            st.caption("体数据配准可另附 task__registered.npy 和 task__warped_prediction.npy，仅用于定性可视化；TRE 仍只由 task__pred.npy 的预测标志点计算。")
     scope = st.radio("可提供的阶段", ["仅最终阶段", "多个 / 部分阶段"], horizontal=True)
     stages = [len(order)] if scope == "仅最终阶段" else st.multiselect("已有阶段位置", list(range(1, len(order) + 1)), default=[len(order)])
     st.caption("缺少阶段将保留为空；BWT、遗忘或迁移指标只有满足对应条件才计算。")
@@ -294,6 +301,17 @@ def new_evaluation(benchmark_id, training_supervision=None):
 
 def preview_arrays(job_id, reference):
     return load_preview(job_dir(job_id), reference)
+
+
+def segmentation_fallback(image, prediction):
+    """Build one prediction-only static slice when WebGL is unavailable."""
+    counts = np.count_nonzero(prediction, axis=(1, 2))
+    index = int(np.argmax(counts)) if np.any(counts) else prediction.shape[0] // 2
+    original = np.asarray(image[index], dtype=np.uint8)
+    overlay = np.repeat(original[..., None], 3, axis=2)
+    foreground = prediction[index] > 0
+    overlay[foreground] = (0.35 * overlay[foreground] + 0.65 * np.array([38, 200, 122])).astype(np.uint8)
+    return original, overlay, index
 
 
 def result_view(job):
@@ -374,14 +392,38 @@ def result_view(job):
                 try:
                     arrays = preview_arrays(job["id"], preview)
                     if b["kind"] == "segmentation":
-                        original, overlay = arrays["original"], arrays["overlay"]
+                        if preview["kind"] == "segmentation-volume":
+                            try:
+                                render_volume(envelope_from_preview(preview, arrays), key=f"volume-{job['id']}-{stage}-{task_id}-{preview['case_id']}")
+                            except (OSError, RuntimeError, TypeError, ValueError):
+                                st.warning("三维组件未能挂载；下方仍保留不含真值的静态切片。")
+                            original, overlay, slice_index = segmentation_fallback(arrays["image_volume"], arrays["prediction_volume"])
+                        else:
+                            original, overlay, slice_index = arrays["original"], arrays["overlay"], None
                         left, right = st.columns(2)
-                        left.image(original, caption="原始测试切片", width="stretch")
-                        right.image(overlay, caption="预测遮罩叠加（绿色）", width="stretch")
+                        suffix = f" · Z={slice_index}" if slice_index is not None else ""
+                        left.image(original, caption="原始测试切片" + suffix, width="stretch")
+                        right.image(overlay, caption="预测遮罩叠加（绿色）" + suffix, width="stretch")
                         st.metric("该病例前景 Dice", score_text(preview["score"]))
-                        st.caption("预览切片在该病例中按预测前景量固定选取；图中不显示、不导出隐藏测试真值。")
+                        st.caption("当前显示的是预测分割，不是真值。三维预览最多每阶段、每任务 3 例，可确定性降采样；静态切片按预测前景量选取，浏览器载荷不包含隐藏测试真值。")
                     else:
-                        moving, prediction = arrays["moving"], arrays["prediction"]
+                        if preview["kind"] == "registration-volume":
+                            try:
+                                render_volume(envelope_from_preview(preview, arrays), key=f"volume-{job['id']}-{stage}-{task_id}-{preview['case_id']}")
+                            except (OSError, RuntimeError, TypeError, ValueError):
+                                st.warning("三维组件未能挂载；下方仍保留静态中心切片。")
+                            center = arrays["fixed_volume"].shape[0] // 2
+                            names = [("固定影像", arrays["fixed_volume"]), ("移动影像", arrays["moving_volume"])]
+                            if "registered_volume" in arrays:
+                                names.append(("提交的配准后影像", arrays["registered_volume"]))
+                            columns = st.columns(len(names))
+                            for column, (name, volume) in zip(columns, names):
+                                column.image(volume[center], caption=f"{name} · Z={center}", width="stretch")
+                            moving, prediction = arrays["moving_points"], arrays["predicted_points"]
+                            if "registered_volume" not in arrays:
+                                st.info("未提交 registered volume；三维组件默认对比 Fixed + Moving。")
+                        else:
+                            moving, prediction = arrays["moving"], arrays["prediction"]
                         if moving.ndim != 2 or prediction.shape != moving.shape or moving.shape[1] < 2:
                             raise ValueError("配准预览维度无效")
                         points = [{"标志点": str(i), "位置": name, "步骤": step, "x": float(array[i, 0]), "y": float(array[i, 1])}
@@ -391,11 +433,14 @@ def result_view(job):
                         chart = base.mark_line(color="#9aaab3").encode(detail="标志点:N", order="步骤:Q") + base.mark_point(size=80).encode(color=alt.Color("位置:N", scale=alt.Scale(range=["#708c9d", "#19a179"])), shape="位置:N", tooltip=["标志点", "位置", "x", "y"])
                         st.altair_chart(chart.properties(height=420), width="stretch")
                         st.metric("该病例 TRE", score_text(preview["score"], b["unit"]))
-                        st.caption("显示移动点到预测配准点的 XY 投影；隐藏固定点只用于服务端 TRE 评分，不进入预览文件。")
+                        if preview["kind"] == "registration-volume":
+                            st.caption("体数据只在固定显示网格做定性比较，平台不执行重采样或形变。TRE 只由预测点评分；隐藏固定点不进入预览文件。")
+                        else:
+                            st.caption("该协议没有三维影像，仅显示 moving points 到 predicted points 的 XY 投影；隐藏 fixed points 只用于服务端 TRE 评分。")
                 except (OSError, ValueError, KeyError):
                     st.warning("私有可视化文件不可读；数值评分仍以已保存结果为准。")
             else:
-                st.info("该记录没有可视化预览；新建的分割 / 配准评测会生成最多 6 个私有病例预览。")
+                st.info("该记录没有可视化预览；新建的分割 / 配准评测每阶段、每任务最多生成 3 个私有病例预览。")
         if b["kind"] != "classification":
             st.subheader("病例数值")
             if cases:
@@ -469,17 +514,25 @@ def compare():
     if b.get("synthetic"):
         st.warning("合成验收对比，不代表真实方法性能。")
     rows = []
+    provenance_labels = {
+        "synthetic": "合成工程验收",
+        "untrained_baseline": "未训练工程基线",
+        "trained_model_declared": "已训练模型（提交者声明）",
+        "external_predictions_unknown": "外部预测 / 来源未知",
+    }
     for jid in selected:
-        result = get_job(jid)["result"]
+        result = compatible_result(get_job(jid)["result"])
+        provenance = result["config"]["provenance"]["category"]
         for tid, value in zip(result["config"]["order"], result["matrices"]["global"][-1]):
-            rows.append({"方法": f"{result['config']['method']} · {jid[:6]}", "任务": tid, b["metric"]: value})
+            rows.append({"方法": f"{result['config']['method']} · {jid[:6]}",
+                         "来源": provenance_labels.get(provenance, "未知来源"), "任务": tid, b["metric"]: value})
     df = pd.DataFrame(rows)
     st.dataframe(df, hide_index=True, width="stretch")
     chart = alt.Chart(df).mark_bar().encode(x=alt.X("任务:N", axis=alt.Axis(labelAngle=0)), y=alt.Y(f"{b['metric']}:Q"),
                                             color=alt.Color("方法:N", scale=alt.Scale(range=["#486b81", "#6d9380", "#8796a5", "#a58b5b"])),
                                             xOffset="方法:N", tooltip=list(df.columns)).properties(height=320)
     st.altair_chart(chart, width="stretch")
-    st.caption("比较最终阶段各任务；缺少最终阶段的记录保留为空，不拿最后可见阶段代替最终阶段。")
+    st.caption("比较最终阶段各任务；来源类别与方法名分开显示。缺少最终阶段的记录保留为空，不拿最后可见阶段代替最终阶段。")
 
 
 {"任务中心": task_center, "评测记录": records, "方法比较": compare}[page]()

@@ -7,6 +7,8 @@ import json
 import math
 import re
 
+from medcl import EVALUATOR_VERSION, VIEWER_SCHEMA_VERSION
+
 
 CONTINUAL_METRICS = ("Final average", "BWT", "Forgetting", "FWT", "BWTR")
 PUBLIC_WARNINGS = {
@@ -45,6 +47,8 @@ def compatible_result(result: dict) -> dict:
         raise ValueError("评测结果缺少冻结配置")
     config = dict(config)
     output["config"] = config
+    config.setdefault("evaluator_version", "legacy-unknown")
+    config.setdefault("viewer_schema_version", "legacy-preview-unknown")
     if config["benchmark"].get("synthetic"):
         config["provenance"] = {"category": "synthetic", "statement": "由已校验的合成协议决定；仅用于工程验收",
                                 "training_verified": False}
@@ -108,10 +112,16 @@ def report_csv(result: dict) -> bytes:
     buffer = io.StringIO(newline="")
     writer = csv.writer(buffer)
     fields = ("stage", "task_id", "client_id", "score", "metric", "direction", "unit", "n_samples", "n_cases", "reason", "benchmark_mean", "background")
-    writer.writerow(["method", "benchmark", "version", "synthetic", "training_supervision", *fields])
+    writer.writerow(["method", "benchmark", "version", "provenance_category", "training_verified", "synthetic",
+                     "evaluator_version", "viewer_schema_version", "training_supervision", *fields])
     config, benchmark = result["config"], result["config"]["benchmark"]
+    provenance = config["provenance"]
     for cell in report_cells(result):
-        writer.writerow([_csv_value(v) for v in [config["method"], benchmark["id"], benchmark["version"], benchmark["synthetic"], config.get("training_supervision", "not-declared"), *[cell.get(k) for k in fields]]])
+        writer.writerow([_csv_value(v) for v in [config["method"], benchmark["id"], benchmark["version"],
+                         provenance["category"], provenance.get("training_verified", False), benchmark["synthetic"],
+                         config.get("evaluator_version", EVALUATOR_VERSION),
+                         config.get("viewer_schema_version", VIEWER_SCHEMA_VERSION),
+                         config.get("training_supervision", "not-declared"), *[cell.get(k) for k in fields]]])
     return ("\ufeff" + buffer.getvalue()).encode("utf-8")
 
 

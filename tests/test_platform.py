@@ -83,6 +83,8 @@ class PlatformChecks(unittest.TestCase):
         t2_clients = next(row for row in result["federated"] if row["stage"] == 3 and row["task_id"] == "T2")
         self.assertAlmostEqual(t2_clients["sample_weighted_accuracy"], 13 / 15)
         rows = list(csv.DictReader(io.StringIO(report_csv(result).decode("utf-8-sig"))))
+        self.assertTrue({"provenance_category", "training_verified", "synthetic", "evaluator_version",
+                         "viewer_schema_version"} <= set(rows[0]))
         self.assertEqual(len(rows), 3 * 3 * 4)
         missing = [r for r in rows if r["stage"] == "1"]
         self.assertTrue(all(r["score"] == "" and r["n_samples"] == "" and r["reason"] == "未提交该阶段" for r in missing))
@@ -117,7 +119,8 @@ class PlatformChecks(unittest.TestCase):
                     with np.load(preview_path, allow_pickle=False) as archive:
                         self.assertNotIn("target", archive.files)
                         self.assertNotIn("fixed", archive.files)
-                        expected = {"original", "overlay"} if kind == "segmentation" else {"moving", "prediction"}
+                        expected = ({"image_volume", "prediction_volume", "spacing_zyx", "spacing_source", "preview_schema_version"}
+                                    if kind == "segmentation" else {"moving", "prediction"})
                         self.assertEqual(set(archive.files), expected)
                     self.assertEqual(set(load_preview(job_dir(jid, self.root), preview)), expected)
                 if kind == "segmentation":

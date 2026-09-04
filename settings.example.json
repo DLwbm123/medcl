@@ -1,23 +1,71 @@
 {
   "benchmarks": [
     {
-      "id": "local-segmentation",
-      "title": "本地分割测试协议",
+      "id": "prostate-domain6",
+      "title": "前列腺分割 · 六中心域增量",
+      "public_title": "前列腺分割 · 六中心域增量",
       "kind": "segmentation",
       "incremental": "domain",
-      "version": "operator-reviewed-v1",
+      "version": "example-prostate-domain6-v1",
       "synthetic": false,
-      "description": "管理员确认测试集、病例边界与类别后接入；路径未配置时不开放评测。",
+      "description": "管理员核对六个固定测试 HDF5、病例边界和标签编码后接入。",
       "source": "请填写有权使用的数据来源和固定测试划分版本",
       "metric": "Foreground Dice",
       "direction": "higher",
       "unit": "fraction",
-      "allow_unseen": false,
+      "allow_unseen": true,
       "output_semantics": "shared-binary-head",
       "preprocessing": "HDF5 HWN 转 NHW float32；无额外标准化",
-      "label_rule": "非负插值标签 astype(int64)；背景 0，前景 1",
+      "label_rule": "背景 0，前景 1；插值标签按协议确定的 int64 语义转换",
       "tasks": [
-        {"id": "T1", "name": "测试域 1", "format": "h5", "path": "/absolute/path/to/domain1.h5", "classes": [1], "all_classes": [0, 1]}
+        {"id": "A", "name": "中心 A", "format": "h5", "path": "/absolute/path/to/center-a.h5", "classes": [1], "all_classes": [0, 1]},
+        {"id": "B", "name": "中心 B", "format": "h5", "path": "/absolute/path/to/center-b.h5", "classes": [1], "all_classes": [0, 1]},
+        {"id": "C", "name": "中心 C", "format": "h5", "path": "/absolute/path/to/center-c.h5", "classes": [1], "all_classes": [0, 1]},
+        {"id": "D", "name": "中心 D", "format": "h5", "path": "/absolute/path/to/center-d.h5", "classes": [1], "all_classes": [0, 1]},
+        {"id": "E", "name": "中心 E", "format": "h5", "path": "/absolute/path/to/center-e.h5", "classes": [1], "all_classes": [0, 1]},
+        {"id": "F", "name": "中心 F", "format": "h5", "path": "/absolute/path/to/center-f.h5", "classes": [1], "all_classes": [0, 1]}
+      ]
+    },
+    {
+      "id": "pathmnist-class3",
+      "title": "PathMNIST · 三阶段类别增量",
+      "public_title": "PathMNIST · 三阶段类别增量",
+      "kind": "classification",
+      "incremental": "class",
+      "version": "example-pathmnist-class3-v1",
+      "synthetic": false,
+      "description": "平台示例分组；管理员需确认测试划分、全局类别编码和公开类别名称。",
+      "source": "请填写有权使用的数据来源和固定测试划分版本",
+      "metric": "Accuracy",
+      "direction": "higher",
+      "unit": "fraction",
+      "allow_unseen": false,
+      "output_semantics": "shared-nine-class-head-seen-label-mask",
+      "class_names": {"0": "class 0", "1": "class 1", "2": "class 2", "3": "class 3", "4": "class 4", "5": "class 5", "6": "class 6", "7": "class 7", "8": "class 8"},
+      "tasks": [
+        {"id": "C1", "name": "类别 0–2", "format": "npy", "images_path": "/absolute/path/to/test_images.npy", "labels_path": "/absolute/path/to/test_labels.npy", "classes": [0, 1, 2], "all_classes": [0, 1, 2, 3, 4, 5, 6, 7, 8]},
+        {"id": "C2", "name": "类别 3–5", "format": "npy", "images_path": "/absolute/path/to/test_images.npy", "labels_path": "/absolute/path/to/test_labels.npy", "classes": [3, 4, 5], "all_classes": [0, 1, 2, 3, 4, 5, 6, 7, 8]},
+        {"id": "C3", "name": "类别 6–8", "format": "npy", "images_path": "/absolute/path/to/test_images.npy", "labels_path": "/absolute/path/to/test_labels.npy", "classes": [6, 7, 8], "all_classes": [0, 1, 2, 3, 4, 5, 6, 7, 8]}
+      ]
+    },
+    {
+      "id": "registration-landmarks",
+      "title": "配准 · 对应标志点任务增量",
+      "public_title": "配准 · 对应标志点任务增量",
+      "kind": "registration",
+      "incremental": "task",
+      "version": "example-registration-landmarks-v1",
+      "synthetic": false,
+      "description": "管理员将有序对应点预先转换为 fixed-space xyz 毫米坐标后接入。",
+      "source": "请填写有权使用的数据来源和固定测试划分版本",
+      "metric": "TRE",
+      "direction": "lower",
+      "unit": "mm",
+      "allow_unseen": false,
+      "output_semantics": "fixed-space-corresponding-landmarks",
+      "tasks": [
+        {"id": "R1", "name": "配准任务 1", "format": "landmarks", "path": "/absolute/path/to/task-1-landmarks.npz", "coordinate_system": "fixed-space xyz, mm", "spacing": [1, 1, 1]},
+        {"id": "R2", "name": "配准任务 2", "format": "landmarks", "path": "/absolute/path/to/task-2-landmarks.npz", "coordinate_system": "fixed-space xyz, mm", "spacing": [1, 1, 1]}
       ]
     }
   ]

@@ -7,14 +7,18 @@ import json
 from pathlib import Path
 import resource
 import traceback
+import zipfile
 
 import numpy as np
 
-from medcl.benchmarks import check_assets, read_task
+from medcl.benchmarks import asset_paths, check_assets, read_task
 from medcl.metrics import continual_summary, federated_summary, score_cases
 from medcl.sandbox import model_predictions
 from medcl.storage import encode, get_job, job_dir, update_job
 from medcl.submissions import align_predictions, load_predictions, required_tasks
+
+MAX_PREVIEW_FILE = 16 * 1024 * 1024
+MAX_PREVIEW_EXPANDED = 64 * 1024 * 1024
 
 
 def aggregate(cases: list[dict], kind: str) -> float | None:
@@ -48,6 +52,7 @@ def _save_previews(folder: Path, kind: str, stage: int, task_id: str, data: dict
         return []
     visual_dir = folder / "visuals"
     visual_dir.mkdir(exist_ok=True, mode=0o700)
+    visual_dir.chmod(0o700)
     available = [i for i, case in enumerate(scored) if case["n_samples"] > 0]
     selected = [available[i] for i in np.linspace(0, len(available) - 1, min(6, len(available)), dtype=int)]
     previews = []
@@ -72,16 +77,50 @@ def _save_previews(folder: Path, kind: str, stage: int, task_id: str, data: dict
     return previews
 
 
+def load_preview(folder: Path, reference: dict) -> dict[str, np.ndarray]:
+    """Read an optional private preview without trusting its stored reference or NPZ."""
+    try:
+        visual_root = (Path(folder) / "visuals").resolve()
+        path = (Path(folder) / reference["file"]).resolve()
+        kind = reference["kind"]
+        expected = {"original", "overlay"} if kind == "segmentation" else {"moving", "prediction"} if kind == "registration" else None
+        if expected is None or path.parent != visual_root or path.suffix != ".npz" or not path.is_file():
+            raise ValueError("可视化引用无效")
+        if not 0 < path.stat().st_size <= MAX_PREVIEW_FILE:
+            raise ValueError("可视化文件大小无效")
+        with zipfile.ZipFile(path) as archive:
+            entries = archive.infolist()
+            if len(entries) != len(expected) or {entry.filename for entry in entries} != {f"{key}.npy" for key in expected}:
+                raise ValueError("可视化数组键无效")
+            if sum(entry.file_size for entry in entries) > MAX_PREVIEW_EXPANDED:
+                raise ValueError("可视化数组超过展开上限")
+        with np.load(path, allow_pickle=False) as archive:
+            if len(archive.files) != len(expected) or set(archive.files) != expected:
+                raise ValueError("可视化数组键无效")
+            arrays = {key: np.array(archive[key]) for key in expected}
+        first, second = arrays.values()
+        if first.shape != second.shape or any(size <= 0 for size in first.shape):
+            raise ValueError("可视化数组形状无效")
+        if kind == "segmentation":
+            if first.dtype != np.uint8 or second.dtype != np.uint8 or first.ndim != 3 or first.shape[-1] != 3:
+                raise ValueError("分割预览必须是同形 RGB uint8 图像")
+        elif first.dtype.kind != "f" or second.dtype.kind != "f" or first.ndim != 2 or first.shape[1] not in (2, 3) or not all(np.isfinite(array).all() for array in arrays.values()):
+            raise ValueError("配准预览必须是有限二维/三维浮点坐标")
+        return arrays
+    except (EOFError, KeyError, OSError, OverflowError, ValueError, zipfile.BadZipFile):
+        raise ValueError("可视化文件损坏") from None
+
+
 def evaluate(job_id: str, root: Path | None = None) -> dict:
     job = get_job(job_id, root)
     if job is None:
         raise ValueError("评测不存在")
     config, folder = job["config"], job_dir(job_id, root)
     private = json.loads((folder / "private.json").read_text(encoding="utf-8"))
-    check_assets(private["assets"])
     benchmark = private["benchmark"]
     kind, order = benchmark["kind"], config["order"]
     tasks = {t["id"]: t for t in benchmark["tasks"]}
+    frozen_assets = {record["path"]: record for record in private["assets"]}
     cells, cases, federated, distributions, visualizations = [], [], [], [], []
     matrices = {name: [[None] * len(order) for _ in order] for name in ["global", *[f"C{i + 1:02d}" for i in range(config["clients"])]]}
     total = sum(len(required_tasks(config, item["stage"])) for item in private["uploads"])
@@ -96,6 +135,7 @@ def evaluate(job_id: str, root: Path | None = None) -> dict:
         for task_id in required:
             update_job(job_id, message=f"评分阶段 {stage} · 任务 {task_id}", progress=done / total, root=root)
             task = tasks[task_id]
+            check_assets([frozen_assets[str(path)] for path in asset_paths(task)])
             data = read_task(benchmark, task)
             if benchmark["incremental"] == "class":
                 allowed = sorted({c for tid in order[:stage] for c in tasks[tid]["classes"]} | ({0} if kind == "segmentation" else set()))
@@ -116,19 +156,24 @@ def evaluate(job_id: str, root: Path | None = None) -> dict:
                     case["benchmark_mean"] = case["score"]
                     case["background"] = case["per_class"]["0"]
                     case["score"] = float(np.mean([case["per_class"][str(c)] for c in task["classes"]]))
-                case.update(stage=stage, task_id=task_id, case_id=data["case_ids"][index],
+                case.update(stage=stage, task_id=task_id,
                             client_id=f"C{index % config['clients'] + 1:02d}")
+                if kind != "classification":
+                    case["case_id"] = data["case_ids"][index]
             visualizations.extend(_save_previews(folder, kind, stage, task_id, data, pred, scored))
-            cases.extend(scored)
+            if kind != "classification":
+                cases.extend(scored)
             client_scores, counts = [], []
             for client_id in matrices:
                 selected = scored if client_id == "global" else [c for c in scored if c["client_id"] == client_id]
                 value = aggregate(selected, kind)
                 n_samples = sum(c["n_samples"] for c in selected)
                 cell = {"stage": stage, "task_id": task_id, "client_id": client_id, "score": value,
-                        "n_samples": n_samples, "n_cases": sum(c["n_samples"] > 0 for c in selected),
+                        "n_samples": n_samples,
                         "metric": benchmark["metric"], "direction": benchmark["direction"], "unit": benchmark["unit"],
                         "reason": "无测试样本，不可计算" if value is None else "实测"}
+                if kind != "classification":
+                    cell["n_cases"] = sum(c["n_samples"] > 0 for c in selected)
                 if kind == "segmentation":
                     valid = [c for c in selected if c["score"] is not None]
                     cell["benchmark_mean"] = float(np.mean([c["benchmark_mean"] for c in valid])) if valid else None
@@ -139,11 +184,9 @@ def evaluate(job_id: str, root: Path | None = None) -> dict:
                     client_scores.append(value)
                     counts.append(n_samples)
                     distribution = {"stage": stage, "task_id": task_id, "client_id": client_id,
-                                    "n_samples": n_samples, "n_cases": cell["n_cases"]}
-                    if kind == "classification":
-                        labels = [data["target"][a:b] for c in selected for a, b in [data["ranges"][c["case_index"]]]]
-                        flat = np.concatenate(labels) if labels else np.asarray([], dtype=int)
-                        distribution["class_counts"] = {str(k): int((flat == k).sum()) for k in task["all_classes"]}
+                                    "n_samples": n_samples}
+                    if kind != "classification":
+                        distribution["n_cases"] = cell["n_cases"]
                     distributions.append(distribution)
             federated.append({"stage": stage, "task_id": task_id,
                               **federated_summary(client_scores, counts, kind, benchmark["direction"])})
@@ -156,12 +199,24 @@ def evaluate(job_id: str, root: Path | None = None) -> dict:
         warnings.append("单机固定逻辑客户端评测模拟；仅聚合评分，没有联邦训练、权重聚合或通信成本。")
     if benchmark.get("synthetic"):
         warnings.insert(0, "合成工程验收样例，禁止作为科研结果引用。")
-    result = {"job_id": job_id, "config": config, "cells": cells, "cases": cases,
+    provenance = config.get("provenance", {}).get("category", "external_predictions_unknown")
+    provenance_warnings = {
+        "untrained_baseline": "未训练工程基线；不得作为方法性能或科研结论。",
+        "trained_model_declared": "已训练模型来源为提交者声明；平台未验证训练过程。",
+        "external_predictions_unknown": "外部预测来源未知；平台只验证测试评分，未验证训练过程。",
+    }
+    if provenance in provenance_warnings:
+        warnings.insert(0, provenance_warnings[provenance])
+    result = {"result_schema_version": 2, "job_id": job_id, "config": config, "cells": cells,
               "matrices": matrices, "continual": summaries, "federated": federated,
               "distributions": distributions, "visualizations": visualizations, "warnings": warnings}
+    if kind != "classification":
+        result["cases"] = cases
     temporary = folder / "result.pending.json"
     temporary.write_text(encode(result), encoding="utf-8")
+    temporary.chmod(0o600)
     temporary.replace(folder / "result.json")
+    (folder / "result.json").chmod(0o600)
     update_job(job_id, status="completed", message="评分完成，报告可下载", progress=1, result=result, root=root)
     return result
 

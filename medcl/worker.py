@@ -19,7 +19,9 @@ def run_worker(root: Path | None = None, once: bool = False) -> None:
     def stop(*_):
         raise KeyboardInterrupt
     signal.signal(signal.SIGTERM, stop)
-    with (root / "worker.lock").open("a+") as lock:
+    lock_path = root / "worker.lock"
+    with lock_path.open("a+") as lock:
+        lock_path.chmod(0o600)
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
@@ -38,6 +40,7 @@ def run_worker(root: Path | None = None, once: bool = False) -> None:
                 continue
             log = job_dir(job["id"], root) / "worker.private.log"
             with log.open("ab") as handle:
+                log.chmod(0o600)
                 # The child inherits the lock: a killed parent cannot permit a second concurrent scorer.
                 process = subprocess.Popen([sys.executable, "-B", "-m", "medcl.runner", job["id"], "--state", str(root)],
                                            cwd=PROJECT, stdout=handle, stderr=handle, stdin=subprocess.DEVNULL,

@@ -1,83 +1,34 @@
 {
-  "schema": "medcl.aggregate-report.v1",
+  "schema": "medcl.aggregate-report.v2",
   "runs": [
     {
-      "job_id": "84b5815d689d4465a404ed50e33984a2",
-      "config": {
-        "schema_version": 1,
-        "benchmark": {
-          "id": "prostate-hk-smoke",
-          "title": "前列腺分割 · HK 完整测试集",
-          "kind": "segmentation",
-          "incremental": "domain",
-          "version": "local-hk-test-v1",
-          "synthetic": false,
-          "description": "HK 的 72 张测试切片 / 3 个病例。单任务真实数据工程验收，不代表完整持续学习实验。",
-          "source": "本地 CL Benchmark HDF5 测试划分；病例边界来自 patient_info_test",
-          "metric": "Foreground Dice",
-          "direction": "higher",
-          "unit": "fraction",
-          "allow_unseen": false,
-          "output_semantics": "shared-binary-head",
-          "preprocessing": "float32 单通道；保留 HDF5 输入值，无额外标准化",
-          "label_rule": "依参考 DenseDataset 将插值标签 astype(int64) 截断；非 0.5 阈值",
-          "tasks": [
-            {
-              "id": "HK",
-              "name": "HK 前列腺",
-              "classes": [
-                1
-              ],
-              "all_classes": [
-                0,
-                1
-              ]
-            }
-          ]
-        },
-        "method": "HK · 固定阈值 0.5（工程基线，未训练）",
-        "order": [
+      "run_id": "run-84b5815d",
+      "benchmark": {
+        "id": "prostate-hk-smoke",
+        "public_title": "前列腺分割 · HK 完整测试集",
+        "version": "local-hk-test-v1",
+        "synthetic": false,
+        "metric": "Foreground Dice",
+        "direction": "higher",
+        "unit": "fraction",
+        "task_order": [
           "HK"
-        ],
-        "stages": [
-          1
-        ],
-        "mode": "predictions",
-        "architecture": null,
-        "clients": 3,
-        "evaluate_unseen": false,
-        "output_head": "shared",
-        "client_split": {
-          "id": "case-round-robin-v1-c3",
-          "version": "1",
-          "source": "平台固定逻辑划分：各任务匿名病例索引 mod 客户端数；分类无病例标识时按图像索引。非论文客户端划分。"
-        },
-        "conditions": "病例级前景类 Dice (eps=1e-5)，另列含背景宏均值；同空=1",
-        "test_assets": [
-          {
-            "task_id": "HK",
-            "files": [
-              {
-                "size": 301996360,
-                "mtime_ns": 1777254057780000000
-              }
-            ]
-          }
-        ],
-        "prediction_provenance": "提交者声明同一阶段全局模型；预测模式不独立验证模型来源"
+        ]
+      },
+      "provenance": {
+        "category": "external_predictions_unknown",
+        "training_verified": false
       },
       "global_cells": [
         {
           "stage": 1,
           "task_id": "HK",
-          "client_id": "global",
           "score": 0.059332002854080086,
           "n_samples": 72,
-          "n_cases": 3,
           "metric": "Foreground Dice",
           "direction": "higher",
           "unit": "fraction",
-          "reason": "实测",
+          "n_cases": 3,
           "benchmark_mean": 0.44676914905324483,
           "background": 0.8342062952524095
         }
@@ -87,26 +38,21 @@
           0.059332002854080086
         ]
       ],
-      "continual": {
+      "global_continual": {
         "Final average": {
-          "value": 0.059332002854080086,
-          "reason": "最终阶段全部任务等权平均"
+          "value": 0.059332002854080086
         },
         "BWT": {
-          "value": null,
-          "reason": "至少需要两个任务"
+          "value": null
         },
         "Forgetting": {
-          "value": null,
-          "reason": "至少需要两个任务"
+          "value": null
         },
         "FWT": {
-          "value": null,
-          "reason": "至少需要两个任务"
+          "value": null
         },
         "BWTR": {
-          "value": null,
-          "reason": "至少需要两个任务"
+          "value": null
         }
       },
       "warnings": [
@@ -116,187 +62,52 @@
       ]
     },
     {
-      "job_id": "1bb8d50485404cf989fa73daae456ee5",
-      "config": {
-        "schema_version": 1,
-        "benchmark": {
-          "id": "pathmnist-class3",
-          "title": "PathMNIST · 平台三阶段类别增量",
-          "kind": "classification",
-          "incremental": "class",
-          "version": "platform-pathmnist-test-012-345-678-v1",
-          "synthetic": false,
-          "description": "7,180 张 28px 测试图像；平台自定义 0–2 → 3–5 → 6–8 顺序，不是 FedSubMerge 原论文客户端或任务协议。",
-          "source": "本地 PathMNIST NPY test split；无病例 ID，只报告图像级准确率",
-          "metric": "Accuracy",
-          "direction": "higher",
-          "unit": "fraction",
-          "allow_unseen": false,
-          "output_semantics": "shared-nine-class-head-seen-label-mask",
-          "preprocessing": "HWC RGB flatten；线性模型 uint8/255，预测提交无额外处理",
-          "label_rule": "全局类别 0–8；各阶段仅允许已见类别输出，不提供任务特定类别 oracle",
-          "tasks": [
-            {
-              "id": "C1",
-              "name": "类别 0–2",
-              "classes": [
-                0,
-                1,
-                2
-              ],
-              "all_classes": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8
-              ]
-            },
-            {
-              "id": "C2",
-              "name": "类别 3–5",
-              "classes": [
-                3,
-                4,
-                5
-              ],
-              "all_classes": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8
-              ]
-            },
-            {
-              "id": "C3",
-              "name": "类别 6–8",
-              "classes": [
-                6,
-                7,
-                8
-              ],
-              "all_classes": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8
-              ]
-            }
-          ]
-        },
-        "method": "PathMNIST · 常数类 0（修复后最终权重验收）",
-        "order": [
+      "run_id": "run-1bb8d504",
+      "benchmark": {
+        "id": "pathmnist-class3",
+        "public_title": "PathMNIST · 平台三阶段类别增量",
+        "version": "platform-pathmnist-test-012-345-678-v1",
+        "synthetic": false,
+        "metric": "Accuracy",
+        "direction": "higher",
+        "unit": "fraction",
+        "task_order": [
           "C1",
           "C2",
           "C3"
-        ],
-        "stages": [
-          3
-        ],
-        "mode": "model",
-        "architecture": "linear-classifier-v1",
-        "clients": 3,
-        "evaluate_unseen": false,
-        "output_head": "shared",
-        "client_split": {
-          "id": "case-round-robin-v1-c3",
-          "version": "1",
-          "source": "平台固定逻辑划分：各任务匿名病例索引 mod 客户端数；分类无病例标识时按图像索引。非论文客户端划分。"
-        },
-        "conditions": "样本准确率；固定全局类别编码；仅已见类别输出；不推断病例 ID",
-        "test_assets": [
-          {
-            "task_id": "C1",
-            "files": [
-              {
-                "size": 16887488,
-                "mtime_ns": 1782271888000000000
-              },
-              {
-                "size": 7308,
-                "mtime_ns": 1782271888000000000
-              }
-            ]
-          },
-          {
-            "task_id": "C2",
-            "files": [
-              {
-                "size": 16887488,
-                "mtime_ns": 1782271888000000000
-              },
-              {
-                "size": 7308,
-                "mtime_ns": 1782271888000000000
-              }
-            ]
-          },
-          {
-            "task_id": "C3",
-            "files": [
-              {
-                "size": 16887488,
-                "mtime_ns": 1782271888000000000
-              },
-              {
-                "size": 7308,
-                "mtime_ns": 1782271888000000000
-              }
-            ]
-          }
-        ],
-        "prediction_provenance": "同一阶段上传权重用于所有逻辑客户端"
+        ]
+      },
+      "provenance": {
+        "category": "external_predictions_unknown",
+        "training_verified": false
       },
       "global_cells": [
         {
           "stage": 3,
           "task_id": "C1",
-          "client_id": "global",
           "score": 0.5301109350237718,
           "n_samples": 2524,
-          "n_cases": 2524,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         },
         {
           "stage": 3,
           "task_id": "C2",
-          "client_id": "global",
           "score": 0.0,
           "n_samples": 2261,
-          "n_cases": 2261,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         },
         {
           "stage": 3,
           "task_id": "C3",
-          "client_id": "global",
           "score": 0.0,
           "n_samples": 2395,
-          "n_cases": 2395,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         }
       ],
       "global_matrix": [
@@ -316,26 +127,21 @@
           0.0
         ]
       ],
-      "continual": {
+      "global_continual": {
         "Final average": {
-          "value": 0.17670364500792393,
-          "reason": "最终阶段全部任务等权平均"
+          "value": 0.17670364500792393
         },
         "BWT": {
-          "value": null,
-          "reason": "缺少获得阶段或最终结果"
+          "value": null
         },
         "Forgetting": {
-          "value": null,
-          "reason": "缺少完整已见历史或最终结果"
+          "value": null
         },
         "FWT": {
-          "value": null,
-          "reason": "协议不允许未见任务评估"
+          "value": null
         },
         "BWTR": {
-          "value": null,
-          "reason": "缺少获得阶段或最终结果"
+          "value": null
         }
       },
       "warnings": [
@@ -345,222 +151,85 @@
       ]
     },
     {
-      "job_id": "ad82bc1b4dc842cabf64c9e6adc3e0c8",
-      "config": {
-        "schema_version": 1,
-        "benchmark": {
-          "id": "prostate-domain5",
-          "title": "前列腺分割 · 本地五域子集",
-          "kind": "segmentation",
-          "incremental": "domain",
-          "version": "platform-five-domain-v1",
-          "synthetic": false,
-          "description": "930 张测试切片 / 27 病例。明确排除缺失 UCL 的五域子集，不冒充原六域协议。",
-          "source": "CL Benchmark 本地五个 HDF5 的原 test split；平台子集版本 v1",
-          "metric": "Foreground Dice",
-          "direction": "higher",
-          "unit": "fraction",
-          "allow_unseen": true,
-          "output_semantics": "shared-binary-head",
-          "preprocessing": "float32 单通道；保留 HDF5 输入值，无额外标准化",
-          "label_rule": "依参考 DenseDataset astype(int64)；病例体积内求 Dice 后病例宏平均",
-          "tasks": [
-            {
-              "id": "A",
-              "name": "BIDMC",
-              "classes": [
-                1
-              ],
-              "all_classes": [
-                0,
-                1
-              ]
-            },
-            {
-              "id": "B",
-              "name": "HK",
-              "classes": [
-                1
-              ],
-              "all_classes": [
-                0,
-                1
-              ]
-            },
-            {
-              "id": "C",
-              "name": "ISBI",
-              "classes": [
-                1
-              ],
-              "all_classes": [
-                0,
-                1
-              ]
-            },
-            {
-              "id": "E",
-              "name": "ISBI 1.5T",
-              "classes": [
-                1
-              ],
-              "all_classes": [
-                0,
-                1
-              ]
-            },
-            {
-              "id": "F",
-              "name": "I2CVB",
-              "classes": [
-                1
-              ],
-              "all_classes": [
-                0,
-                1
-              ]
-            }
-          ]
-        },
-        "method": "五域前列腺 · 固定阈值 0.5（未训练最终权重）",
-        "order": [
+      "run_id": "run-ad82bc1b",
+      "benchmark": {
+        "id": "prostate-domain5",
+        "public_title": "前列腺分割 · 本地五域子集",
+        "version": "platform-five-domain-v1",
+        "synthetic": false,
+        "metric": "Foreground Dice",
+        "direction": "higher",
+        "unit": "fraction",
+        "task_order": [
           "A",
           "B",
           "C",
           "E",
           "F"
-        ],
-        "stages": [
-          5
-        ],
-        "mode": "model",
-        "architecture": "pixel-linear-v1",
-        "clients": 3,
-        "evaluate_unseen": false,
-        "output_head": "shared",
-        "client_split": {
-          "id": "case-round-robin-v1-c3",
-          "version": "1",
-          "source": "平台固定逻辑划分：各任务匿名病例索引 mod 客户端数；分类无病例标识时按图像索引。非论文客户端划分。"
-        },
-        "conditions": "病例级前景类 Dice (eps=1e-5)，另列含背景宏均值；同空=1",
-        "test_assets": [
-          {
-            "task_id": "A",
-            "files": [
-              {
-                "size": 546314568,
-                "mtime_ns": 1777254049990000000
-              }
-            ]
-          },
-          {
-            "task_id": "B",
-            "files": [
-              {
-                "size": 301996360,
-                "mtime_ns": 1777254057780000000
-              }
-            ]
-          },
-          {
-            "task_id": "C",
-            "files": [
-              {
-                "size": 606083400,
-                "mtime_ns": 1777254055180000000
-              }
-            ]
-          },
-          {
-            "task_id": "E",
-            "files": [
-              {
-                "size": 1012930888,
-                "mtime_ns": 1777254077390000000
-              }
-            ]
-          },
-          {
-            "task_id": "F",
-            "files": [
-              {
-                "size": 1275074888,
-                "mtime_ns": 1777254068680000000
-              }
-            ]
-          }
-        ],
-        "prediction_provenance": "同一阶段上传权重用于所有逻辑客户端"
+        ]
+      },
+      "provenance": {
+        "category": "external_predictions_unknown",
+        "training_verified": false
       },
       "global_cells": [
         {
           "stage": 5,
           "task_id": "A",
-          "client_id": "global",
           "score": 0.05550316158408817,
           "n_samples": 126,
-          "n_cases": 3,
           "metric": "Foreground Dice",
           "direction": "higher",
           "unit": "fraction",
-          "reason": "实测",
+          "n_cases": 3,
           "benchmark_mean": 0.4686758142715591,
           "background": 0.88184846695903
         },
         {
           "stage": 5,
           "task_id": "B",
-          "client_id": "global",
           "score": 0.059332002854080086,
           "n_samples": 72,
-          "n_cases": 3,
           "metric": "Foreground Dice",
           "direction": "higher",
           "unit": "fraction",
-          "reason": "实测",
+          "n_cases": 3,
           "benchmark_mean": 0.44676914905324483,
           "background": 0.8342062952524095
         },
         {
           "stage": 5,
           "task_id": "C",
-          "client_id": "global",
           "score": 0.03622328552203419,
           "n_samples": 158,
-          "n_cases": 8,
           "metric": "Foreground Dice",
           "direction": "higher",
           "unit": "fraction",
-          "reason": "实测",
+          "n_cases": 8,
           "benchmark_mean": 0.42783439102659643,
           "background": 0.8194454965311586
         },
         {
           "stage": 5,
           "task_id": "E",
-          "client_id": "global",
           "score": 0.01923441172417978,
           "n_samples": 254,
-          "n_cases": 8,
           "metric": "Foreground Dice",
           "direction": "higher",
           "unit": "fraction",
-          "reason": "实测",
+          "n_cases": 8,
           "benchmark_mean": 0.3991762036299785,
           "background": 0.7791179955357772
         },
         {
           "stage": 5,
           "task_id": "F",
-          "client_id": "global",
           "score": 0.054404848692734965,
           "n_samples": 320,
-          "n_cases": 5,
           "metric": "Foreground Dice",
           "direction": "higher",
           "unit": "fraction",
-          "reason": "实测",
+          "n_cases": 5,
           "benchmark_mean": 0.4512537699379299,
           "background": 0.8481026911831249
         }
@@ -602,26 +271,21 @@
           0.054404848692734965
         ]
       ],
-      "continual": {
+      "global_continual": {
         "Final average": {
-          "value": 0.04493954207542344,
-          "reason": "最终阶段全部任务等权平均"
+          "value": 0.04493954207542344
         },
         "BWT": {
-          "value": null,
-          "reason": "缺少获得阶段或最终结果"
+          "value": null
         },
         "Forgetting": {
-          "value": null,
-          "reason": "缺少完整已见历史或最终结果"
+          "value": null
         },
         "FWT": {
-          "value": null,
-          "reason": "协议不允许未见任务评估"
+          "value": null
         },
         "BWTR": {
-          "value": null,
-          "reason": "缺少获得阶段或最终结果"
+          "value": null
         }
       },
       "warnings": [
@@ -631,178 +295,79 @@
       ]
     },
     {
-      "job_id": "d02c37159af74826bbd2c06ad8e4019d",
-      "config": {
-        "schema_version": 1,
-        "benchmark": {
-          "id": "demo-classification",
-          "title": "分类 · 合成验收样例",
-          "kind": "classification",
-          "incremental": "class",
-          "version": "synthetic-v1",
-          "synthetic": true,
-          "description": "程序生成的手算 / 工程验收数据；不代表医学数据、训练效果或论文结果。",
-          "source": "MedCL deterministic synthetic fixture v1",
-          "metric": "Accuracy",
-          "direction": "higher",
-          "unit": "fraction",
-          "allow_unseen": false,
-          "output_semantics": "shared-global-labels",
-          "tasks": [
-            {
-              "id": "T1",
-              "name": "合成任务 1",
-              "classes": [
-                0
-              ],
-              "all_classes": [
-                0,
-                1,
-                2
-              ],
-              "coordinate_system": null,
-              "spacing": null
-            },
-            {
-              "id": "T2",
-              "name": "合成任务 2",
-              "classes": [
-                1
-              ],
-              "all_classes": [
-                0,
-                1,
-                2
-              ],
-              "coordinate_system": null,
-              "spacing": null
-            },
-            {
-              "id": "T3",
-              "name": "合成任务 3",
-              "classes": [
-                2
-              ],
-              "all_classes": [
-                0,
-                1,
-                2
-              ],
-              "coordinate_system": null,
-              "spacing": null
-            }
-          ]
-        },
-        "method": "合成分类 · 全阶段未训练结构（T3→T1→T2）",
-        "order": [
+      "run_id": "run-d02c3715",
+      "benchmark": {
+        "id": "demo-classification",
+        "public_title": "分类 · 合成验收样例",
+        "version": "synthetic-v1",
+        "synthetic": true,
+        "metric": "Accuracy",
+        "direction": "higher",
+        "unit": "fraction",
+        "task_order": [
           "T3",
           "T1",
           "T2"
-        ],
-        "stages": [
-          1,
-          2,
-          3
-        ],
-        "mode": "model",
-        "architecture": "linear-classifier-v1",
-        "clients": 3,
-        "evaluate_unseen": false,
-        "output_head": "shared",
-        "client_split": {
-          "id": "case-round-robin-v1-c3",
-          "version": "1",
-          "source": "平台固定逻辑划分：各任务匿名病例索引 mod 客户端数；分类无病例标识时按图像索引。非论文客户端划分。"
-        },
-        "conditions": "样本准确率；固定全局类别编码；仅已见类别输出；不推断病例 ID",
-        "test_assets": [
-          {
-            "task_id": "T1",
-            "files": []
-          },
-          {
-            "task_id": "T2",
-            "files": []
-          },
-          {
-            "task_id": "T3",
-            "files": []
-          }
-        ],
-        "prediction_provenance": "同一阶段上传权重用于所有逻辑客户端"
+        ]
+      },
+      "provenance": {
+        "category": "synthetic",
+        "training_verified": false
       },
       "global_cells": [
         {
           "stage": 1,
           "task_id": "T3",
-          "client_id": "global",
           "score": 1.0,
           "n_samples": 18,
-          "n_cases": 18,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         },
         {
           "stage": 2,
           "task_id": "T3",
-          "client_id": "global",
           "score": 1.0,
           "n_samples": 18,
-          "n_cases": 18,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         },
         {
           "stage": 2,
           "task_id": "T1",
-          "client_id": "global",
           "score": 1.0,
           "n_samples": 12,
-          "n_cases": 12,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         },
         {
           "stage": 3,
           "task_id": "T3",
-          "client_id": "global",
           "score": 1.0,
           "n_samples": 18,
-          "n_cases": 18,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         },
         {
           "stage": 3,
           "task_id": "T1",
-          "client_id": "global",
           "score": 1.0,
           "n_samples": 12,
-          "n_cases": 12,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         },
         {
           "stage": 3,
           "task_id": "T2",
-          "client_id": "global",
           "score": 0.8666666666666667,
           "n_samples": 15,
-          "n_cases": 15,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         }
       ],
       "global_matrix": [
@@ -822,26 +387,21 @@
           0.8666666666666667
         ]
       ],
-      "continual": {
+      "global_continual": {
         "Final average": {
-          "value": 0.9555555555555555,
-          "reason": "最终阶段全部任务等权平均"
+          "value": 0.9555555555555555
         },
         "BWT": {
-          "value": 0.0,
-          "reason": "正值表示后续学习带来提升"
+          "value": 0.0
         },
         "Forgetting": {
-          "value": 0.0,
-          "reason": "正值为下降，负值为超过历史最佳"
+          "value": 0.0
         },
         "FWT": {
-          "value": null,
-          "reason": "协议不允许未见任务评估"
+          "value": null
         },
         "BWTR": {
-          "value": 0.0,
-          "reason": "相对获得阶段的变化比例，非百分数"
+          "value": 0.0
         }
       },
       "warnings": [
@@ -852,153 +412,61 @@
       ]
     },
     {
-      "job_id": "9d55eef05a25466da4b9f275638ab8c8",
-      "config": {
-        "schema_version": 1,
-        "benchmark": {
-          "id": "demo-classification",
-          "title": "分类 · 合成验收样例",
-          "kind": "classification",
-          "incremental": "class",
-          "version": "synthetic-v1",
-          "synthetic": true,
-          "description": "程序生成的手算 / 工程验收数据；不代表医学数据、训练效果或论文结果。",
-          "source": "MedCL deterministic synthetic fixture v1",
-          "metric": "Accuracy",
-          "direction": "higher",
-          "unit": "fraction",
-          "allow_unseen": false,
-          "output_semantics": "shared-global-labels",
-          "tasks": [
-            {
-              "id": "T1",
-              "name": "合成任务 1",
-              "classes": [
-                0
-              ],
-              "all_classes": [
-                0,
-                1,
-                2
-              ],
-              "coordinate_system": null,
-              "spacing": null
-            },
-            {
-              "id": "T2",
-              "name": "合成任务 2",
-              "classes": [
-                1
-              ],
-              "all_classes": [
-                0,
-                1,
-                2
-              ],
-              "coordinate_system": null,
-              "spacing": null
-            },
-            {
-              "id": "T3",
-              "name": "合成任务 3",
-              "classes": [
-                2
-              ],
-              "all_classes": [
-                0,
-                1,
-                2
-              ],
-              "coordinate_system": null,
-              "spacing": null
-            }
-          ]
-        },
-        "method": "合成分类 · T3→T1→T2，缺少阶段 2",
-        "order": [
+      "run_id": "run-9d55eef0",
+      "benchmark": {
+        "id": "demo-classification",
+        "public_title": "分类 · 合成验收样例",
+        "version": "synthetic-v1",
+        "synthetic": true,
+        "metric": "Accuracy",
+        "direction": "higher",
+        "unit": "fraction",
+        "task_order": [
           "T3",
           "T1",
           "T2"
-        ],
-        "stages": [
-          1,
-          3
-        ],
-        "mode": "predictions",
-        "architecture": null,
-        "clients": 3,
-        "evaluate_unseen": false,
-        "output_head": "shared",
-        "client_split": {
-          "id": "case-round-robin-v1-c3",
-          "version": "1",
-          "source": "平台固定逻辑划分：各任务匿名病例索引 mod 客户端数；分类无病例标识时按图像索引。非论文客户端划分。"
-        },
-        "conditions": "样本准确率；固定全局类别编码；仅已见类别输出；不推断病例 ID",
-        "test_assets": [
-          {
-            "task_id": "T1",
-            "files": []
-          },
-          {
-            "task_id": "T2",
-            "files": []
-          },
-          {
-            "task_id": "T3",
-            "files": []
-          }
-        ],
-        "prediction_provenance": "提交者声明同一阶段全局模型；预测模式不独立验证模型来源"
+        ]
+      },
+      "provenance": {
+        "category": "synthetic",
+        "training_verified": false
       },
       "global_cells": [
         {
           "stage": 1,
           "task_id": "T3",
-          "client_id": "global",
           "score": 1.0,
           "n_samples": 18,
-          "n_cases": 18,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         },
         {
           "stage": 3,
           "task_id": "T3",
-          "client_id": "global",
           "score": 1.0,
           "n_samples": 18,
-          "n_cases": 18,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         },
         {
           "stage": 3,
           "task_id": "T1",
-          "client_id": "global",
           "score": 1.0,
           "n_samples": 12,
-          "n_cases": 12,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         },
         {
           "stage": 3,
           "task_id": "T2",
-          "client_id": "global",
           "score": 0.8666666666666667,
           "n_samples": 15,
-          "n_cases": 15,
           "metric": "Accuracy",
           "direction": "higher",
-          "unit": "fraction",
-          "reason": "实测"
+          "unit": "fraction"
         }
       ],
       "global_matrix": [
@@ -1018,26 +486,21 @@
           0.8666666666666667
         ]
       ],
-      "continual": {
+      "global_continual": {
         "Final average": {
-          "value": 0.9555555555555555,
-          "reason": "最终阶段全部任务等权平均"
+          "value": 0.9555555555555555
         },
         "BWT": {
-          "value": null,
-          "reason": "缺少获得阶段或最终结果"
+          "value": null
         },
         "Forgetting": {
-          "value": null,
-          "reason": "缺少完整已见历史或最终结果"
+          "value": null
         },
         "FWT": {
-          "value": null,
-          "reason": "协议不允许未见任务评估"
+          "value": null
         },
         "BWTR": {
-          "value": null,
-          "reason": "缺少获得阶段或最终结果"
+          "value": null
         }
       },
       "warnings": [
@@ -1048,5 +511,5 @@
       ]
     }
   ],
-  "note": "仅全局聚合指标。不含病例明细、客户端个体结果、标签、原始预测、模型或资产路径。发布前仍需检查方法名称与管理员协议文字。"
+  "note": "显式白名单生成的全局聚合发布候选；不含方法自由文本、病例/客户端明细、标签、预测、模型、资产元数据或管理员私有说明，发布前仍需人工复核。"
 }

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 import json
 import os
@@ -12,6 +12,9 @@ import sqlite3
 import uuid
 
 from medcl.benchmarks import state_path
+from medcl.reports import submitter_result
+
+DB_SCHEMA_VERSION = 3
 
 
 def now() -> str:
@@ -22,14 +25,35 @@ def encode(value) -> str:
     return json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
 
 
+def _secure_sqlite(root: Path) -> None:
+    for name in ("medcl.sqlite3", "medcl.sqlite3-wal", "medcl.sqlite3-shm"):
+        path = root / name
+        if path.exists():
+            os.chmod(path, 0o600)
+
+
+def _replace_private_json(path: Path, value: dict) -> None:
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.pending")
+    temporary.write_text(encode(value), encoding="utf-8")
+    temporary.chmod(0o600)
+    temporary.replace(path)
+    path.chmod(0o600)
+
+
 def initialize(root: Path | None = None) -> Path:
     root = Path(root or state_path())
-    root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    os.chmod(root, 0o700)
-    (root / "jobs").mkdir(exist_ok=True, mode=0o700)
-    with sqlite3.connect(root / "medcl.sqlite3", timeout=10) as db:
-        db.execute("PRAGMA journal_mode=WAL")
-        db.executescript("""
+    jobs_root = root / "jobs"
+    try:
+        root.mkdir(parents=True, exist_ok=True, mode=0o700)
+        os.chmod(root, 0o700)
+        jobs_root.mkdir(exist_ok=True, mode=0o700)
+        os.chmod(jobs_root, 0o700)
+    except OSError:
+        raise RuntimeError("私有状态目录无法创建或收紧为仅所有者访问") from None
+    with closing(sqlite3.connect(root / "medcl.sqlite3", timeout=10)) as db:
+        with db:
+            db.execute("PRAGMA journal_mode=WAL")
+            db.executescript("""
             CREATE TABLE IF NOT EXISTS jobs (
                 id TEXT PRIMARY KEY, created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
                 status TEXT NOT NULL CHECK(status IN ('queued','running','completed','failed')),
@@ -40,14 +64,45 @@ def initialize(root: Path | None = None) -> Path:
             CREATE TRIGGER IF NOT EXISTS immutable_job_config BEFORE UPDATE OF config ON jobs
             BEGIN SELECT RAISE(ABORT, 'evaluation configuration is immutable'); END;
             CREATE TABLE IF NOT EXISTS worker_state (id INTEGER PRIMARY KEY CHECK(id=1), heartbeat TEXT NOT NULL);
-        """)
-    os.chmod(root / "medcl.sqlite3", 0o600)
+            """)
+            version = db.execute("PRAGMA user_version").fetchone()[0]
+            if version < DB_SCHEMA_VERSION:
+                for job_id, encoded in db.execute("SELECT id,result FROM jobs WHERE result IS NOT NULL").fetchall():
+                    result = submitter_result(json.loads(encoded))
+                    db.execute("UPDATE jobs SET result=? WHERE id=?", (encode(result), job_id))
+                    result_file = jobs_root / job_id / "result.json"
+                    if result_file.is_file():
+                        _replace_private_json(result_file, submitter_result(json.loads(result_file.read_text(encoding="utf-8"))))
+                for folder in jobs_root.iterdir():
+                    if not folder.is_dir():
+                        continue
+                    os.chmod(folder, 0o700)
+                    for directory in (folder / "uploads", folder / "visuals"):
+                        if directory.is_dir():
+                            os.chmod(directory, 0o700)
+                    for name in ("private.json", "result.json", "result.pending.json", "worker.private.log", "inference-error.txt"):
+                        path = folder / name
+                        if path.is_file():
+                            os.chmod(path, 0o600)
+                    uploads = folder / "uploads"
+                    if uploads.is_dir():
+                        for path in uploads.iterdir():
+                            if path.is_file():
+                                os.chmod(path, 0o600)
+                    visuals = folder / "visuals"
+                    if visuals.is_dir():
+                        for path in visuals.iterdir():
+                            if path.is_file():
+                                os.chmod(path, 0o600)
+                db.execute(f"PRAGMA user_version={DB_SCHEMA_VERSION}")
+    _secure_sqlite(root)
     return root
 
 
 @contextmanager
 def connection(root: Path | None = None):
-    db = sqlite3.connect(Path(root or state_path()) / "medcl.sqlite3", timeout=10)
+    root = Path(root or state_path())
+    db = sqlite3.connect(root / "medcl.sqlite3", timeout=10)
     db.row_factory = sqlite3.Row
     try:
         yield db
@@ -57,6 +112,7 @@ def connection(root: Path | None = None):
         raise
     finally:
         db.close()
+        _secure_sqlite(root)
 
 
 def job_dir(job_id: str, root: Path | None = None) -> Path:
@@ -71,17 +127,24 @@ def create_job(config: dict, private: dict, uploads: list[dict], root: Path | No
     job_id = uuid.uuid4().hex
     folder = job_dir(job_id, root)
     folder.mkdir(mode=0o700)
-    (folder / "uploads").mkdir(mode=0o700)
+    os.chmod(folder, 0o700)
+    uploads_dir = folder / "uploads"
+    uploads_dir.mkdir(mode=0o700)
+    os.chmod(uploads_dir, 0o700)
     saved = []
     try:
         for item in uploads:
             suffix = Path(item["name"]).suffix.lower()
             filename = f"stage-{item['stage']:02d}{suffix}"
-            with (folder / "uploads" / filename).open("xb") as handle:
+            destination = uploads_dir / filename
+            with destination.open("xb") as handle:
                 handle.write(item["data"])
+            destination.chmod(0o600)
             saved.append({"stage": item["stage"], "filename": filename})
         private = {**private, "uploads": saved}
-        (folder / "private.json").write_text(encode(private), encoding="utf-8")
+        private_path = folder / "private.json"
+        private_path.write_text(encode(private), encoding="utf-8")
+        private_path.chmod(0o600)
         with connection(root) as db:
             db.execute("INSERT INTO jobs(id,created_at,updated_at,status,config,message) VALUES(?,?,?,'queued',?,?)",
                        (job_id, now(), now(), encode(config), "等待独立评分 worker"))
@@ -96,7 +159,7 @@ def _decode(row) -> dict | None:
         return None
     result = dict(row)
     result["config"] = json.loads(result["config"])
-    result["result"] = json.loads(result["result"]) if result["result"] else None
+    result["result"] = submitter_result(json.loads(result["result"])) if result["result"] else None
     return result
 
 
@@ -135,7 +198,7 @@ def update_job(job_id: str, *, message: str, progress: float | None = None,
         args.append(status)
     if result is not None:
         fields.append("result=?")
-        args.append(encode(result))
+        args.append(encode(submitter_result(result)))
     with connection(root) as db:
         db.execute(f"UPDATE jobs SET {','.join(fields)} WHERE id=?", (*args, job_id))
 

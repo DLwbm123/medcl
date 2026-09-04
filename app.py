@@ -1,16 +1,15 @@
 """The local MedCL browser application. Long-running scoring belongs to the worker."""
 
 from html import escape
-import json
 
 import altair as alt
-import numpy as np
 import pandas as pd
 import streamlit as st
 
-from medcl.benchmarks import INCREMENTS, KINDS, catalog, config_path, public_protocol, readiness
+from medcl.benchmarks import INCREMENTS, KINDS, catalog, config_path, readiness
 from medcl.examples import baseline_predictions, example_weights, pack_predictions, sample_manifest
-from medcl.reports import compatibility, report_csv, report_html, report_json
+from medcl.reports import compatible_result, compatibility, report_csv, report_html, report_json
+from medcl.runner import load_preview
 from medcl.sandbox import sandbox_available
 from medcl.storage import get_job, initialize, job_dir, list_jobs, worker_alive
 from medcl.submissions import ARCHITECTURES, submit
@@ -206,13 +205,29 @@ def new_evaluation(benchmark_id, training_supervision=None):
     if clients > 1:
         st.info(f"按匿名病例索引固定轮转到 {clients} 个逻辑客户端；分类无病例标识时按图像划分。仅评分汇总，不训练或聚合权重。划分版本将随配置保存。")
     head = st.selectbox("输出头与任务信息条件", ["shared", "task-specific"], format_func=lambda x: "共享输出头 / 全局类别编码" if x == "shared" else "任务指定输出头 / 已知任务 ID")
-    unseen = st.checkbox("同时评测未见任务", disabled=not b["allow_unseen"] or head != "shared", value=False)
+    unseen_key = f"evaluate-unseen-{benchmark_id}"
+    unseen_enabled = b["allow_unseen"] and head == "shared"
+    if unseen_key not in st.session_state or not unseen_enabled:
+        st.session_state[unseen_key] = False
+    unseen = st.checkbox("同时评测未见任务", disabled=not unseen_enabled, key=unseen_key)
     if not b["allow_unseen"]:
         st.caption("当前协议不允许对未见任务评分；不会补造前向迁移曲线。")
     st.subheader("02 / 模型或预测")
     method = st.text_input("方法 / 本次评测名称", value="", placeholder="例如：方法名称 · final / seed42", max_chars=80)
     mode_label = st.radio("提交类型", ["预测文件", "已支持结构的模型权重"], horizontal=True)
     mode = "predictions" if mode_label == "预测文件" else "model"
+    if b["synthetic"]:
+        provenance = "synthetic"
+        st.caption("结果来源：合成工程验收；由协议结构确定，不能改标为真实结果。")
+    else:
+        provenance_labels = {
+            "external_predictions_unknown": "外部预测 / 来源未知",
+            "untrained_baseline": "未训练工程基线",
+            "trained_model_declared": "已训练模型（提交者声明）",
+        }
+        provenance = st.selectbox("结果来源声明", list(provenance_labels), format_func=provenance_labels.get,
+                                  key=f"provenance-{benchmark_id}")
+        st.caption("来源类别是提交者声明；平台验证测试评分，不验证训练过程。")
     architecture = None
     model_ok = True
     if mode == "model":
@@ -260,12 +275,12 @@ def new_evaluation(benchmark_id, training_supervision=None):
         st.caption("预测模式由提交者声明同一阶段各客户端预测来自同一全局模型；平台不要求训练日志，也不伪称已验证模型来源。")
     if not worker_alive():
         st.warning("worker 当前离线；请先由管理员启动服务。不会在网页请求里执行长评测。")
-    ready = bool(method.strip()) and bool(stages) and len(files) == len(stages) and len(set(order)) == len(order) and model_ok and (mode != "model" or head == "shared") and worker_alive()
+    ready = bool(method.strip()) and bool(stages) and len(files) == len(stages) and len(set(order)) == len(order) and model_ok and (mode != "model" or head == "shared") and (not unseen or unseen_enabled) and worker_alive()
     if st.button("提交并开始评测", type="primary", disabled=not ready):
         try:
             job_id = submit(b, method=method, order=order, uploads=files, mode=mode, architecture=architecture,
                             clients=clients, evaluate_unseen=unseen, output_head=head,
-                            training_supervision=training_supervision)
+                            training_supervision=training_supervision, provenance=provenance)
         except ValueError as exc:
             st.error(str(exc))
         except Exception:
@@ -278,19 +293,22 @@ def new_evaluation(benchmark_id, training_supervision=None):
 
 
 def preview_arrays(job_id, reference):
-    visual_root = (job_dir(job_id) / "visuals").resolve()
-    path = (job_dir(job_id) / reference["file"]).resolve()
-    if path.parent != visual_root or path.suffix != ".npz":
-        raise ValueError("可视化引用无效")
-    with np.load(path, allow_pickle=False) as archive:
-        return {key: archive[key] for key in archive.files}
+    return load_preview(job_dir(job_id), reference)
 
 
 def result_view(job):
-    result, config = job["result"], job["config"]
+    result = compatible_result(job["result"])
+    config = result["config"]
     b = config["benchmark"]
     if b.get("synthetic"):
         st.warning("合成工程验收结果 · 不得作为医学或论文实验结果")
+    provenance = ({"category": "synthetic", "statement": "由已校验的合成协议决定；仅用于工程验收"}
+                  if b.get("synthetic") else config.get("provenance", {
+                      "category": "external_predictions_unknown", "statement": "旧记录未保存结构化来源；按未知外部来源显示"}))
+    if not isinstance(provenance, dict):
+        provenance = {"category": "external_predictions_unknown", "statement": "结果来源格式无效；按未知外部来源显示"}
+    if provenance.get("category") != "synthetic":
+        st.warning(provenance.get("statement", "结果来源未经平台验证"))
     st.subheader(config["method"])
     supervision = {"full": "全监督", "weak": "弱监督", "not-declared": "未声明", "not-applicable": "不适用"}.get(config.get("training_supervision"), "未声明")
     st.caption(f"{b['title']} · {b['version']} · {config['mode']} · 配置已冻结" + (f" · {supervision}分割" if b["kind"] == "segmentation" else ""))
@@ -303,7 +321,8 @@ def result_view(job):
         col.metric(labels[metric], score_text(summary[metric]["value"], b["unit"]))
         col.caption(summary[metric]["reason"])
     st.caption("上述指标由独立评分服务从每阶段测试矩阵计算；— 表示条件不足，不用 0 补齐。")
-    tab_matrix, tab_clients, tab_cases, tab_protocol = st.tabs(["阶段—任务矩阵", "逻辑客户端", "病例 / 样本结果", "协议与导出"])
+    detail_label = "类别名称" if b["kind"] == "classification" else "病例结果与可视化"
+    tab_matrix, tab_clients, tab_cases, tab_protocol = st.tabs(["阶段—任务矩阵", "逻辑客户端", detail_label, "协议与导出"])
     with tab_matrix:
         client_id = st.selectbox("查看结果层级", list(result["matrices"]), format_func=lambda x: "全体测试样本" if x == "global" else f"逻辑客户端 {x}")
         heatmap(result["matrices"][client_id], config["order"], [f"阶段 {s}" for s in range(1, len(config["order"]) + 1)], b["direction"], b["metric"] + (" ↓" if b["direction"] == "lower" else " ↑"))
@@ -322,27 +341,31 @@ def result_view(job):
             frame = pd.DataFrame(stats).rename(columns={"task_id": "任务", "client_macro": "客户端宏平均", "sample_weighted_accuracy": "按样本数加权准确率", "worst_client": "最低性能客户端", "client_std": "客户端标准差", "client_gap": "客户端极差", "available_clients": "有样本客户端", "total_clients": "客户端总数", "stage": "阶段"})
             st.dataframe(frame, hide_index=True, width="stretch")
             st.caption("分类加权项使用每客户端样本准确率 × 样本数；分割和配准不套用分类加权准确率。TRE 越低越好，因此最低性能客户端对应最大 TRE。")
-            dist = pd.DataFrame([r for r in result["distributions"] if r["stage"] == stage])
-            chart_data = dist.rename(columns={"client_id": "逻辑客户端", "n_samples": "样本数", "task_id": "任务"})
-            chart = alt.Chart(chart_data).mark_bar().encode(x="逻辑客户端:N", y="样本数:Q",
-                color=alt.Color("任务:N", scale=alt.Scale(range=["#486b81", "#6d9380", "#8796a5", "#a58b5b", "#627e73", "#a7bbc6"])),
-                tooltip=["逻辑客户端", "任务", "样本数"]).properties(height=250)
-            st.altair_chart(chart, width="stretch")
-            st.dataframe(dist, hide_index=True, width="stretch")
+            dist = pd.DataFrame([r for r in result.get("distributions", []) if r.get("stage") == stage])
+            if dist.empty:
+                st.info("此阶段没有可展示的客户端样本量。")
+            else:
+                chart_data = dist.rename(columns={"client_id": "逻辑客户端", "n_samples": "样本数", "task_id": "任务"})
+                chart = alt.Chart(chart_data).mark_bar().encode(x="逻辑客户端:N", y="样本数:Q",
+                    color=alt.Color("任务:N", scale=alt.Scale(range=["#486b81", "#6d9380", "#8796a5", "#a58b5b", "#627e73", "#a7bbc6"])),
+                    tooltip=["逻辑客户端", "任务", "样本数"]).properties(height=250)
+                st.altair_chart(chart, width="stretch")
+                st.dataframe(dist, hide_index=True, width="stretch")
         else:
             st.info("此阶段未提交，没有可展示的客户端统计。")
     with tab_cases:
         stage = st.selectbox("可视化阶段", sorted(config["stages"]), index=len(config["stages"]) - 1, key=f"case-stage-{job['id']}")
-        available_tasks = [tid for tid in config["order"] if any(c["task_id"] == tid and c["stage"] == stage for c in result["cases"])]
-        task_id = st.selectbox("病例 / 样本任务", available_tasks or config["order"], key=f"case-task-{job['id']}")
-        cases = [c for c in result["cases"] if c["task_id"] == task_id and c["stage"] == stage]
+        cases_result = result.get("cases", []) if b["kind"] != "classification" else []
+        available_tasks = [tid for tid in config["order"] if any(c["task_id"] == tid and c["stage"] == stage for c in cases_result)]
+        task_id = st.selectbox("类别任务" if b["kind"] == "classification" else "病例任务", available_tasks or config["order"], key=f"case-task-{job['id']}")
+        cases = [c for c in cases_result if c["task_id"] == task_id and c["stage"] == stage]
         task = next(t for t in b["tasks"] if t["id"] == task_id)
         if b["kind"] == "classification":
             registered = lookup.get(b["id"], {})
             class_names = b.get("class_names") or (registered.get("class_names", {}) if registered.get("version") == b.get("version") else {})
             st.subheader("类别名称")
             st.dataframe(pd.DataFrame([{"Class ID": value, "类别名称": class_names.get(str(value), f"类别 {value}")} for value in task.get("classes", [])]), hide_index=True, width="stretch")
-            st.caption("分类无病例 ID 时按图像统计，不将其声称为患者级评测。")
+            st.caption("分类只发布任务与逻辑客户端聚合准确率；不显示或下载逐样本正误、样本 ID、病例 ID 或隐藏标签频数。")
         previews = [v for v in result.get("visualizations", []) if v["task_id"] == task_id and v["stage"] == stage]
         if b["kind"] in ("segmentation", "registration"):
             st.subheader("预测结果可视化")
@@ -373,11 +396,12 @@ def result_view(job):
                     st.warning("私有可视化文件不可读；数值评分仍以已保存结果为准。")
             else:
                 st.info("该记录没有可视化预览；新建的分割 / 配准评测会生成最多 6 个私有病例预览。")
-        st.subheader("病例 / 样本数值")
-        if cases:
-            st.dataframe(pd.DataFrame(cases).drop(columns=["case_index"], errors="ignore"), hide_index=True, width="stretch", height=340)
-        else:
-            st.info("该任务在选定阶段没有病例结果。")
+        if b["kind"] != "classification":
+            st.subheader("病例数值")
+            if cases:
+                st.dataframe(pd.DataFrame(cases).drop(columns=["case_index"], errors="ignore"), hide_index=True, width="stretch", height=340)
+            else:
+                st.info("该任务在选定阶段没有病例结果。")
     with tab_protocol:
         st.json(config)
         for warning in result["warnings"]:

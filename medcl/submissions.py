@@ -16,9 +16,19 @@ from medcl.benchmarks import freeze_assets, public_protocol, readiness
 from medcl.storage import create_job
 
 MAX_FILE = 128 * 1024 * 1024
+MAX_JSON = 16 * 1024 * 1024
 MAX_TOTAL = 256 * 1024 * 1024
 MAX_EXPANDED = 512 * 1024 * 1024
+MAX_JSON_PREDICTIONS = 2_000_000
+MAX_JSON_IDS = 1_000_000
+MAX_JSON_STRING_CHARS = 8_000_000
 SCHEMA = "medcl.predictions.v1"
+PROVENANCE = {
+    "synthetic": "由已校验的合成协议决定；仅用于工程验收",
+    "untrained_baseline": "提交者声明为未训练基线；平台未验证训练过程",
+    "trained_model_declared": "提交者声明为已训练模型；平台未验证训练过程",
+    "external_predictions_unknown": "外部预测来源未知；平台仅验证测试评分",
+}
 ARCHITECTURES = {
     "classification": {"linear-classifier-v1": "线性分类器 · 固定全局类别输出"},
     "segmentation": {"pixel-linear-v1": "逐像素线性分割器 · 共享输出头"},
@@ -42,6 +52,51 @@ def parse_json(data: bytes):
         return json.loads(data, object_pairs_hook=_pairs, parse_constant=bad_constant)
     except (UnicodeError, json.JSONDecodeError, RecursionError):
         raise ValueError("JSON 文件无效或嵌套过深") from None
+
+
+def validate_prediction_json(doc: object) -> dict:
+    if not isinstance(doc, dict) or set(doc) != {"schema", "tasks"} or doc.get("schema") != SCHEMA or not isinstance(doc.get("tasks"), dict):
+        raise ValueError("JSON 必须使用 medcl.predictions.v1 格式")
+    tasks = doc["tasks"]
+    if not 1 <= len(tasks) <= 12:
+        raise ValueError("预测 JSON 必须包含 1–12 个任务")
+    string_chars = 0
+    prediction_count = 0
+    for task_id, value in tasks.items():
+        if not isinstance(task_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]{0,63}", task_id):
+            raise ValueError("预测任务 ID 格式错误")
+        if not isinstance(value, dict) or set(value) != {"sample_ids", "predictions"}:
+            raise ValueError("每个任务必须且仅包含 sample_ids 和 predictions")
+        ids = value["sample_ids"]
+        if not isinstance(ids, list) or not 1 <= len(ids) <= MAX_JSON_IDS:
+            raise ValueError("sample_ids 数量超出上限")
+        if any(not isinstance(item, str) or not 1 <= len(item) <= 128 or any(ord(c) < 32 for c in item) for item in ids):
+            raise ValueError("sample_ids 必须是有界可见字符串")
+        string_chars += sum(map(len, ids))
+        if string_chars > MAX_JSON_STRING_CHARS:
+            raise ValueError("JSON 内容超过资源上限；请改用 NPZ")
+        stack = [(value["predictions"], 0)]
+        while stack:
+            item, depth = stack.pop()
+            if depth > 5:
+                raise ValueError("predictions 嵌套过深；大型预测请使用 NPZ")
+            if isinstance(item, list):
+                if not item:
+                    raise ValueError("predictions 不得包含空数组")
+                stack.extend((child, depth + 1) for child in item)
+            elif isinstance(item, bool) or not isinstance(item, (int, float)):
+                raise ValueError("predictions 只能包含有限数值")
+            else:
+                try:
+                    finite = math.isfinite(item)
+                except OverflowError:
+                    finite = False
+                if not finite:
+                    raise ValueError("predictions 只能包含有限数值")
+                prediction_count += 1
+                if prediction_count > MAX_JSON_PREDICTIONS:
+                    raise ValueError("JSON 内容超过资源上限；请改用 NPZ")
+    return doc
 
 
 def validate_archive(data: bytes) -> None:
@@ -113,20 +168,26 @@ def validate_weights(data: bytes, architecture: str) -> None:
         raise ValueError("权重数据截断或存在多余内容")
 
 
-def inspect_upload(name: str, data: bytes, mode: str, architecture: str | None = None) -> None:
+def inspect_upload(name: str, data: bytes, mode: str, architecture: str | None = None):
     if not isinstance(data, bytes) or not 0 < len(data) <= MAX_FILE:
         raise ValueError("每个文件需为 1 byte–128 MiB")
     suffix = Path(name).suffix.lower()
     if mode == "model":
         if suffix != ".safetensors":
             raise ValueError("模型仅接受 safetensors；禁止 Python、Pickle、PT/PTH")
+        if architecture not in {item for choices in ARCHITECTURES.values() for item in choices}:
+            raise ValueError("模型结构未在审核白名单中")
         validate_weights(data, architecture)
-    elif suffix in (".npz", ".zip"):
+        return None
+    if mode != "predictions":
+        raise ValueError("提交模式无效")
+    if suffix in (".npz", ".zip"):
         validate_archive(data)
-    elif suffix == ".json":
-        doc = parse_json(data)
-        if not isinstance(doc, dict) or doc.get("schema") != SCHEMA or not isinstance(doc.get("tasks"), dict):
-            raise ValueError("JSON 必须使用 medcl.predictions.v1 格式")
+        return None
+    if suffix == ".json":
+        if len(data) > MAX_JSON:
+            raise ValueError("JSON 不可超过 16 MiB；大型预测请使用 NPZ")
+        return validate_prediction_json(parse_json(data))
     else:
         raise ValueError("预测仅接受 JSON 或 NPZ/ZIP 数组包")
 
@@ -137,15 +198,10 @@ def required_tasks(config: dict, stage: int) -> list[str]:
 
 def load_predictions(path: Path) -> dict[str, dict]:
     data = path.read_bytes()
-    inspect_upload(path.name, data, "predictions")
+    doc = inspect_upload(path.name, data, "predictions")
     if path.suffix == ".json":
-        doc = parse_json(data)
         result = {}
-        if len(doc["tasks"]) > 12:
-            raise ValueError("预测任务数超过上限")
         for key, value in doc["tasks"].items():
-            if not isinstance(value, dict) or set(value) != {"sample_ids", "predictions"}:
-                raise ValueError("每个任务必须且仅包含 sample_ids 和 predictions")
             result[key] = {"ids": np.asarray(value["sample_ids"]), "pred": np.asarray(value["predictions"])}
         return result
     with np.load(io.BytesIO(data), allow_pickle=False) as archive:
@@ -175,7 +231,7 @@ def align_predictions(entry: dict, sample_ids: np.ndarray, expected_shape: tuple
 def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict],
            mode: str, architecture: str | None, clients: int, evaluate_unseen: bool,
            output_head: str = "shared", training_supervision: str | None = None,
-           root: Path | None = None) -> str:
+           provenance: str | None = None, root: Path | None = None) -> str:
     ok, _ = readiness(benchmark)
     if not ok:
         raise ValueError("该基准资产尚未接入")
@@ -198,6 +254,14 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
         raise ValueError("未见任务选项必须为布尔值")
     if evaluate_unseen and (not benchmark["allow_unseen"] or output_head != "shared"):
         raise ValueError("该协议或输出头不允许评测未见任务")
+    if benchmark["synthetic"]:
+        if provenance not in (None, "synthetic"):
+            raise ValueError("合成协议的结果来源必须标记为 synthetic")
+        provenance = "synthetic"
+    else:
+        provenance = provenance or "external_predictions_unknown"
+        if provenance not in PROVENANCE or provenance == "synthetic":
+            raise ValueError("真实协议结果来源必须使用受限声明类别")
     if not 1 <= len(uploads) <= len(order):
         raise ValueError("每个阶段最多一个文件；至少提交一个阶段")
     stages = [u["stage"] for u in uploads]
@@ -217,7 +281,7 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
     by_path = {a["path"]: a for a in assets}
     from medcl.benchmarks import asset_paths
     config = {
-        "schema_version": 1, "benchmark": public_protocol(benchmark), "method": method.strip(),
+        "schema_version": 2, "benchmark": public_protocol(benchmark), "method": method.strip(),
         "order": list(order), "stages": sorted(stages), "mode": mode, "architecture": architecture,
         "clients": clients, "evaluate_unseen": bool(evaluate_unseen), "output_head": output_head,
         "training_supervision": supervision,
@@ -225,9 +289,10 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
         "client_split": {"id": f"case-round-robin-v1-c{clients}", "version": "1",
                          "source": "平台固定逻辑划分：各任务匿名病例索引 mod 客户端数；分类无病例标识时按图像索引。非论文客户端划分。"},
         "conditions": {"segmentation": "病例级前景类 Dice (eps=1e-5)，另列含背景宏均值；同空=1",
-                       "classification": "样本准确率；固定全局类别编码；仅已见类别输出；不推断病例 ID",
+                       "classification": "任务级样本准确率；固定全局类别编码；仅已见类别输出；不发布逐样本正误",
                        "registration": "固定空间对应点 TRE；有序坐标乘协议 spacing 后求欧氏距离；mm"}[benchmark["kind"]],
         "test_assets": [{"task_id": task["id"], "files": [{"size": by_path[str(p)]["size"], "mtime_ns": by_path[str(p)]["mtime_ns"]} for p in asset_paths(task)]} for task in benchmark["tasks"]],
-        "prediction_provenance": "提交者声明同一阶段全局模型；预测模式不独立验证模型来源" if mode == "predictions" else "同一阶段上传权重用于所有逻辑客户端",
+        "provenance": {"category": provenance, "statement": PROVENANCE[provenance],
+                       "training_verified": False},
     }
     return create_job(config, {"benchmark": benchmark, "assets": assets}, uploads, root)

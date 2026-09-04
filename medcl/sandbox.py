@@ -101,12 +101,15 @@ def model_predictions(architecture: str, weights: Path, images: np.ndarray, acti
         root = Path(folder).resolve()
         inputs, manifest, output = root / "images.npz", root / "protocol.json", root / "prediction.npy"
         np.savez(inputs, images=images)
+        inputs.chmod(0o600)
         manifest.write_text(json.dumps({"architecture": architecture, "active_classes": active_classes,
                                         "all_classes": all_classes or active_classes}), encoding="utf-8")
+        manifest.chmod(0o600)
         command = ["/usr/bin/sandbox-exec", "-p", profile([weights, inputs, manifest], output),
                    str(EXE), "-I", "-B", str(INFER), str(manifest), str(weights.resolve()), str(inputs), str(output)]
         log = root / "private-stderr.txt"
         with log.open("wb") as errors:
+            log.chmod(0o600)
             process = subprocess.Popen(command, cwd="/", env=clean_env(), stdin=subprocess.DEVNULL,
                                        stdout=subprocess.DEVNULL, stderr=errors)
             started = time.monotonic()
@@ -123,6 +126,9 @@ def model_predictions(architecture: str, weights: Path, images: np.ndarray, acti
                     process.kill()
                 process.wait()
         if process.returncode or not output.is_file():
-            (workdir / "inference-error.txt").write_bytes(log.read_bytes())
+            error_log = workdir / "inference-error.txt"
+            error_log.write_bytes(log.read_bytes())
+            error_log.chmod(0o600)
             raise ValueError("隔离推理失败：请核对结构、输入维度及 float32 权重；服务器保留失败状态")
+        output.chmod(0o600)
         return np.load(output, allow_pickle=False)

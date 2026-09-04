@@ -144,6 +144,9 @@ class PlatformChecks(unittest.TestCase):
         self.assertEqual(compatibility(config), compatibility(alternate))
         alternate["training_supervision"] = "weak"
         self.assertNotEqual(compatibility(config), compatibility(alternate))
+        alternate = copy.deepcopy(config)
+        alternate["evaluator_version"] = "medcl-evaluator-next"
+        self.assertNotEqual(compatibility(config), compatibility(alternate))
 
     def test_illegal_payloads_rejected_before_queue(self):
         for name, data, mode in (("x.pth", b"pickle", "model"), ("x.py", b"print(1)", "model"),
@@ -287,6 +290,7 @@ class PlatformChecks(unittest.TestCase):
         doc = json.loads(public)
         self.assertEqual(doc["schema"], "medcl.aggregate-report.v2")
         self.assertEqual(doc["runs"][0]["run_id"], f"run-{result['job_id'][:8]}")
+        self.assertEqual(doc["runs"][0]["evaluator_version"], result["config"]["evaluator_version"])
 
     def test_preview_corruption_and_legacy_result_degrade_safely(self):
         benchmark = demo_protocol("segmentation")

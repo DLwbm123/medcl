@@ -14,6 +14,7 @@ ENVELOPE_SCHEMA = "medcl.cornerstone-envelope.v1"
 _MAX_HEADER = 64 * 1024
 _MAX_BYTES = 32 * 1024 * 1024
 _ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,63}")
+_IDENTITY_DIRECTION = (1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
 _DTYPES = {"uint8": np.dtype("u1"), "uint16": np.dtype("<u2"), "float32": np.dtype("<f4")}
 _MODE_NAMES = {
     "segmentation": (("image", "scalar"), ("prediction", "labelmap")),
@@ -75,6 +76,8 @@ def pack_envelope(*, viewer_mode: str, volumes: Iterable[tuple[str, str, np.ndar
     spacing = _numbers(spacing_zyx, 3, "spacing", positive=True)
     origin = _numbers(origin_xyz, 3, "origin")
     direction = _numbers(direction_xyz, 9, "direction")
+    if any(abs(value - expected) > 1e-6 for value, expected in zip(direction, _IDENTITY_DIRECTION)):
+        raise ValueError("当前 viewer 只支持 identity direction")
     declared, payloads, offset = [], [], 0
     allowed = dict(_MODE_NAMES[viewer_mode])
     for name, role, raw in volumes:

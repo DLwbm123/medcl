@@ -16,6 +16,7 @@ KINDS = {"classification": "分类", "segmentation": "分割", "registration": "
 INCREMENTS = {"domain": "域增量", "class": "类别增量", "task": "任务增量"}
 _ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,63}")
 _VERSION = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}")
+_IDENTITY_DIRECTION = (1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
 _METRICS = {
     "classification": ("Accuracy", "higher", "fraction"),
     "segmentation": ("Foreground Dice", "higher", "fraction"),
@@ -155,7 +156,9 @@ def validate_task(benchmark: dict, task: dict) -> None:
             if "origin_xyz" in task:
                 _finite_vector(task["origin_xyz"], "origin_xyz", 3)
             if "direction_xyz" in task:
-                _finite_vector(task["direction_xyz"], "direction_xyz", 9)
+                direction = _finite_vector(task["direction_xyz"], "direction_xyz", 9)
+                if any(abs(value - expected) > 1e-6 for value, expected in zip(direction, _IDENTITY_DIRECTION)):
+                    raise ValueError("当前 registration-volume 只支持 identity direction")
         if fmt == "synthetic" and (coordinate_system != "fixed-space xy, mm" or spacing != [1, 1]):
             raise ValueError("合成配准协议固定使用 fixed-space xy, mm 且 spacing=[1,1]")
         if fmt == "landmarks" and (coordinate_system != "fixed-space xyz, mm" or spacing != [1, 1, 1]):

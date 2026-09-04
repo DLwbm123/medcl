@@ -35,6 +35,15 @@ describe("volume envelope", () => {
     expect(xyzSpacing(parsed.spacingZYX)).toEqual([1, 2, 3]);
   });
 
+  it("accepts only identity direction within a tiny tolerance", () => {
+    const volumes = [
+      { name: "image", role: "scalar", dtype: "uint8", shape_zyx: [1, 1, 1], offset: 0, byte_length: 1 },
+      { name: "prediction", role: "labelmap", dtype: "uint8", shape_zyx: [1, 1, 1], offset: 1, byte_length: 1 },
+    ];
+    expect(parseEnvelope(encode({ ...header(volumes), direction_xyz: [1 + 5e-7, 0, 0, 0, 1, 0, 0, 0, 1] }, new Uint8Array(2))).directionXYZ[0]).toBeCloseTo(1);
+    expect(() => parseEnvelope(encode({ ...header(volumes), direction_xyz: [-1, 0, 0, 0, 1, 0, 0, 0, 1] }, new Uint8Array(2)))).toThrow("unsupported_direction");
+  });
+
   it.each([
     ["gap", 1, 8],
     ["overlap", 3, 8],

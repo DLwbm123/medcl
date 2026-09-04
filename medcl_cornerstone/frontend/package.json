@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "check:bundle": "npm run build && git diff --exit-code -- build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

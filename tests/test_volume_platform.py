@@ -61,6 +61,17 @@ class EnvelopeChecks(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 unpack_envelope(mutate_header(self.data, change))
 
+    def test_only_identity_direction_is_supported(self):
+        close = [1 + 5e-7, 0, 0, 0, 1, 0, 0, 0, 1]
+        pack_envelope(viewer_mode="segmentation",
+                      volumes=[("image", "scalar", np.zeros((1, 1, 1), dtype=np.uint8)),
+                               ("prediction", "labelmap", np.zeros((1, 1, 1), dtype=np.uint8))],
+                      spacing_zyx=[1, 1, 1], spacing_source="index-space-default",
+                      direction_xyz=close)
+        with self.assertRaisesRegex(ValueError, "identity"):
+            unpack_envelope(mutate_header(self.data, lambda h: h.update(
+                direction_xyz=[-1, 0, 0, 0, 1, 0, 0, 0, 1])))
+
 
 class VolumePlatformChecks(unittest.TestCase):
     def setUp(self):
@@ -194,6 +205,10 @@ class VolumePlatformChecks(unittest.TestCase):
     def test_registration_volume_asset_and_optional_preview(self):
         benchmark, target = self.registration_asset()
         validate_benchmark(benchmark)
+        invalid_direction = copy.deepcopy(benchmark)
+        invalid_direction["tasks"][0]["direction_xyz"][0] = -1
+        with self.assertRaisesRegex(ValueError, "identity"):
+            validate_benchmark(invalid_direction)
         without = self.run_registration(benchmark, self.registration_payload(
             benchmark, target, registered=False, warped=False), "landmarks only")
         with_volume = self.run_registration(benchmark, self.registration_payload(

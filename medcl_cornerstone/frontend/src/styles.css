@@ -61,6 +61,12 @@
   outline: 2px solid #49a6ff66;
 }
 
+.medcl-button-active {
+  color: #07111f;
+  background: #6db8ff;
+  border-color: #9bd0ff;
+}
+
 .medcl-control {
   display: inline-flex;
   align-items: center;

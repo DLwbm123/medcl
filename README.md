@@ -13,7 +13,7 @@ python3 -m pip install -r requirements.txt
 python3 run.py
 ```
 
-仓库已提交构建后的前端静态文件，生产启动不需要 Node.js。只有修改 `medcl_cornerstone/frontend/src` 后才需在该目录运行 `npm ci && npm run typecheck && npm test -- --run && npm run build`，并一同提交 `build/`。
+仓库已提交构建后的前端静态文件，生产启动不需要 Node.js。只有修改 `medcl_cornerstone/frontend/src` 后才需在该目录运行 `npm ci && npm run typecheck && npm test -- --run && npm run build`，并一同提交 `build/`；提交后可用 `npm run check:bundle` 确认重建不会产生差异。
 
 使用 Python 3.12；已存在的环境即可，不需要 Torch 或 GPU。macOS 启动器优先复用 `/opt/miniconda3/bin/python`，也可用 `MEDCL_PYTHON` 指定现有解释器。不要向公网绑定端口。
 

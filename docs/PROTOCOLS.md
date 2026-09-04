@@ -45,15 +45,17 @@ HDF5 管理员输入键为 `test_images`、`test_labels`（HWN）和 `patient_in
 
 每个阶段任务最多保存 3 个私有病例预览。单轴不超过 128，单体素数不超过 1,000,000，按确定性步长下采样；scalar volume 用该预览体的 1/99 百分位归一化为 uint8，预测 labelmap 保留整数标签。spacing 随下采样步长更新。若协议未提供 spacing，则使用 `[1,1,1]` 并标记 `index-space-default`；若未同时提供 origin/direction，则查看器标记 index-space，三视图标题仅为 axial-like / coronal-like / sagittal-like，病人方向未经验证。
 
-隐藏分割真值、fixed points、fixed truth segmentation 均不进入浏览器信封、预览 NPZ、完整下载报告或公开聚合。结果报告只含数值、元数据和私有预览引用，不嵌入体数据。预览读取限制路径、文件/展开大小、键、dtype、shape、有限值和 schema 版本；损坏预览只降级该图，不改变已保存数值评分。Cornerstone3D 查看器是论文范围内的只读单病例展示，不是完整 ITK-SNAP 替代品。
+用于可视化的原始/fixed/moving/registered 影像和预测 labelmap 会进入本机浏览器内存。隐藏分割真值、fixed points、fixed truth segmentation 均不进入浏览器信封、预览 NPZ、完整下载报告或公开聚合。结果报告只含数值、元数据和私有预览引用，不嵌入体数据。预览读取限制路径、文件/展开大小、键、dtype、shape、有限值和 schema 版本；损坏预览只降级该图，不改变已保存数值评分。Cornerstone3D 查看器是论文范围内的只读单病例展示，不是完整 ITK-SNAP 替代品。
 
 ## 管理员协议 schema
 
 配置加载时集中校验 1–12 个唯一安全 ID 任务、严格布尔值、任务类型固定的 metric/direction/unit、资产格式、输出头 allow-list 及必填绝对路径。分类类别增量任务必须使用一致的 `all_classes`、互斥且完整覆盖的 `classes` 和完整 `class_names`；分割必须显式登记背景 0、非空前景类、可选非负 `label_shift` 及可选正数 `voxel_spacing_zyx`；配准不得携带类别语义。标志点 v1 只接受 `fixed-space xyz, mm` 与 `[1,1,1]`；体数据 v1 只接受 `fixed-display-grid xyz, mm`，其点坐标已经是毫米，`spacing` 必须省略或为 `[1,1,1]`。任一合成任务要求整个协议 `synthetic=true` 且全部任务均为合成格式；专供浏览器验收的非对称 `registration-volume` 测试资产可作为全合成协议登记，但必须由管理员明确标记，不能混入真实协议。待接入协议可为空，但永远不进入 ready 状态。
 
+本论文版本不恢复 DICOM patient orientation；`direction_xyz` 仅接受 identity matrix（允许 `1e-6` 以内的浮点误差），其他 affine 直接拒绝。
+
 ## 比较与可追溯性
 
-比较校验基准版本/协议、真实或合成属性、任务顺序、测试资产轻量元数据、客户端版本/数量、分割监督声明、未见任务开关、输出头与指标条件。该相容性不能识别“同大小且恢复原 mtime”的内容替换；发生资产异常时需管理员确认并新建评测。方法名称、模型还是预测的输入方式不改变测试条件；原始来源仍随本地报告保存。无最终阶段的对比保留空值，不以其他阶段替代。
+比较校验 evaluator_version、基准版本/协议、真实或合成属性、任务顺序、测试资产轻量元数据、客户端版本/数量、分割监督声明、未见任务开关、输出头与指标条件。该相容性不能识别“同大小且恢复原 mtime”的内容替换；发生资产异常时需管理员确认并新建评测。方法名称、模型还是预测的输入方式不改变测试条件；原始来源仍随本地报告保存。无最终阶段的对比保留空值，不以其他阶段替代。
 
 预测模式无法从预测数组独立验证模型来源；结构化 provenance 只记录受限类别和是否由平台验证，不要求用户上传训练日志来伪证明声明。模型模式的同一阶段权重会用于所有任务/客户端，评分只汇总数值、不聚合参数。公开 aggregate v2 不复制完整 config，而是白名单重建 run/benchmark 标识、来源类别、全局 cells/matrix/持续学习指标和固定安全警示；方法自由文本、管理员 description/source、病例/客户端明细和资产元数据均排除。
 

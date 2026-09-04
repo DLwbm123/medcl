@@ -405,7 +405,7 @@ def result_view(job):
                         left.image(original, caption="原始测试切片" + suffix, width="stretch")
                         right.image(overlay, caption="预测遮罩叠加（绿色）" + suffix, width="stretch")
                         st.metric("该病例前景 Dice", score_text(preview["score"]))
-                        st.caption("当前显示的是预测分割，不是真值。三维预览最多每阶段、每任务 3 例，可确定性降采样；静态切片按预测前景量选取，浏览器载荷不包含隐藏测试真值。")
+                        st.caption("当前显示的原始影像和预测 labelmap 会进入本机浏览器内存；隐藏测试真值不进入浏览器。三维预览最多每阶段、每任务 3 例，可确定性降采样；静态切片按预测前景量选取。")
                     else:
                         if preview["kind"] == "registration-volume":
                             try:
@@ -434,7 +434,7 @@ def result_view(job):
                         st.altair_chart(chart.properties(height=420), width="stretch")
                         st.metric("该病例 TRE", score_text(preview["score"], b["unit"]))
                         if preview["kind"] == "registration-volume":
-                            st.caption("体数据只在固定显示网格做定性比较，平台不执行重采样或形变。TRE 只由预测点评分；隐藏固定点不进入预览文件。")
+                            st.caption("用于显示的 fixed、moving、可选 registered 和 warped prediction 会进入本机浏览器内存；隐藏 fixed points 和 fixed truth segmentation 不进入预览文件或浏览器。平台只在固定显示网格做定性比较，不执行重采样或形变；TRE 只由预测点评分。")
                         else:
                             st.caption("该协议没有三维影像，仅显示 moving points 到 predicted points 的 XY 投影；隐藏 fixed points 只用于服务端 TRE 评分。")
                 except (OSError, ValueError, KeyError):
@@ -497,7 +497,7 @@ def records():
 
 
 def compare():
-    title("方法比较", "仅比较基准版本、任务顺序、输出头和评价条件相容的结果；不同任务类型不合成总分。")
+    title("方法比较", "仅比较评测器版本、基准版本、任务顺序、输出头和评价条件相容的结果；不同任务类型不合成总分。")
     jobs = [j for j in list_jobs() if j["status"] == "completed"]
     if len(jobs) < 2:
         st.info("至少需要两条已完成且协议相容的评测。不会使用示意分数填充对比。")
@@ -508,7 +508,7 @@ def compare():
     if len(selected) < 2:
         return
     if len({compatibility(mapping[jid]["config"]) for jid in selected}) != 1:
-        st.error("比较已拒绝：基准版本、任务顺序、测试资产、输出头或客户端条件不相容。请选择相同评价条件的记录。")
+        st.error("比较已拒绝：评测器版本、基准版本、任务顺序、测试资产、输出头或客户端条件不相容。请选择相同评价条件的记录。")
         return
     b = mapping[selected[0]]["config"]["benchmark"]
     if b.get("synthetic"):
@@ -525,6 +525,7 @@ def compare():
         provenance = result["config"]["provenance"]["category"]
         for tid, value in zip(result["config"]["order"], result["matrices"]["global"][-1]):
             rows.append({"方法": f"{result['config']['method']} · {jid[:6]}",
+                         "评测器": result["config"]["evaluator_version"],
                          "来源": provenance_labels.get(provenance, "未知来源"), "任务": tid, b["metric"]: value})
     df = pd.DataFrame(rows)
     st.dataframe(df, hide_index=True, width="stretch")

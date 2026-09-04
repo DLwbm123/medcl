@@ -177,6 +177,7 @@ def report_html(result: dict) -> bytes:
 
 def compatibility(config: dict) -> str:
     fields = {k: config[k] for k in ("benchmark", "order", "clients", "client_split", "evaluate_unseen", "output_head", "conditions")}
+    fields["evaluator_version"] = config.get("evaluator_version", "legacy-unknown")
     fields["training_supervision"] = config.get("training_supervision", "not-declared")
     fields["test_assets"] = config.get("test_assets", [])
     return json.dumps(fields, sort_keys=True, ensure_ascii=False)
@@ -195,6 +196,9 @@ def aggregate_report(results: list[dict]) -> bytes:
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
             raise ValueError("公开聚合只接受有限数值或 null")
         return value
+
+    def version(value):
+        return value if isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", value) else "legacy-unknown"
 
     runs = []
     for raw in results:
@@ -233,6 +237,7 @@ def aggregate_report(results: list[dict]) -> bytes:
         matrix = [[number(value) for value in row] for row in result["matrices"]["global"]]
         runs.append({
             "run_id": f"run-{safe_job[:8]}",
+            "evaluator_version": version(config.get("evaluator_version")),
             "benchmark": {
                 "id": label(benchmark.get("id"), "unknown-benchmark"),
                 "public_title": label(benchmark.get("public_title", benchmark.get("title")), label(benchmark.get("id"), "MedCL benchmark")),

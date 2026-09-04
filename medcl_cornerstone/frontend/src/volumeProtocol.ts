@@ -129,6 +129,10 @@ export function parseEnvelope(input: Uint8Array | ArrayBuffer): ParsedEnvelope {
   const spacingZYX = tuple(header.spacing_zyx, 3, true) as ParsedEnvelope["spacingZYX"];
   const originXYZ = tuple(header.origin_xyz, 3) as ParsedEnvelope["originXYZ"];
   const directionXYZ = tuple(header.direction_xyz, 9) as ParsedEnvelope["directionXYZ"];
+  const identityDirection = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+  if (directionXYZ.some((value, index) => Math.abs(value - identityDirection[index]!) > 1e-6)) {
+    throw new Error("unsupported_direction");
+  }
   if (!Array.isArray(header.segments) || header.segments.some((value) => !Number.isInteger(value) || value < 1 || value > 65535) ||
       new Set(header.segments).size !== header.segments.length) throw new Error("invalid_segments");
   if (!Array.isArray(header.volumes) || header.volumes.length < 1 || header.volumes.length > 4) throw new Error("invalid_volume_count");

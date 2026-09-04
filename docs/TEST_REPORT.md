@@ -2,7 +2,7 @@
 
 结论：外部审阅中与毕业论文平台范围一致的建议已落地。页面保持“分割 / 分类 / 配准 → 增量场景 → 监督方式 → 具体协议”的纵向结构；分割和体数据配准接入统一、只读的 Cornerstone3D 单病例查看器。数值评分仍由独立 Python worker 完成，查看器不训练、不配准、不重采样，也不接触隐藏真值。
 
-基线为 `710fdfab29dc93c0b9597b43f1b2c50a4f4b8388`，开发分支为 `codex/medcl-evaluation-platform`。提交前工作区已有与本项目无关的 `.hatch-pet/`、`.pet-runs/` 未跟踪目录；本轮未修改、未纳入提交。
+本轮用户给定基线为 `36735319026e086dd3ce9d7fc44057b535eb5d42`；实际开始 HEAD 为其后续 3D 体绘制修复 `7075ed9e77c8ae220c878f30936d599b205e90f4`，本轮未回退或改写该历史。开发分支为 `codex/medcl-evaluation-platform`。提交前工作区已有与本项目无关的 `.hatch-pet/`、`.pet-runs/` 未跟踪目录；本轮未修改、未纳入提交。
 
 ## 运行环境
 
@@ -17,11 +17,11 @@
 
 ```text
 PATH=/opt/miniconda3/bin:$PATH python3 -m unittest discover -s tests -v
-Ran 35 tests in 14.587s
+Ran 36 tests in 15.211s
 OK
 ```
 
-结果为 **35 passed，0 failed，0 errors，0 skipped**。覆盖既有指标、队列、报告、沙箱和页面提交，以及新增的标签空间/`label_shift`、输出头 allow-list、体数据配准资产、可选 registered/warped 数组、几何默认值、三维预览边界、旧二维降级和 envelope 恶意输入。
+结果为 **36 passed，0 failed，0 errors，0 skipped**。覆盖既有指标、队列、报告、沙箱和页面提交，以及新增的标签空间/`label_shift`、输出头 allow-list、体数据配准资产、可选 registered/warped 数组、几何默认值、三维预览边界、旧二维降级和 envelope 恶意输入。
 
 前端从 lockfile 干净安装后实际执行：
 
@@ -29,11 +29,11 @@ OK
 npm ci --no-audit --prefer-offline
 npm run typecheck
 npm test -- --run
-Test Files 2 passed (2)
-Tests 8 passed (8)
+Test Files 3 passed (3)
+Tests 15 passed (15)
 npm run build
-2000 modules transformed
-built in 5.48s
+2001 modules transformed
+built in 6.13s
 ```
 
 最终 typecheck、Vitest 和 Vite build 均为退出码 0。bundle 含 `index.js` 与本地 compute worker；生产页面没有远程脚本依赖。
@@ -45,7 +45,7 @@ built in 5.48s
 1. 一级入口是分割、分类、配准；结果页仍显示矩阵、客户端聚合、病例与报告页签。
 2. 分割合成非对称体显示 Z/Y/X 三个 MPR 和一个 3D viewport，最终构建的 4 个 Cornerstone canvas 均实际调整为 `982×526` backing pixels；原图/预测分别开关、prediction labelmap 叠加、类别选择、透明度、病例 Dice、滚轮切片和病例切换可用。
 3. 配准合成非对称体显示 fixed、moving、registered、fixed+moving、fixed+registered、融合滑杆、可选 warped prediction 和 TRE；最终构建的 4 个 canvas 均为 `982×494` backing pixels。
-4. W/L、Pan、Zoom、Crosshair、Reset、叠加开关和透明度控件均可操作。切换病例会清理并重建 rendering engine/volume/segmentation，不复用旧体数据。
+4. W/L、Pan、Zoom、Crosshair 切换后仅一个工具保留左键主绑定，`aria-pressed` 与高亮按钮同步；中键 Pan、右键 Zoom 和滚轮切片保留。配准 Fusion 从 0.5 调到 0.8 后切片仍保持在原位置。切换病例会清理并重建 rendering engine/volume/segmentation，不复用旧体数据。
 5. 缺 registered 的配准记录明确显示 Fixed + Moving，并提示 TRE 仍来自 predicted landmarks；空分割预测保留原图 MPR，明确说明没有前景 overlay/3D labelmap。
 6. 干净会话无控制台 error。Cornerstone 在仅 2 个 Z 切片的合成分割体上记录过一条非致命的最近切片匹配 warning；四视口、切片和覆盖层仍正常渲染。
 

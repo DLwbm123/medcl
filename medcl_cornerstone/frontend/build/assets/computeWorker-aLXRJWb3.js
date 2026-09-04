@@ -189,7 +189,7 @@ uniform int PrimitiveIDOffset;
 // clipping plane vars
 //VTK::Clip::Dec
 
-// label outline
+// label outline 
 //VTK::LabelOutline::Dec
 
 // the output of this shader

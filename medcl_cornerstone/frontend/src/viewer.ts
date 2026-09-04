@@ -23,6 +23,7 @@ import {
 import type { FrontendRendererArgs } from "@streamlit/component-v2-lib";
 import { CleanupBag } from "./lifecycle";
 import viewerStyles from "./styles.css?inline";
+import { mprBindingPlan, MprPrimaryTool, MprTool, MouseBinding } from "./interaction";
 import {
   defaultRegistrationLayer,
   LayerMode,
@@ -57,6 +58,20 @@ const viewportSpecs = [
 const toolClasses = [WindowLevelTool, PanTool, ZoomTool, StackScrollTool, CrosshairsTool, TrackballRotateTool];
 const normalizedVoi = { lower: 0, upper: 255 } as const;
 let initialized: Promise<void> | undefined;
+
+const mprToolNames: Record<MprTool, string> = {
+  windowLevel: WindowLevelTool.toolName,
+  pan: PanTool.toolName,
+  zoom: ZoomTool.toolName,
+  crosshairs: CrosshairsTool.toolName,
+  stackScroll: StackScrollTool.toolName,
+};
+const mouseBindings: Record<MouseBinding, ToolEnums.MouseBindings> = {
+  Primary: ToolEnums.MouseBindings.Primary,
+  Auxiliary: ToolEnums.MouseBindings.Auxiliary,
+  Secondary: ToolEnums.MouseBindings.Secondary,
+  Wheel: ToolEnums.MouseBindings.Wheel,
+};
 
 const initialize = (): Promise<void> => {
   if (!initialized) {
@@ -141,10 +156,7 @@ const configureToolGroups = (engineId: string, mprIds: string[], volume3dId: str
   for (const name of [TrackballRotateTool.toolName, PanTool.toolName, ZoomTool.toolName]) volume3d.addTool(name);
   for (const id of mprIds) mpr.addViewport(id, engineId);
   volume3d.addViewport(volume3dId, engineId);
-  mpr.setToolActive(WindowLevelTool.toolName, { bindings: [{ mouseButton: ToolEnums.MouseBindings.Primary }] });
-  mpr.setToolActive(PanTool.toolName, { bindings: [{ mouseButton: ToolEnums.MouseBindings.Auxiliary }] });
-  mpr.setToolActive(ZoomTool.toolName, { bindings: [{ mouseButton: ToolEnums.MouseBindings.Secondary }] });
-  mpr.setToolActive(StackScrollTool.toolName, { bindings: [{ mouseButton: ToolEnums.MouseBindings.Wheel }] });
+  applyMprTool(mpr, "windowLevel");
   volume3d.setToolActive(TrackballRotateTool.toolName, { bindings: [{ mouseButton: ToolEnums.MouseBindings.Primary }] });
   volume3d.setToolActive(PanTool.toolName, { bindings: [{ mouseButton: ToolEnums.MouseBindings.Auxiliary }] });
   volume3d.setToolActive(ZoomTool.toolName, { bindings: [
@@ -154,10 +166,14 @@ const configureToolGroups = (engineId: string, mprIds: string[], volume3dId: str
   return [mprGroupId, volumeGroupId];
 };
 
-const activateMprTool = (groupId: string, name: string): void => {
-  const group = ToolGroupManager.getToolGroup(groupId);
-  if (!group) return;
-  group.setToolActive(name, { bindings: [{ mouseButton: ToolEnums.MouseBindings.Primary }] });
+const applyMprTool = (group: NonNullable<ReturnType<typeof ToolGroupManager.getToolGroup>>, primary: MprPrimaryTool): void => {
+  const plan = mprBindingPlan(primary);
+  for (const name of Object.values(mprToolNames)) group.setToolPassive(name, { removeAllBindings: true });
+  for (const [tool, bindings] of Object.entries(plan) as [MprTool, MouseBinding[]][]) {
+    if (bindings.length) group.setToolActive(mprToolNames[tool], {
+      bindings: bindings.map((mouseButton) => ({ mouseButton: mouseBindings[mouseButton] })),
+    });
+  }
 };
 
 function makeShell(parent: HTMLElement | ShadowRoot, envelope: ParsedEnvelope): {
@@ -218,15 +234,30 @@ function makeShell(parent: HTMLElement | ShadowRoot, envelope: ParsedEnvelope): 
 }
 
 const addToolButtons = (toolbar: HTMLDivElement, mprGroupId: string, engine: RenderingEngine): void => {
-  const actions: Array<[string, string, string]> = [
-    ["W/L", "Window / level", WindowLevelTool.toolName],
-    ["Pan", "Pan all MPR views", PanTool.toolName],
-    ["Zoom", "Zoom all MPR views", ZoomTool.toolName],
-    ["Crosshair", "Linked crosshair navigation", CrosshairsTool.toolName],
+  const actions: Array<[string, string, MprPrimaryTool]> = [
+    ["W/L", "Window / level", "windowLevel"],
+    ["Pan", "Pan all MPR views", "pan"],
+    ["Zoom", "Zoom all MPR views", "zoom"],
+    ["Crosshair", "Linked crosshair navigation", "crosshairs"],
   ];
+  let active: MprPrimaryTool = "windowLevel";
+  const controls = new Map<MprPrimaryTool, HTMLButtonElement>();
   for (const [label, title, tool] of actions) {
     const control = button(label, title);
-    control.addEventListener("click", () => activateMprTool(mprGroupId, tool));
+    controls.set(tool, control);
+    control.setAttribute("aria-pressed", String(tool === active));
+    control.classList.toggle("medcl-button-active", tool === active);
+    control.addEventListener("click", () => {
+      if (tool === active) return;
+      const group = ToolGroupManager.getToolGroup(mprGroupId);
+      if (!group) return;
+      applyMprTool(group, tool);
+      active = tool;
+      for (const [name, item] of controls) {
+        item.setAttribute("aria-pressed", String(name === active));
+        item.classList.toggle("medcl-button-active", name === active);
+      }
+    });
     toolbar.append(control);
   }
   const reset = button("Reset", "Reset cameras and display properties");
@@ -333,11 +364,29 @@ const setRegistrationVolumes = async (
   engine.render();
 };
 
+const setRegistrationOpacity = (
+  mode: LayerMode,
+  opacity: number,
+  engine: RenderingEngine,
+  viewportIds: string[],
+  ids: Map<VolumeName, string>,
+): void => {
+  const inputs = layerInputs(mode, ids);
+  if (inputs.length !== 2) return;
+  for (const viewportId of viewportIds) {
+    engine.getViewport<VolumeViewport>(viewportId).setProperties(
+      { voiRange: normalizedVoi, colormap: { opacity } }, inputs[1]!.volumeId,
+    );
+  }
+  engine.render();
+};
+
 const addRegistrationControls = (
   toolbar: HTMLDivElement,
   envelope: ParsedEnvelope,
   args: Args,
-  apply: (mode: LayerMode, opacity: number) => Promise<void>,
+  applyMode: (mode: LayerMode, opacity: number) => Promise<void>,
+  applyOpacity: (mode: LayerMode, opacity: number) => void,
 ): LayerMode => {
   const initial = defaultRegistrationLayer(envelope);
   const layerLabel = element("label", "medcl-control", "Layers ");
@@ -355,13 +404,12 @@ const addRegistrationControls = (
   opacity.max = "1";
   opacity.step = "0.05";
   opacity.value = "0.5";
-  const update = (): void => {
+  select.addEventListener("change", () => {
     const mode = select.value as LayerMode;
     args.setStateValue("layer_mode", mode);
-    void apply(mode, Number(opacity.value)).catch(() => args.setStateValue("viewer_error_code", "LAYER_UPDATE_FAILED"));
-  };
-  select.addEventListener("change", update);
-  opacity.addEventListener("input", update);
+    void applyMode(mode, Number(opacity.value)).catch(() => args.setStateValue("viewer_error_code", "LAYER_UPDATE_FAILED"));
+  });
+  opacity.addEventListener("input", () => applyOpacity(select.value as LayerMode, Number(opacity.value)));
   layerLabel.append(select);
   opacityLabel.append(opacity);
   toolbar.append(layerLabel, opacityLabel);
@@ -471,10 +519,12 @@ export async function mountViewer(args: Args, envelope: ParsedEnvelope, bag: Cle
     });
     addOverlayControls(shell.toolbar, [...mprIds, volume3dId], segmentationId, envelope.segments, args);
   } else {
-    const apply = (mode: LayerMode, opacity: number) =>
+    const applyMode = (mode: LayerMode, opacity: number) =>
       setRegistrationVolumes(mode, opacity, engine, mprIds, volume3dId, ids);
-    const initial = addRegistrationControls(shell.toolbar, envelope, args, apply);
-    await apply(initial, 0.5);
+    const applyOpacity = (mode: LayerMode, opacity: number) =>
+      setRegistrationOpacity(mode, opacity, engine, mprIds, ids);
+    const initial = addRegistrationControls(shell.toolbar, envelope, args, applyMode, applyOpacity);
+    await applyMode(initial, 0.5);
     args.setStateValue("layer_mode", initial);
     const warpedId = ids.get("warped_prediction");
     if (warpedId) {

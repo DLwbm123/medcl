@@ -4,6 +4,7 @@ from html import escape
 import json
 
 import altair as alt
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -11,35 +12,36 @@ from medcl.benchmarks import INCREMENTS, KINDS, catalog, config_path, public_pro
 from medcl.examples import baseline_predictions, example_weights, pack_predictions, sample_manifest
 from medcl.reports import compatibility, report_csv, report_html, report_json
 from medcl.sandbox import sandbox_available
-from medcl.storage import get_job, initialize, list_jobs, worker_alive
+from medcl.storage import get_job, initialize, job_dir, list_jobs, worker_alive
 from medcl.submissions import ARCHITECTURES, submit
 
 st.set_page_config(page_title="MedCL · 医学影像持续学习评测", page_icon="🔬", layout="wide")
 st.html('''<style>
 html,body,.stApp,input,button,textarea {font-family: -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
-.stMainBlockContainer {max-width:1440px;padding-top:2rem;padding-bottom:3rem;}
+.stMainBlockContainer {max-width:1180px;padding-top:1.4rem;padding-bottom:3rem;}
 h1 {font-size:2rem!important;font-weight:650!important;letter-spacing:-.035em;}
 h2 {font-size:1.3rem!important;} h3 {font-size:1.1rem!important;}
-[data-testid="stSidebar"] {border-right:1px solid #dce4e8;}
 [data-testid="stMetric"] {background:#fff;border:1px solid #dce4e8;border-radius:8px;padding:14px 18px;}
 [data-testid="stMetricValue"] {font-size:1.75rem!important;}
-.brand {display:flex;align-items:center;gap:12px;margin:4px 0 22px;}
+.topbar {display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid #dce4e8;padding:4px 0 15px;margin-bottom:12px;}
+.brand {display:flex;align-items:center;gap:12px;margin:0;}
 .brand-mark {border:1px solid #708c9d;background:#e0e9ed;width:40px;height:40px;border-radius:9px;display:grid;place-items:center;font-size:24px;color:#3b5e74;}
 .brand strong {font-size:24px;letter-spacing:-.03em;}.brand small{display:block;color:#617382;font-size:12px;}
+.runtime {text-align:right;color:#526b7a;font-size:13px;line-height:1.55}.runtime b{color:#355d4a}
 .eyebrow {color:#627785;letter-spacing:.1em;font-size:12px;font-weight:650;margin-bottom:8px;}
-.protocol-card {background:white;border:1px solid #dce4e8;border-radius:8px;padding:20px;min-height:194px;margin-bottom:16px;}
+.protocol-card {background:white;border:1px solid #dce4e8;border-radius:8px;padding:20px;margin:4px 0 10px;}
 .protocol-card h3 {margin:10px 0 6px;}.protocol-card p{font-size:14px;line-height:1.7;color:#4c6372;margin:8px 0;}
 .badge {display:inline-block;border:1px solid #cbd7dd;background:#edf2f5;color:#38586e;padding:2px 9px;font-size:12px;border-radius:4px;margin-right:6px;}
 .badge.ready {background:#e8f0ed;border-color:#c8d9d1;color:#355d4a;}.badge.pending{background:#f7f1e7;border-color:#e1d4bb;color:#795c2e;}
 .timeline {display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 22px;}.task-step {display:flex;align-items:center;gap:9px;border:1px solid #cfdbe1;border-radius:6px;background:#fff;padding:9px 14px;font-size:14px;}.task-step b {color:#486b81;font-size:12px;}.task-step span{color:#243746;}
 .subtle {color:#627785;font-size:14px;line-height:1.7;}
 .stButton button,.stDownloadButton button {border-radius:6px;min-height:40px;}
-@media(max-width:700px){.stMainBlockContainer{padding:1rem}.protocol-card{min-height:0}.task-step{padding:7px 10px}h1{font-size:1.6rem!important}}
+@media(max-width:700px){.stMainBlockContainer{padding:1rem}.topbar{align-items:flex-start}.runtime{font-size:11px}.task-step{padding:7px 10px}h1{font-size:1.6rem!important}}
 </style>''')
 
 initialize()
 STATUS = {"queued": "排队中", "running": "评测中", "completed": "已完成", "failed": "失败"}
-NAV = ["平台首页", "新建评测", "评测记录", "方法比较"]
+NAV = ["任务中心", "评测记录", "方法比较"]
 
 
 def navigate(page):
@@ -59,19 +61,12 @@ except Exception:
     st.stop()
 lookup = {b["id"]: b for b in benchmarks}
 
-with st.sidebar:
-    st.html('<div class="brand"><div class="brand-mark">M</div><div><strong>MedCL</strong><small>医学影像持续学习评测</small></div></div>')
-    page = st.radio("主导航", NAV, key="nav", label_visibility="collapsed")
-    st.divider()
-    st.caption("运行范围")
-    st.write("本地评测 · 仅 evaluation")
-    st.caption("不训练 · 不调参 · 不聚合权重")
-    alive = worker_alive()
-    if alive:
-        st.success("评分 worker 在线")
-    else:
-        st.warning("评分 worker 离线")
-    st.caption("仅本机访问。单机多客户端为逻辑评测模拟，不代表多医院部署。")
+alive = worker_alive()
+st.html(f'<div class="topbar"><div class="brand"><div class="brand-mark">M</div><div><strong>MedCL</strong><small>医学影像持续学习评测</small></div></div><div class="runtime"><b>{"● 评分服务在线" if alive else "○ 评分服务离线"}</b><br>本地 evaluation · 不训练 / 不调参 / 不聚合权重</div></div>')
+if st.session_state.get("nav") not in NAV:
+    st.session_state.nav = NAV[0]
+page = st.segmented_control("主导航", NAV, key="nav", label_visibility="collapsed", width="stretch")
+st.caption("页面自上而下递进；单机多客户端是逻辑评分模拟，不代表多医院部署。")
 
 
 def title(name, detail):
@@ -107,37 +102,83 @@ def heatmap(matrix, columns, rows, direction="higher", title_text=""):
     st.altair_chart(chart, width="stretch")
 
 
-def home():
-    title("评测工作台", "选择协议，提交模型或预测，查看可追溯的测试结果。")
-    jobs = list_jobs()
-    ready_real = [b for b in benchmarks if not b.get("synthetic") and readiness(b)[0]]
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("可用真实基准", len(ready_real))
-    c2.metric("已完成评测", sum(j["status"] == "completed" for j in jobs))
-    c3.metric("排队 / 评测中", sum(j["status"] in ("queued", "running") for j in jobs))
-    c4.metric("合成验收协议", sum(b.get("synthetic", False) for b in benchmarks))
-    st.write("")
-    left, right, _ = st.columns([1, 1, 3])
-    left.button("＋ 新建评测", type="primary", width="stretch", on_click=navigate, args=("新建评测",))
-    right.button("查看评测记录", width="stretch", on_click=navigate, args=("评测记录",))
-    st.subheader("基准与接入状态")
-    st.caption("真实基准、待接入协议和合成验收数据分开标识。配置就绪不等于已完成评测。")
-    group = st.segmented_control("基准范围", ["真实基准", "合成验收"], default="真实基准", label_visibility="collapsed")
-    shown = [b for b in benchmarks if b.get("synthetic", False) == (group == "合成验收")]
-    for start in range(0, len(shown), 2):
-        columns = st.columns(2)
-        for col, b in zip(columns, shown[start:start + 2]):
-            ok, reason = readiness(b)
-            with col:
-                st.html(f'<div class="protocol-card"><span class="badge">{KINDS[b["kind"]]} / {INCREMENTS[b["incremental"]]}</span><span class="badge {"ready" if ok else "pending"}">{"✓ " if ok else "○ "}{escape(reason)}</span><h3>{escape(b["title"])}</h3><p>{escape(b["description"])}</p><div class="subtle">{escape(b["version"])} · {escape(b["metric"])} · {"↓ 越低越好" if b["direction"]=="lower" else "↑ 越高越好"}</div></div>')
-    with st.expander("评测边界与增量定义"):
-        st.write("域增量：输入域变化；类别增量：类别集合扩展；任务增量：器官、模态或分析目标变化。FedSubMerge 对应类别增量，SAMCL 对应任务增量；本平台不据此假定原论文输出头或测试条件。")
-        st.write("不同任务类型不合并总分；历史指标需要相应阶段与参照。没有模型隔离条件时只接受预测。未经评测的数据集不会展示性能数值。")
+def task_center():
+    chosen = st.session_state.get("selected_benchmark")
+    if chosen in lookup:
+        if st.button("← 返回具体任务"):
+            st.session_state.pop("selected_benchmark", None)
+            st.rerun()
+        new_evaluation(chosen, st.session_state.get("selected_supervision"))
+        return
+    st.session_state.pop("selected_benchmark", None)
+    title("任务中心", "按医学影像大任务、持续学习场景和具体协议自上而下选择。")
+    selected_kind = st.session_state.get("selected_kind")
+    if selected_kind not in KINDS:
+        st.subheader("一级 / 选择三类大任务")
+        cards = {
+            "segmentation": ("🧩", "医学影像分割", "优先完善：域增量、类增量、任务增量；全监督 / 弱监督；病例 Dice 与预测叠加图。"),
+            "classification": ("🧬", "医学影像分类", "类别增量；显示类别语义名称；支持固定逻辑客户端的联邦评分模拟。"),
+            "registration": ("🗺️", "医学影像配准", "任务增量；展示移动点与预测配准点；服务端计算 TRE。"),
+        }
+        for kind, (icon, name, detail) in cards.items():
+            with st.container(border=True):
+                st.markdown(f"### {icon} {name}")
+                st.write(detail)
+                if st.button(f"进入{KINDS[kind]}任务", key=f"enter-{kind}", type="primary" if kind == "segmentation" else "secondary"):
+                    st.session_state.selected_kind = kind
+                    st.rerun()
+        st.caption(f"当前可用真实协议 {sum(readiness(b)[0] and not b.get('synthetic') for b in benchmarks)} 个；已完成评测 {sum(j['status'] == 'completed' for j in list_jobs())} 条。")
+        return
+
+    if st.button("← 返回三类大任务"):
+        st.session_state.pop("selected_kind", None)
+        st.rerun()
+    st.subheader(f"二级 / {KINDS[selected_kind]}的持续学习场景")
+    scenario_keys = {"segmentation": ["domain", "class", "task"], "classification": ["class"], "registration": ["task"]}[selected_kind]
+    scenario_labels = [INCREMENTS[key] for key in scenario_keys]
+    scenario_label = st.segmented_control("增量场景", scenario_labels, default=scenario_labels[0], key=f"scenario-{selected_kind}", width="stretch")
+    scenario = scenario_keys[scenario_labels.index(scenario_label)]
+    if selected_kind == "classification":
+        st.info("分类当前开放类别增量；配置时可选固定逻辑客户端，展示客户端宏平均、样本加权准确率、最差客户端与差异；不伪称有联邦训练或通信。")
+
+    supervision = None
+    if selected_kind == "segmentation":
+        st.subheader("三级 / 外部训练监督方式")
+        supervision_label = st.segmented_control("分割监督方式", ["全监督", "弱监督"], default="全监督", key="segmentation-supervision", width="stretch")
+        supervision = {"全监督": "full", "弱监督": "weak"}[supervision_label]
+        st.caption("这是提交者声明的模型训练条件；两者都使用同一冻结、完整标注的测试集计算 Dice，平台不根据训练日志自行判定。")
+
+    st.subheader(f"{'四' if selected_kind == 'segmentation' else '三'}级 / 选择具体任务")
+    scope = st.segmented_control("数据范围", ["全部协议", "真实 / 待接入", "合成模拟"], default="全部协议", key=f"scope-{selected_kind}", width="stretch")
+    shown = [b for b in benchmarks if b["kind"] == selected_kind and b["incremental"] == scenario]
+    if scope == "真实 / 待接入":
+        shown = [b for b in shown if not b.get("synthetic")]
+    elif scope == "合成模拟":
+        shown = [b for b in shown if b.get("synthetic")]
+    shown.sort(key=lambda b: (2 if b.get("synthetic") else 0 if readiness(b)[0] else 1, b["title"]))
+    if not shown:
+        st.info("该场景尚无已登记协议。")
+    for b in shown:
+        ok, reason = readiness(b)
+        tasks = " → ".join(f"{t['id']} {t['name']}" for t in b["tasks"]) or "任务和测试资产待登记"
+        with st.container(border=True):
+            st.html(f'<span class="badge">{INCREMENTS[b["incremental"]]}</span><span class="badge {"ready" if ok else "pending"}">{"✓ " if ok else "○ "}{escape(reason)}</span><span class="badge">{"合成模拟" if b.get("synthetic") else "真实协议"}</span>')
+            st.markdown(f"### {b['title']}")
+            st.write(b["description"])
+            st.caption(f"{tasks} · {b['metric']} · {b['version']}")
+            if b.get("class_names"):
+                st.caption("类别名称：" + "；".join(f"{k} {v}" for k, v in b["class_names"].items()))
+            if st.button("配置此任务", key=f"configure-{b['id']}", disabled=not ok, type="primary" if ok else "secondary"):
+                st.session_state.selected_benchmark = b["id"]
+                st.session_state.selected_supervision = supervision
+                st.rerun()
+    with st.expander("增量场景与数值边界"):
+        st.write("域增量是输入中心 / 分布变化；类别增量是类别集合扩展；任务增量是器官、模态或分析目标变化。")
+        st.write("没有真实测试资产的协议明确标记待接入；合成协议只验收工程链路，不补造科研结果。")
 
 
-def new_evaluation():
+def new_evaluation(benchmark_id, training_supervision=None):
     title("配置与提交", "无需训练日志或用户编写的配置清单。提交后协议冻结，改变顺序需新建评测。")
-    benchmark_id = st.selectbox("选择基准", list(lookup), format_func=lambda bid: lookup[bid]["title"] + (" · 待接入" if not readiness(lookup[bid])[0] else ""))
     b = lookup[benchmark_id]
     ok, reason = readiness(b)
     st.caption(f"{b['version']} · {KINDS[b['kind']]} / {INCREMENTS[b['incremental']]} · {b['description']}")
@@ -146,20 +187,22 @@ def new_evaluation():
         return
     if b.get("synthetic"):
         st.warning("当前是合成工程验收样例，所有结果均不属于真实科研结果。")
+    if b["kind"] == "segmentation":
+        training_supervision = training_supervision if training_supervision in ("full", "weak") else "full"
+        st.info(f"当前分割训练条件：{'**全监督**' if training_supervision == 'full' else '**弱监督**'}（提交者声明）。评分统一使用冻结完整测试标注。")
     names = {t["id"]: t["name"] for t in b["tasks"]}
     standard = list(names)
     st.subheader("01 / 固定评测协议")
     custom = st.toggle("使用自定义任务顺序", key=f"custom-{benchmark_id}")
     order = standard
     if custom:
-        order = [col.selectbox(f"阶段位置 {i + 1}", standard, index=i, format_func=lambda t: f"{t} · {names[t]}", key=f"order-{benchmark_id}-{i}")
-                 for i, col in enumerate(st.columns(len(standard)))]
+        order = [st.selectbox(f"阶段位置 {i + 1}", standard, index=i, format_func=lambda t: f"{t} · {names[t]}", key=f"order-{benchmark_id}-{i}")
+                 for i in range(len(standard))]
         if len(set(order)) != len(order):
             st.error("任务 ID 重复；每个任务必须出现一次。")
     timeline(order, b)
-    c1, c2 = st.columns(2)
-    scenario = c1.radio("评测场景", ["集中式", "联邦持续评测（逻辑客户端）"], horizontal=True)
-    clients = c2.selectbox("固定逻辑客户端数", [2, 3, 4], index=1) if scenario != "集中式" else 1
+    scenario = st.radio("评测场景", ["集中式", "联邦持续评测（逻辑客户端）"], horizontal=True)
+    clients = st.selectbox("固定逻辑客户端数", [2, 3, 4], index=1) if scenario != "集中式" else 1
     if clients > 1:
         st.info(f"按匿名病例索引固定轮转到 {clients} 个逻辑客户端；分类无病例标识时按图像划分。仅评分汇总，不训练或聚合权重。划分版本将随配置保存。")
     head = st.selectbox("输出头与任务信息条件", ["shared", "task-specific"], format_func=lambda x: "共享输出头 / 全局类别编码" if x == "shared" else "任务指定输出头 / 已知任务 ID")
@@ -187,6 +230,7 @@ def new_evaluation():
     scope = st.radio("可提供的阶段", ["仅最终阶段", "多个 / 部分阶段"], horizontal=True)
     stages = [len(order)] if scope == "仅最终阶段" else st.multiselect("已有阶段位置", list(range(1, len(order) + 1)), default=[len(order)])
     st.caption("缺少阶段将保留为空；BWT、遗忘或迁移指标只有满足对应条件才计算。")
+    st.info("提交后由独立评分服务读取冻结测试集，计算任务主指标及 Final average、BWT、Forgetting、FWT、BWTR；条件不足的指标明确显示为不可计算。")
     files = []
     for stage in sorted(stages):
         seen_names = " → ".join(order[:stage])
@@ -220,7 +264,8 @@ def new_evaluation():
     if st.button("提交并开始评测", type="primary", disabled=not ready):
         try:
             job_id = submit(b, method=method, order=order, uploads=files, mode=mode, architecture=architecture,
-                            clients=clients, evaluate_unseen=unseen, output_head=head)
+                            clients=clients, evaluate_unseen=unseen, output_head=head,
+                            training_supervision=training_supervision)
         except ValueError as exc:
             st.error(str(exc))
         except Exception:
@@ -232,20 +277,32 @@ def new_evaluation():
             st.button("查看此次评测", on_click=navigate, args=("评测记录",), type="primary")
 
 
+def preview_arrays(job_id, reference):
+    visual_root = (job_dir(job_id) / "visuals").resolve()
+    path = (job_dir(job_id) / reference["file"]).resolve()
+    if path.parent != visual_root or path.suffix != ".npz":
+        raise ValueError("可视化引用无效")
+    with np.load(path, allow_pickle=False) as archive:
+        return {key: archive[key] for key in archive.files}
+
+
 def result_view(job):
     result, config = job["result"], job["config"]
     b = config["benchmark"]
     if b.get("synthetic"):
         st.warning("合成工程验收结果 · 不得作为医学或论文实验结果")
     st.subheader(config["method"])
-    st.caption(f"{b['title']} · {b['version']} · {config['mode']} · 配置已冻结")
+    supervision = {"full": "全监督", "weak": "弱监督", "not-declared": "未声明", "not-applicable": "不适用"}.get(config.get("training_supervision"), "未声明")
+    st.caption(f"{b['title']} · {b['version']} · {config['mode']} · 配置已冻结" + (f" · {supervision}分割" if b["kind"] == "segmentation" else ""))
     timeline(config["order"], b)
     st.caption(config["conditions"])
     summary = result["continual"]["global"]
-    columns = st.columns(4)
-    for col, metric in zip(columns, ("Final average", "BWT", "Forgetting", "FWT")):
-        col.metric({"Final average": "最终任务宏平均", "BWT": "后向迁移 BWT", "Forgetting": "遗忘", "FWT": "前向迁移 FWT"}[metric], score_text(summary[metric]["value"], b["unit"]))
+    columns = st.columns(5)
+    labels = {"Final average": "最终任务宏平均", "BWT": "后向迁移 BWT", "Forgetting": "遗忘", "FWT": "前向迁移 FWT", "BWTR": "相对后向迁移 BWTR"}
+    for col, metric in zip(columns, labels):
+        col.metric(labels[metric], score_text(summary[metric]["value"], b["unit"]))
         col.caption(summary[metric]["reason"])
+    st.caption("上述指标由独立评分服务从每阶段测试矩阵计算；— 表示条件不足，不用 0 补齐。")
     tab_matrix, tab_clients, tab_cases, tab_protocol = st.tabs(["阶段—任务矩阵", "逻辑客户端", "病例 / 样本结果", "协议与导出"])
     with tab_matrix:
         client_id = st.selectbox("查看结果层级", list(result["matrices"]), format_func=lambda x: "全体测试样本" if x == "global" else f"逻辑客户端 {x}")
@@ -275,9 +332,48 @@ def result_view(job):
         else:
             st.info("此阶段未提交，没有可展示的客户端统计。")
     with tab_cases:
-        task_id = st.selectbox("病例任务", config["order"])
-        cases = [c for c in result["cases"] if c["task_id"] == task_id and c["stage"] == max(config["stages"])]
-        st.caption("显示最后一个已提交阶段。分类仅有图像 ID 时按图像统计，不将其声称为患者级评测。")
+        stage = st.selectbox("可视化阶段", sorted(config["stages"]), index=len(config["stages"]) - 1, key=f"case-stage-{job['id']}")
+        available_tasks = [tid for tid in config["order"] if any(c["task_id"] == tid and c["stage"] == stage for c in result["cases"])]
+        task_id = st.selectbox("病例 / 样本任务", available_tasks or config["order"], key=f"case-task-{job['id']}")
+        cases = [c for c in result["cases"] if c["task_id"] == task_id and c["stage"] == stage]
+        task = next(t for t in b["tasks"] if t["id"] == task_id)
+        if b["kind"] == "classification":
+            registered = lookup.get(b["id"], {})
+            class_names = b.get("class_names") or (registered.get("class_names", {}) if registered.get("version") == b.get("version") else {})
+            st.subheader("类别名称")
+            st.dataframe(pd.DataFrame([{"Class ID": value, "类别名称": class_names.get(str(value), f"类别 {value}")} for value in task.get("classes", [])]), hide_index=True, width="stretch")
+            st.caption("分类无病例 ID 时按图像统计，不将其声称为患者级评测。")
+        previews = [v for v in result.get("visualizations", []) if v["task_id"] == task_id and v["stage"] == stage]
+        if b["kind"] in ("segmentation", "registration"):
+            st.subheader("预测结果可视化")
+            if previews:
+                preview = previews[st.selectbox("选择预览病例", range(len(previews)), format_func=lambda i: f"{previews[i]['case_id']} · {b['metric']} {score_text(previews[i]['score'], b['unit'])}", key=f"preview-{job['id']}-{stage}-{task_id}")]
+                try:
+                    arrays = preview_arrays(job["id"], preview)
+                    if b["kind"] == "segmentation":
+                        original, overlay = arrays["original"], arrays["overlay"]
+                        left, right = st.columns(2)
+                        left.image(original, caption="原始测试切片", width="stretch")
+                        right.image(overlay, caption="预测遮罩叠加（绿色）", width="stretch")
+                        st.metric("该病例前景 Dice", score_text(preview["score"]))
+                        st.caption("预览切片在该病例中按预测前景量固定选取；图中不显示、不导出隐藏测试真值。")
+                    else:
+                        moving, prediction = arrays["moving"], arrays["prediction"]
+                        if moving.ndim != 2 or prediction.shape != moving.shape or moving.shape[1] < 2:
+                            raise ValueError("配准预览维度无效")
+                        points = [{"标志点": str(i), "位置": name, "步骤": step, "x": float(array[i, 0]), "y": float(array[i, 1])}
+                                  for i in range(len(moving)) for step, (name, array) in enumerate((("移动点", moving), ("预测配准点", prediction)))]
+                        frame = pd.DataFrame(points)
+                        base = alt.Chart(frame).encode(x=alt.X("x:Q", scale=alt.Scale(zero=False)), y=alt.Y("y:Q", scale=alt.Scale(zero=False)))
+                        chart = base.mark_line(color="#9aaab3").encode(detail="标志点:N", order="步骤:Q") + base.mark_point(size=80).encode(color=alt.Color("位置:N", scale=alt.Scale(range=["#708c9d", "#19a179"])), shape="位置:N", tooltip=["标志点", "位置", "x", "y"])
+                        st.altair_chart(chart.properties(height=420), width="stretch")
+                        st.metric("该病例 TRE", score_text(preview["score"], b["unit"]))
+                        st.caption("显示移动点到预测配准点的 XY 投影；隐藏固定点只用于服务端 TRE 评分，不进入预览文件。")
+                except (OSError, ValueError, KeyError):
+                    st.warning("私有可视化文件不可读；数值评分仍以已保存结果为准。")
+            else:
+                st.info("该记录没有可视化预览；新建的分割 / 配准评测会生成最多 6 个私有病例预览。")
+        st.subheader("病例 / 样本数值")
         if cases:
             st.dataframe(pd.DataFrame(cases).drop(columns=["case_index"], errors="ignore"), hide_index=True, width="stretch", height=340)
         else:
@@ -300,7 +396,7 @@ def records():
     jobs = list_jobs()
     if not jobs:
         st.info("还没有评测记录。先提交一个最终模型或预测即可，无需训练日志。")
-        st.button("新建第一条评测", on_click=navigate, args=("新建评测",), type="primary")
+        st.button("新建第一条评测", on_click=navigate, args=("任务中心",), type="primary")
         return
     options = [j["id"] for j in jobs]
     mapping = {j["id"]: j for j in jobs}
@@ -362,4 +458,4 @@ def compare():
     st.caption("比较最终阶段各任务；缺少最终阶段的记录保留为空，不拿最后可见阶段代替最终阶段。")
 
 
-{"平台首页": home, "新建评测": new_evaluation, "评测记录": records, "方法比较": compare}[page]()
+{"任务中心": task_center, "评测记录": records, "方法比较": compare}[page]()

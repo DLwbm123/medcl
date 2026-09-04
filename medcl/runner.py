@@ -25,6 +25,53 @@ def aggregate(cases: list[dict], kind: str) -> float | None:
                             weights=[c["n_samples"] for c in usable] if kind == "classification" else None))
 
 
+def _plane(array: np.ndarray) -> np.ndarray:
+    plane = np.asarray(array)
+    while plane.ndim > 2:
+        plane = plane[plane.shape[0] // 2]
+    return plane
+
+
+def _segmentation_image(image: np.ndarray, prediction: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    image, mask = _plane(image).astype(np.float32), _plane(prediction) != 0
+    low, high = np.percentile(image, (1, 99))
+    gray = np.zeros(image.shape, dtype=np.uint8) if high <= low else (np.clip((image - low) / (high - low), 0, 1) * 255).astype(np.uint8)
+    original = np.repeat(gray[..., None], 3, axis=-1)
+    overlay = original.copy()
+    overlay[mask] = (overlay[mask] * 0.4 + np.array([25, 160, 120]) * 0.6).astype(np.uint8)
+    return original, overlay
+
+
+def _save_previews(folder: Path, kind: str, stage: int, task_id: str, data: dict,
+                   prediction: np.ndarray, scored: list[dict]) -> list[dict]:
+    if kind not in ("segmentation", "registration") or not scored:
+        return []
+    visual_dir = folder / "visuals"
+    visual_dir.mkdir(exist_ok=True, mode=0o700)
+    available = [i for i, case in enumerate(scored) if case["n_samples"] > 0]
+    selected = [available[i] for i in np.linspace(0, len(available) - 1, min(6, len(available)), dtype=int)]
+    previews = []
+    for case_index in selected:
+        start, end = data["ranges"][case_index]
+        if kind == "segmentation":
+            areas = np.count_nonzero(prediction[start:end], axis=tuple(range(1, prediction.ndim)))
+            sample = start + int(np.argmax(areas)) if np.any(areas) else start + (end - start) // 2
+            arrays = dict(zip(("original", "overlay"), _segmentation_image(data["images"][sample], prediction[sample])))
+        else:
+            sample = start
+            arrays = {"moving": np.asarray(data["images"][sample], dtype=np.float32),
+                      "prediction": np.asarray(prediction[sample], dtype=np.float32)}
+        filename = f"stage-{stage:02d}-{task_id}-case-{case_index:04d}.npz"
+        path = visual_dir / filename
+        with path.open("xb") as handle:
+            np.savez_compressed(handle, **arrays)
+        path.chmod(0o600)
+        previews.append({"kind": kind, "stage": stage, "task_id": task_id,
+                         "case_id": data["case_ids"][case_index], "case_index": int(case_index),
+                         "score": scored[case_index]["score"], "file": f"visuals/{filename}"})
+    return previews
+
+
 def evaluate(job_id: str, root: Path | None = None) -> dict:
     job = get_job(job_id, root)
     if job is None:
@@ -35,7 +82,7 @@ def evaluate(job_id: str, root: Path | None = None) -> dict:
     benchmark = private["benchmark"]
     kind, order = benchmark["kind"], config["order"]
     tasks = {t["id"]: t for t in benchmark["tasks"]}
-    cells, cases, federated, distributions = [], [], [], []
+    cells, cases, federated, distributions, visualizations = [], [], [], [], []
     matrices = {name: [[None] * len(order) for _ in order] for name in ["global", *[f"C{i + 1:02d}" for i in range(config["clients"])]]}
     total = sum(len(required_tasks(config, item["stage"])) for item in private["uploads"])
     done = 0
@@ -71,6 +118,7 @@ def evaluate(job_id: str, root: Path | None = None) -> dict:
                     case["score"] = float(np.mean([case["per_class"][str(c)] for c in task["classes"]]))
                 case.update(stage=stage, task_id=task_id, case_id=data["case_ids"][index],
                             client_id=f"C{index % config['clients'] + 1:02d}")
+            visualizations.extend(_save_previews(folder, kind, stage, task_id, data, pred, scored))
             cases.extend(scored)
             client_scores, counts = [], []
             for client_id in matrices:
@@ -110,7 +158,7 @@ def evaluate(job_id: str, root: Path | None = None) -> dict:
         warnings.insert(0, "合成工程验收样例，禁止作为科研结果引用。")
     result = {"job_id": job_id, "config": config, "cells": cells, "cases": cases,
               "matrices": matrices, "continual": summaries, "federated": federated,
-              "distributions": distributions, "warnings": warnings}
+              "distributions": distributions, "visualizations": visualizations, "warnings": warnings}
     temporary = folder / "result.pending.json"
     temporary.write_text(encode(result), encoding="utf-8")
     temporary.replace(folder / "result.json")

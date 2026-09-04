@@ -31,10 +31,10 @@ def report_csv(result: dict) -> bytes:
     buffer = io.StringIO(newline="")
     writer = csv.writer(buffer)
     fields = ("stage", "task_id", "client_id", "score", "metric", "direction", "unit", "n_samples", "n_cases", "reason", "benchmark_mean", "background")
-    writer.writerow(["method", "benchmark", "version", "synthetic", *fields])
+    writer.writerow(["method", "benchmark", "version", "synthetic", "training_supervision", *fields])
     config, benchmark = result["config"], result["config"]["benchmark"]
     for cell in report_cells(result):
-        writer.writerow([_csv_value(v) for v in [config["method"], benchmark["id"], benchmark["version"], benchmark["synthetic"], *[cell.get(k) for k in fields]]])
+        writer.writerow([_csv_value(v) for v in [config["method"], benchmark["id"], benchmark["version"], benchmark["synthetic"], config.get("training_supervision", "not-declared"), *[cell.get(k) for k in fields]]])
     return ("\ufeff" + buffer.getvalue()).encode("utf-8")
 
 
@@ -60,6 +60,8 @@ def report_html(result: dict) -> bytes:
                           _value(r["worst_client"]), _value(r["client_std"]), f"{r['available_clients']}/{r['total_clients']}")) + "</tr>" for r in result["federated"])
     warning_items = "".join(f"<li>{escape(w)}</li>" for w in result["warnings"])
     protocol = escape(json.dumps(config, ensure_ascii=False, indent=2))
+    supervision = {"full": "全监督", "weak": "弱监督", "not-declared": "未声明"}.get(config.get("training_supervision"), "未声明")
+    supervision_row = f"<p>分割训练监督：{supervision}（提交者声明，平台仅验证测试分数）</p>" if b["kind"] == "segmentation" else ""
     html = f'''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
@@ -69,6 +71,7 @@ def report_html(result: dict) -> bytes:
     </style></head><body><p>MedCL / 医学影像持续学习评测</p><h1>{escape(config['method'])}</h1>
     <p>{escape(b['title'])}{heading} · {escape(b['version'])}</p>
     <p>任务顺序：{' → '.join(escape(t + ' ' + task_names[t]) for t in config['order'])}</p>
+    {supervision_row}
     <p>主指标：{escape(b['metric'])} · {'越低越好' if b['direction']=='lower' else '越高越好'} · {escape(b['unit'])}</p>
     <p>{escape(config['conditions'])}</p><div class="notice"><ul>{warning_items}</ul></div>
     <h2>阶段 × 客户端 × 测试任务</h2><table><thead><tr><th>阶段</th><th>任务</th><th>客户端</th><th>分数</th><th>样本数</th><th>状态</th></tr></thead><tbody>{table}</tbody></table>
@@ -80,6 +83,7 @@ def report_html(result: dict) -> bytes:
 
 def compatibility(config: dict) -> str:
     fields = {k: config[k] for k in ("benchmark", "order", "clients", "client_split", "evaluate_unseen", "output_head", "conditions")}
+    fields["training_supervision"] = config.get("training_supervision", "not-declared")
     fields["test_assets"] = config.get("test_assets", [])
     return json.dumps(fields, sort_keys=True, ensure_ascii=False)
 

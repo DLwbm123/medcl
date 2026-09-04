@@ -19,7 +19,7 @@ from medcl.infer import predict
 from medcl.reports import aggregate_report, compatibility, report_csv, report_html, report_json
 from medcl.runner import evaluate
 from medcl.sandbox import sandbox_available
-from medcl.storage import claim_job, connection, get_job, initialize, update_job
+from medcl.storage import claim_job, connection, get_job, initialize, job_dir, update_job
 from medcl.submissions import align_predictions, inspect_upload, load_predictions, submit
 from medcl.worker import run_worker
 
@@ -88,10 +88,20 @@ class PlatformChecks(unittest.TestCase):
             with self.subTest(kind=kind):
                 b = demo_protocol(kind)
                 jid = submit(b, method="synthetic", order=self.order, uploads=[self.payload(3, b=b, as_json=False)],
-                             mode="predictions", architecture=None, clients=4, evaluate_unseen=False, root=self.root)
+                             mode="predictions", architecture=None, clients=4, evaluate_unseen=False,
+                             training_supervision="weak" if kind == "segmentation" else None, root=self.root)
                 result = evaluate(jid, self.root)
                 self.assertIsNotNone(result["continual"]["global"]["Final average"]["value"])
+                self.assertTrue(result["visualizations"])
+                for preview in result["visualizations"]:
+                    self.assertFalse(Path(preview["file"]).is_absolute())
+                    with np.load(job_dir(jid, self.root) / preview["file"], allow_pickle=False) as archive:
+                        self.assertNotIn("target", archive.files)
+                        self.assertNotIn("fixed", archive.files)
+                        expected = {"original", "overlay"} if kind == "segmentation" else {"moving", "prediction"}
+                        self.assertEqual(set(archive.files), expected)
                 if kind == "segmentation":
+                    self.assertEqual(result["config"]["training_supervision"], "weak")
                     empty = [c for c in result["cells"] if c["client_id"] == "C04"]
                     self.assertTrue(all(c["score"] is None and c["n_samples"] == 0 for c in empty))
                     self.assertTrue(all("benchmark_mean" in c for c in result["cases"]))
@@ -109,6 +119,8 @@ class PlatformChecks(unittest.TestCase):
         alternate = copy.deepcopy(config)
         alternate["method"] = "another algorithm"
         self.assertEqual(compatibility(config), compatibility(alternate))
+        alternate["training_supervision"] = "weak"
+        self.assertNotEqual(compatibility(config), compatibility(alternate))
 
     def test_illegal_payloads_rejected_before_queue(self):
         for name, data, mode in (("x.pth", b"pickle", "model"), ("x.py", b"print(1)", "model"),
@@ -132,6 +144,8 @@ class PlatformChecks(unittest.TestCase):
             self.queue(evaluate_unseen=True)
         with self.assertRaises(ValueError):
             self.queue([self.payload(3), self.payload(3)])
+        with self.assertRaises(ValueError):
+            self.queue(training_supervision="weak")
 
     def test_mapping_checks_and_failed_job_visibility(self):
         data = read_task(self.b, self.b["tasks"][0])

@@ -174,7 +174,8 @@ def align_predictions(entry: dict, sample_ids: np.ndarray, expected_shape: tuple
 
 def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict],
            mode: str, architecture: str | None, clients: int, evaluate_unseen: bool,
-           output_head: str = "shared", root: Path | None = None) -> str:
+           output_head: str = "shared", training_supervision: str | None = None,
+           root: Path | None = None) -> str:
     ok, _ = readiness(benchmark)
     if not ok:
         raise ValueError("该基准资产尚未接入")
@@ -187,6 +188,12 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
         raise ValueError("提交模式或客户端数量无效")
     if output_head not in ("shared", "task-specific"):
         raise ValueError("输出头条件无效")
+    supervision = training_supervision or ("not-declared" if benchmark["kind"] == "segmentation" else "not-applicable")
+    if benchmark["kind"] == "segmentation":
+        if supervision not in ("full", "weak", "not-declared"):
+            raise ValueError("分割训练监督类型无效")
+    elif supervision != "not-applicable":
+        raise ValueError("当前任务不使用分割训练监督类型")
     if type(evaluate_unseen) is not bool:
         raise ValueError("未见任务选项必须为布尔值")
     if evaluate_unseen and (not benchmark["allow_unseen"] or output_head != "shared"):
@@ -213,6 +220,8 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
         "schema_version": 1, "benchmark": public_protocol(benchmark), "method": method.strip(),
         "order": list(order), "stages": sorted(stages), "mode": mode, "architecture": architecture,
         "clients": clients, "evaluate_unseen": bool(evaluate_unseen), "output_head": output_head,
+        "training_supervision": supervision,
+        "supervision_source": "提交者声明的外部训练监督类型；平台仅在同一冻结测试集评分，不读取训练集或训练日志" if benchmark["kind"] == "segmentation" else "不适用",
         "client_split": {"id": f"case-round-robin-v1-c{clients}", "version": "1",
                          "source": "平台固定逻辑划分：各任务匿名病例索引 mod 客户端数；分类无病例标识时按图像索引。非论文客户端划分。"},
         "conditions": {"segmentation": "病例级前景类 Dice (eps=1e-5)，另列含背景宏均值；同空=1",

@@ -23,7 +23,7 @@ def state_path() -> Path:
 
 
 def demo_protocol(kind: str) -> dict:
-    return {
+    protocol = {
         "id": f"demo-{kind}", "title": f"{KINDS[kind]} · 合成验收样例",
         "kind": kind, "incremental": {"classification": "class", "segmentation": "domain", "registration": "task"}[kind],
         "version": "synthetic-v1", "synthetic": True,
@@ -41,6 +41,9 @@ def demo_protocol(kind: str) -> dict:
                    "coordinate_system": "fixed-space xy, mm" if kind == "registration" else None}
                   for i in range(3)],
     }
+    if kind == "classification":
+        protocol["class_names"] = {str(i): f"合成类别 {i}" for i in range(3)}
+    return protocol
 
 
 def pending_protocols() -> list[dict]:
@@ -102,7 +105,7 @@ def readiness(benchmark: dict) -> tuple[bool, str]:
 
 def public_protocol(benchmark: dict) -> dict:
     """Explicit allow-list prevents file paths/hidden labels escaping in reports."""
-    keys = ("id", "title", "kind", "incremental", "version", "synthetic", "description", "source",
+    keys = ("id", "title", "kind", "incremental", "version", "synthetic", "description", "source", "class_names",
             "metric", "direction", "unit", "allow_unseen", "output_semantics", "preprocessing", "label_rule")
     out = {k: benchmark[k] for k in keys if k in benchmark}
     task_keys = ("id", "name", "classes", "all_classes", "coordinate_system", "spacing", "source", "label_shift")

@@ -103,6 +103,23 @@ class BrowserAppCheck(unittest.TestCase):
                 self.assertEqual(len(jobs), 1)
                 self.assertFalse(jobs[0]["config"]["evaluate_unseen"])
 
+    def test_required_task_segments_recover_after_deselection(self):
+        with tempfile.TemporaryDirectory(prefix="medcl-ui-segment-") as directory:
+            root = initialize(Path(directory))
+            with patch.dict(os.environ, {"MEDCL_STATE_DIR": str(root), "MEDCL_CONFIG": str(root / "no-assets.json"),
+                                             "MEDCL_SHOW_DEMOS": "1"}):
+                heartbeat(root)
+                app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
+                next(button for button in app.button if button.label == "进入分割任务").click().run()
+                app.session_state["scenario-segmentation"] = None
+                app.session_state["segmentation-supervision"] = None
+                app.session_state["scope-segmentation"] = None
+                app.run()
+                self.assertFalse(app.exception)
+                self.assertEqual(next(control for control in app.segmented_control if control.label == "增量场景").value, "域增量")
+                self.assertEqual(next(control for control in app.segmented_control if control.label == "分割监督方式").value, "全监督")
+                self.assertEqual(next(control for control in app.segmented_control if control.label == "数据范围").value, "全部协议")
+
 
 if __name__ == "__main__":
     unittest.main()

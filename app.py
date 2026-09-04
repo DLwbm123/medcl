@@ -84,6 +84,12 @@ def navigate(page):
     st.session_state.nav = page
 
 
+def required_segmented_control(label, options, key):
+    if st.session_state.get(key) not in options:
+        st.session_state[key] = options[0]
+    return st.segmented_control(label, options, key=key, width="stretch")
+
+
 @st.cache_data(ttl=30)
 def load_catalog(config_mtime):
     return catalog()
@@ -185,21 +191,21 @@ def task_center():
     scenario_column, supervision_column = st.columns(2, gap="large")
     with scenario_column:
         st.subheader(f"{KINDS[selected_kind]}持续学习场景")
-        scenario_label = st.segmented_control("增量场景", scenario_labels, default=scenario_labels[0], key=f"scenario-{selected_kind}", width="stretch")
+        scenario_label = required_segmented_control("增量场景", scenario_labels, f"scenario-{selected_kind}")
         scenario = scenario_keys[scenario_labels.index(scenario_label)]
         if selected_kind == "classification":
             st.caption("支持类别增量和逻辑客户端聚合评分，不包含联邦训练或通信。")
     with supervision_column:
         if selected_kind == "segmentation":
             st.subheader("训练监督方式")
-            supervision_label = st.segmented_control("分割监督方式", ["全监督", "弱监督"], default="全监督", key="segmentation-supervision", width="stretch")
+            supervision_label = required_segmented_control("分割监督方式", ["全监督", "弱监督"], "segmentation-supervision")
             supervision = {"全监督": "full", "弱监督": "weak"}[supervision_label]
             st.caption("监督方式由提交者声明；两者使用同一冻结测试集计算 Dice。")
 
     st.subheader("选择评测协议")
     shown = [b for b in benchmarks if b["kind"] == selected_kind and b["incremental"] == scenario]
     if SHOW_DEMOS:
-        scope = st.segmented_control("数据范围", ["全部协议", "真实 / 待接入", "合成模拟"], default="全部协议", key=f"scope-{selected_kind}", width="stretch")
+        scope = required_segmented_control("数据范围", ["全部协议", "真实 / 待接入", "合成模拟"], f"scope-{selected_kind}")
         if scope == "真实 / 待接入":
             shown = [b for b in shown if not b.get("synthetic")]
         elif scope == "合成模拟":

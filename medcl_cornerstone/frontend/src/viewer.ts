@@ -328,7 +328,7 @@ const setRegistrationVolumes = async (
   }
   const volume3d = engine.getViewport<VolumeViewport>(volume3dId);
   await volume3d.setVolumes([inputs.at(-1)!], false);
-  volume3d.setProperties({ voiRange: normalizedVoi }, inputs.at(-1)!.volumeId);
+  volume3d.setProperties({ voiRange: normalizedVoi, preset: "MR-Default" }, inputs.at(-1)!.volumeId);
   volume3d.resetCamera();
   engine.render();
 };
@@ -430,6 +430,7 @@ export async function mountViewer(args: Args, envelope: ParsedEnvelope, bag: Cle
       viewport.setProperties({ voiRange: normalizedVoi }, scalarId);
       viewport.resetCamera();
     }
+    engine.getViewport<VolumeViewport>(volume3dId).setProperties({ preset: "MR-Default" }, scalarId);
     const imageLabel = element("label", "medcl-control");
     const imageVisible = element("input") as HTMLInputElement;
     imageVisible.type = "checkbox";

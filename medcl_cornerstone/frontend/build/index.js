@@ -121371,7 +121371,7 @@ const BHe = (t, e, n) => {
     o.length === 2 && l.setProperties({ voiRange: aC, colormap: { opacity: e } }, o[1].volumeId), l.resetCamera();
   }
   const s = n.getViewport(i);
-  await s.setVolumes([o.at(-1)], !1), s.setProperties({ voiRange: aC }, o.at(-1).volumeId), s.resetCamera(), n.render();
+  await s.setVolumes([o.at(-1)], !1), s.setProperties({ voiRange: aC, preset: "MR-Default" }, o.at(-1).volumeId), s.resetCamera(), n.render();
 }, LHe = (t, e, n, r) => {
   const i = qee(e), a = ir("label", "medcl-control", "Layers "), o = ir("select");
   for (const u of zee(e)) {
@@ -121444,6 +121444,7 @@ async function VHe(t, e, n, r) {
       const M = u.getViewport(T);
       await M.setVolumes([{ volumeId: E, actorUID: E }], !1), M.setProperties({ voiRange: aC }, E), M.resetCamera();
     }
+    u.getViewport(d).setProperties({ preset: "MR-Default" }, E);
     const I = ir("label", "medcl-control"), w = ir("input");
     w.type = "checkbox", w.checked = !0, I.append(w, document.createTextNode(" image")), w.addEventListener("change", () => {
       for (const T of [...A, d])

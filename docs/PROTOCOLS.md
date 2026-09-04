@@ -57,4 +57,4 @@ HDF5 管理员输入键为 `test_images`、`test_labels`（HWN）和 `patient_in
 
 预测模式无法从预测数组独立验证模型来源；结构化 provenance 只记录受限类别和是否由平台验证，不要求用户上传训练日志来伪证明声明。模型模式的同一阶段权重会用于所有任务/客户端，评分只汇总数值、不聚合参数。公开 aggregate v2 不复制完整 config，而是白名单重建 run/benchmark 标识、来源类别、全局 cells/matrix/持续学习指标和固定安全警示；方法自由文本、管理员 description/source、病例/客户端明细和资产元数据均排除。
 
-前端生产包随 Python 包预构建，不从 CDN 加载脚本，也不要求生产机安装 Node.js。修改 TypeScript/CSS 后必须重新执行 typecheck、Vitest 和 Vite build，并提交新的 `medcl_cornerstone/build`；只改源码而不重建不会影响生产页面。
+前端生产包随 Python 包预构建，不从 CDN 加载脚本，也不要求生产机安装 Node.js。修改 TypeScript/CSS 后必须重新执行 typecheck、Vitest 和 Vite build，并提交新的 `medcl_cornerstone/frontend/build`；只改源码而不重建不会影响生产页面。

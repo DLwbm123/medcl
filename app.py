@@ -19,24 +19,59 @@ from medcl.submissions import ARCHITECTURES, submit
 
 st.set_page_config(page_title="MedCL · 医学影像持续学习评测", page_icon="🔬", layout="wide")
 st.html('''<style>
-html,body,.stApp,input,button,textarea {font-family: -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
-.stMainBlockContainer {max-width:1180px;padding-top:1.4rem;padding-bottom:3rem;}
-h1 {font-size:2rem!important;font-weight:650!important;letter-spacing:-.035em;}
-h2 {font-size:1.3rem!important;} h3 {font-size:1.1rem!important;}
-[data-testid="stMetric"] {background:#fff;border:1px solid #dce4e8;border-radius:8px;padding:14px 18px;}
-[data-testid="stMetricValue"] {font-size:1.75rem!important;}
-.topbar {display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid #dce4e8;padding:4px 0 15px;margin-bottom:12px;}
-.brand {display:flex;align-items:center;gap:12px;margin:0;}
-.brand-mark {border:1px solid #708c9d;background:#e0e9ed;width:40px;height:40px;border-radius:9px;display:grid;place-items:center;font-size:24px;color:#3b5e74;}
-.brand strong {font-size:24px;letter-spacing:-.03em;}.brand small{display:block;color:#617382;font-size:12px;}
-.protocol-card {background:white;border:1px solid #dce4e8;border-radius:8px;padding:20px;margin:4px 0 10px;}
-.protocol-card h3 {margin:10px 0 6px;}.protocol-card p{font-size:14px;line-height:1.7;color:#4c6372;margin:8px 0;}
-.badge {display:inline-block;border:1px solid #cbd7dd;background:#edf2f5;color:#38586e;padding:2px 9px;font-size:12px;border-radius:4px;margin-right:6px;}
-.badge.ready {background:#e8f0ed;border-color:#c8d9d1;color:#355d4a;}.badge.pending{background:#f7f1e7;border-color:#e1d4bb;color:#795c2e;}
-.timeline {display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 22px;}.task-step {display:flex;align-items:center;gap:9px;border:1px solid #cfdbe1;border-radius:6px;background:#fff;padding:9px 14px;font-size:14px;}.task-step b {color:#486b81;font-size:12px;}.task-step span{color:#243746;}
-.subtle {color:#627785;font-size:14px;line-height:1.7;}
-.stButton button,.stDownloadButton button {border-radius:6px;min-height:40px;}
-@media(max-width:700px){.stMainBlockContainer{padding:1rem}.topbar{align-items:flex-start}.task-step{padding:7px 10px}h1{font-size:1.6rem!important}}
+:root {
+  --page-bg:#F6F8FB;--surface:#FFFFFF;--surface-subtle:#F9FAFC;
+  --text:#17212B;--text-secondary:#667085;--text-tertiary:#8A94A3;
+  --border:#E3E8EF;--border-strong:#D4DBE5;
+  --primary:#2563EB;--primary-hover:#1D4ED8;--primary-soft:#EEF4FF;
+  --success:#15803D;--success-soft:#ECFDF3;
+  --warning:#A16207;--warning-soft:#FFFBEB;
+  --danger:#B42318;--danger-soft:#FEF3F2;--viewer-bg:#070B12;
+}
+html,body,.stApp,input,button,textarea {font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);}
+.stApp,[data-testid="stAppViewContainer"] {background:var(--page-bg);}
+.stMainBlockContainer {max-width:1760px;padding:1.25rem 2.5rem 4rem;}
+[data-testid="stHeader"] {background:transparent;}
+[data-testid="stToolbar"],[data-testid="stDecoration"],footer {display:none!important;}
+h1 {font-size:2.35rem!important;font-weight:720!important;letter-spacing:-.045em!important;line-height:1.12!important;margin:.35rem 0 .4rem!important;color:var(--text)!important;}
+h2 {font-size:1.45rem!important;font-weight:680!important;letter-spacing:-.025em!important;color:var(--text)!important;}
+h3 {font-size:1.12rem!important;font-weight:650!important;color:var(--text)!important;}
+h4 {font-size:.9rem!important;font-weight:680!important;color:#344054!important;letter-spacing:.01em!important;margin-top:.3rem!important;}
+p,li {line-height:1.65;} label p {color:#344054!important;font-weight:520!important;}
+[data-testid="stCaptionContainer"] p {color:var(--text-secondary)!important;font-size:.875rem!important;line-height:1.55!important;}
+.topbar {display:flex;align-items:center;min-height:64px;border-bottom:1px solid var(--border);padding:0 0 14px;margin-bottom:16px;}
+.brand {display:flex;align-items:center;gap:12px;}
+.brand-mark {border:1px solid #BFD0FF;background:var(--primary-soft);width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:19px;font-weight:750;color:var(--primary);}
+.brand strong {font-size:22px;letter-spacing:-.035em;color:var(--text);}.brand small{display:block;color:var(--text-secondary);font-size:12px;margin-top:1px;}
+[data-testid="stButtonGroup"] [role="radiogroup"] {background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,.03);}
+[data-testid="stButtonGroup"] button {border:0!important;border-radius:7px!important;min-height:36px!important;color:var(--text-secondary)!important;}
+[data-testid="stButtonGroup"] button[aria-checked="true"] {background:var(--text)!important;color:#fff!important;box-shadow:0 1px 2px rgba(16,24,40,.18)!important;}
+[data-testid="stButtonGroup"] button[aria-checked="true"] p {color:#fff!important;}
+[data-testid="stVerticalBlockBorderWrapper"] {background:var(--surface);border:1px solid var(--border)!important;border-radius:14px!important;box-shadow:0 1px 2px rgba(16,24,40,.025);transition:border-color .15s ease,box-shadow .15s ease;}
+[data-testid="stVerticalBlockBorderWrapper"]:hover {border-color:var(--border-strong)!important;box-shadow:0 8px 24px rgba(16,24,40,.055);}
+.task-heading {display:flex;align-items:center;gap:12px;margin:2px 0 8px;}.task-heading h3{font-size:1.16rem;margin:0;}.task-heading small{display:block;color:var(--text-secondary);font-size:12px;margin-top:2px;}
+.task-symbol {width:38px;height:38px;border-radius:10px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-weight:750;font-size:15px;flex:0 0 auto;}
+.inline-note {border-left:3px solid var(--primary);background:var(--primary-soft);color:#344054;border-radius:0 8px 8px 0;padding:9px 12px;margin:8px 0 14px;font-size:13px;line-height:1.55;}
+[data-testid="stMetric"] {background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:16px 18px;min-height:108px;box-shadow:0 1px 2px rgba(16,24,40,.025);}
+[data-testid="stMetricLabel"] p {color:var(--text-secondary)!important;font-size:.82rem!important;font-weight:560!important;}
+[data-testid="stMetricValue"] {font-size:1.9rem!important;font-weight:680!important;letter-spacing:-.035em!important;color:var(--text)!important;}
+.badge {display:inline-flex;align-items:center;border:1px solid var(--border);background:var(--surface-subtle);color:#475467;padding:3px 9px;font-size:12px;border-radius:999px;margin-right:6px;}
+.badge.ready {background:var(--success-soft);border-color:#C7EAD4;color:var(--success);}.badge.pending{background:var(--warning-soft);border-color:#F4E2B7;color:var(--warning);}
+.timeline {display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 24px;}.task-step {display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-radius:9px;background:var(--surface);padding:9px 13px;font-size:14px;}.task-step b {color:var(--primary);font-size:12px;}.task-step span{color:#344054;}
+.stButton button,.stDownloadButton button {border-radius:9px!important;min-height:40px!important;font-weight:600!important;border-color:var(--border-strong)!important;box-shadow:none!important;}
+.stButton button[kind="primary"],.stDownloadButton button[kind="primary"] {background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important;}
+.stButton button[kind="primary"]:hover,.stDownloadButton button[kind="primary"]:hover {background:var(--primary-hover)!important;border-color:var(--primary-hover)!important;}
+.stButton button:focus-visible,.stDownloadButton button:focus-visible {outline:3px solid #BFDBFE!important;outline-offset:2px!important;}
+[data-testid="stAlert"] {background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:10px!important;padding:.72rem .9rem!important;color:#344054!important;box-shadow:none!important;}
+[data-testid="stAlertContainer"] {background:transparent!important;padding:0!important;}
+[data-testid="stFileUploaderDropzone"],input,textarea,[data-baseweb="select"]>div {background:var(--surface)!important;border-color:var(--border-strong)!important;border-radius:10px!important;}
+[data-testid="stDataFrame"],[data-testid="stVegaLiteChart"] {background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px;overflow:hidden;}
+[data-baseweb="tab-list"] {gap:22px;border-bottom:1px solid var(--border);}
+[data-baseweb="tab"] {padding:12px 2px!important;color:var(--text-secondary)!important;font-weight:600!important;}
+[aria-selected="true"][data-baseweb="tab"] {color:var(--primary)!important;}
+[data-testid="stExpander"] {background:var(--surface);border-color:var(--border)!important;border-radius:10px!important;}
+hr {border-color:var(--border)!important;}
+@media(max-width:900px){.stMainBlockContainer{padding:1rem 1.25rem 3rem}h1{font-size:1.9rem!important}.task-step{padding:7px 10px}}
 </style>''')
 
 initialize()
@@ -100,11 +135,12 @@ def heatmap(matrix, columns, rows, direction="higher", title_text=""):
     base = alt.Chart(df).encode(x=alt.X("任务:N", sort=columns, axis=alt.Axis(labelAngle=0, title=None)),
                                 y=alt.Y("阶段 / 客户端:N", sort=rows, axis=alt.Axis(title=None)),
                                 tooltip=["任务", "阶段 / 客户端", "显示", "状态"])
-    rect = base.mark_rect(stroke="#ffffff", strokeWidth=3, cornerRadius=3).encode(
-        color=alt.condition("isValid(datum.分数)", alt.Color("分数:Q", scale=alt.Scale(domain=domain, range=["#e9f0f2", "#3d657e"] if direction == "higher" else ["#3d657e", "#e9f0f2"]), legend=None), alt.value("#eceff1")))
+    rect = base.mark_rect(stroke="#ffffff", strokeWidth=3, cornerRadius=4).encode(
+        color=alt.condition("isValid(datum.分数)", alt.Color("分数:Q", scale=alt.Scale(domain=domain, range=["#EEF4FF", "#2563EB"] if direction == "higher" else ["#2563EB", "#EEF4FF"]), legend=None), alt.value("#F2F4F7")))
     text = base.mark_text(fontSize=14).encode(text="显示:N", color=alt.condition(
         f"isValid(datum.分数) && datum.分数 {'>' if direction == 'higher' else '<'} {sum(domain)/2}", alt.value("white"), alt.value("#314957")))
-    chart = (rect + text).properties(height=max(160, len(rows) * 48), title=title_text).configure_view(stroke=None)
+    chart = (rect + text).properties(height=max(170, len(rows) * 52), title=title_text).configure_view(stroke=None).configure_axis(
+        domain=False, tickColor="#D4DBE5", labelColor="#475467", titleColor="#344054")
     st.altair_chart(chart, width="stretch")
 
 
@@ -122,17 +158,19 @@ def task_center():
     if selected_kind not in KINDS:
         st.subheader("选择任务类型")
         cards = {
-            "segmentation": ("🧩", "医学影像分割", "域增量、类增量与任务增量；支持全监督和弱监督结果展示。"),
-            "classification": ("🧬", "医学影像分类", "类别增量评测，展示类别名称与逻辑客户端聚合结果。"),
-            "registration": ("🗺️", "医学影像配准", "任务增量评测，展示配准影像与 TRE。"),
+            "segmentation": ("分", "医学影像分割", "多场景持续学习", "域增量、类增量与任务增量；支持全监督和弱监督结果展示。"),
+            "classification": ("类", "医学影像分类", "类别增量评测", "展示类别名称、整体准确率与逻辑客户端聚合结果。"),
+            "registration": ("配", "医学影像配准", "任务增量评测", "对比固定、移动与配准后影像，展示标志点 TRE。"),
         }
-        for kind, (icon, name, detail) in cards.items():
-            with st.container(border=True):
-                st.markdown(f"### {icon} {name}")
-                st.write(detail)
-                if st.button(f"进入{KINDS[kind]}任务", key=f"enter-{kind}", type="primary" if kind == "segmentation" else "secondary"):
-                    st.session_state.selected_kind = kind
-                    st.rerun()
+        columns = st.columns(3, gap="medium")
+        for column, (kind, (symbol, name, label, detail)) in zip(columns, cards.items()):
+            with column:
+                with st.container(border=True):
+                    st.html(f'<div class="task-heading"><span class="task-symbol">{symbol}</span><div><h3>{name}</h3><small>{label}</small></div></div>')
+                    st.write(detail)
+                    if st.button(f"进入{KINDS[kind]}任务", key=f"enter-{kind}", type="primary" if kind == "segmentation" else "secondary", width="stretch"):
+                        st.session_state.selected_kind = kind
+                        st.rerun()
         completed = sum(job["status"] == "completed" for job in visible_jobs())
         if completed:
             st.caption(f"已完成评测 {completed} 条。")
@@ -141,20 +179,22 @@ def task_center():
     if st.button("← 返回三类大任务"):
         st.session_state.pop("selected_kind", None)
         st.rerun()
-    st.subheader(f"{KINDS[selected_kind]}持续学习场景")
     scenario_keys = {"segmentation": ["domain", "class", "task"], "classification": ["class"], "registration": ["task"]}[selected_kind]
     scenario_labels = [INCREMENTS[key] for key in scenario_keys]
-    scenario_label = st.segmented_control("增量场景", scenario_labels, default=scenario_labels[0], key=f"scenario-{selected_kind}", width="stretch")
-    scenario = scenario_keys[scenario_labels.index(scenario_label)]
-    if selected_kind == "classification":
-        st.info("分类支持类别增量和逻辑客户端聚合评分，不包含联邦训练或通信。")
-
     supervision = None
-    if selected_kind == "segmentation":
-        st.subheader("训练监督方式")
-        supervision_label = st.segmented_control("分割监督方式", ["全监督", "弱监督"], default="全监督", key="segmentation-supervision", width="stretch")
-        supervision = {"全监督": "full", "弱监督": "weak"}[supervision_label]
-        st.caption("监督方式由提交者声明；两者使用同一冻结测试集计算 Dice。")
+    scenario_column, supervision_column = st.columns(2, gap="large")
+    with scenario_column:
+        st.subheader(f"{KINDS[selected_kind]}持续学习场景")
+        scenario_label = st.segmented_control("增量场景", scenario_labels, default=scenario_labels[0], key=f"scenario-{selected_kind}", width="stretch")
+        scenario = scenario_keys[scenario_labels.index(scenario_label)]
+        if selected_kind == "classification":
+            st.caption("支持类别增量和逻辑客户端聚合评分，不包含联邦训练或通信。")
+    with supervision_column:
+        if selected_kind == "segmentation":
+            st.subheader("训练监督方式")
+            supervision_label = st.segmented_control("分割监督方式", ["全监督", "弱监督"], default="全监督", key="segmentation-supervision", width="stretch")
+            supervision = {"全监督": "full", "弱监督": "weak"}[supervision_label]
+            st.caption("监督方式由提交者声明；两者使用同一冻结测试集计算 Dice。")
 
     st.subheader("选择评测协议")
     shown = [b for b in benchmarks if b["kind"] == selected_kind and b["incremental"] == scenario]
@@ -203,7 +243,8 @@ def new_evaluation(benchmark_id, training_supervision=None):
         st.warning("当前是合成工程验收样例，所有结果均不属于真实科研结果。")
     if b["kind"] == "segmentation":
         training_supervision = training_supervision if training_supervision in ("full", "weak") else "full"
-        st.info(f"当前分割训练条件：{'**全监督**' if training_supervision == 'full' else '**弱监督**'}（提交者声明）。评分统一使用冻结完整测试标注。")
+        supervision_name = "全监督" if training_supervision == "full" else "弱监督"
+        st.html(f'<div class="inline-note">训练条件：<strong>{supervision_name}</strong>（提交者声明）。评分统一使用冻结完整测试标注。</div>')
     names = {t["id"]: t["name"] for t in b["tasks"]}
     standard = list(names)
     st.subheader("评测协议")
@@ -215,57 +256,61 @@ def new_evaluation(benchmark_id, training_supervision=None):
         if len(set(order)) != len(order):
             st.error("任务 ID 重复；每个任务必须出现一次。")
     timeline(order, b)
-    scenario = st.radio("评测场景", ["集中式", "联邦持续评测（逻辑客户端）"], horizontal=True)
-    clients = st.selectbox("固定逻辑客户端数", [2, 3, 4], index=1) if scenario != "集中式" else 1
-    if clients > 1:
-        st.info(f"按匿名病例索引固定轮转到 {clients} 个逻辑客户端；分类无病例标识时按图像划分。仅评分汇总，不训练或聚合权重。划分版本将随配置保存。")
-    heads = allowed_output_heads(b)
-    head = st.selectbox("输出头与任务信息条件", heads, format_func=lambda x: "共享输出头 / 全局类别编码" if x == "shared" else "任务指定输出头 / 已知任务 ID")
-    unseen_key = f"evaluate-unseen-{benchmark_id}"
-    unseen_enabled = b["allow_unseen"] and head == "shared"
-    if unseen_key not in st.session_state or not unseen_enabled:
-        st.session_state[unseen_key] = False
-    unseen = st.checkbox("同时评测未见任务", disabled=not unseen_enabled, key=unseen_key)
-    if not b["allow_unseen"]:
-        st.caption("当前协议不允许对未见任务评分；不会补造前向迁移曲线。")
-    st.subheader("模型或预测")
-    method = st.text_input("方法 / 本次评测名称", value="", placeholder="例如：方法名称 · final / seed42", max_chars=80)
-    registration_volume = b["kind"] == "registration" and any(t.get("format") == "registration-volume" for t in b["tasks"])
-    mode_options = ["预测文件"] if registration_volume else ["预测文件", "已支持结构的模型权重"]
-    mode_label = st.radio("提交类型", mode_options, horizontal=True)
-    mode = "predictions" if mode_label == "预测文件" else "model"
-    if b["synthetic"]:
-        provenance = "synthetic"
-        st.caption("结果来源：合成工程验收；由协议结构确定，不能改标为真实结果。")
-    else:
-        provenance_labels = {
-            "external_predictions_unknown": "外部预测 / 来源未知",
-            "untrained_baseline": "未训练工程基线",
-            "trained_model_declared": "已训练模型（提交者声明）",
-        }
-        provenance = st.selectbox("结果来源声明", list(provenance_labels), format_func=provenance_labels.get,
-                                  key=f"provenance-{benchmark_id}")
-        st.caption("来源类别是提交者声明；平台验证测试评分，不验证训练过程。")
-    architecture = None
-    model_ok = True
-    if mode == "model":
-        model_ok = sandbox_available()
-        architecture = st.selectbox("已审核模型结构", list(ARCHITECTURES[b["kind"]]), format_func=ARCHITECTURES[b["kind"]].get)
-        st.caption("只读 float32 safetensors。仅支持上列结构；UNet / EfficientNet / 自定义模型请先在本地生成预测。")
-        if head != "shared":
-            st.warning("当前已审核模型仅支持共享输出头。任务指定输出头请使用预测文件提交。")
-        if model_ok:
-            st.success("本机模型隔离检查通过：无网络、无密钥、输入不含标签；限时限内存。")
+    settings_column, submission_column = st.columns(2, gap="large")
+    with settings_column:
+        st.markdown("#### 评测设置")
+        scenario = st.radio("评测场景", ["集中式", "逻辑客户端评测"], horizontal=True)
+        clients = st.selectbox("逻辑客户端数", [2, 3, 4], index=1) if scenario != "集中式" else 1
+        if clients > 1:
+            st.caption(f"匿名病例固定划分至 {clients} 个逻辑客户端，仅汇总评分，不训练或聚合权重。")
+        heads = allowed_output_heads(b)
+        head = st.selectbox("输出头与任务信息", heads, format_func=lambda x: "共享输出头 / 全局类别编码" if x == "shared" else "任务指定输出头 / 已知任务 ID")
+        unseen_key = f"evaluate-unseen-{benchmark_id}"
+        unseen_enabled = b["allow_unseen"] and head == "shared"
+        if unseen_key not in st.session_state or not unseen_enabled:
+            st.session_state[unseen_key] = False
+        unseen = st.checkbox("同时评测未见任务", disabled=not unseen_enabled, key=unseen_key)
+        if not b["allow_unseen"]:
+            st.caption("当前协议不评分未见任务。")
+    with submission_column:
+        st.markdown("#### 提交内容")
+        method = st.text_input("方法 / 本次评测名称", value="", placeholder="例如：方法名称 · 最终模型 · 随机种子 42", max_chars=80)
+        registration_volume = b["kind"] == "registration" and any(t.get("format") == "registration-volume" for t in b["tasks"])
+        mode_options = ["预测文件"] if registration_volume else ["预测文件", "已支持结构的模型权重"]
+        mode_label = st.radio("提交类型", mode_options, horizontal=True)
+        mode = "predictions" if mode_label == "预测文件" else "model"
+        if b["synthetic"]:
+            provenance = "synthetic"
+            st.caption("结果来源固定为合成工程验收。")
         else:
-            st.warning("本机未满足模型隔离条件，模型提交关闭；预测评分仍可使用。")
-    else:
-        st.caption("JSON 或 NPZ/ZIP。数组包使用 task__ids.npy 与 task__pred.npy；客户端由平台固定映射，无需单独上传客户端文件。")
-        if registration_volume:
-            st.caption("体数据配准可另附 task__registered.npy 和 task__warped_prediction.npy，仅用于定性可视化；TRE 仍只由 task__pred.npy 的预测标志点计算。")
+            provenance_labels = {
+                "external_predictions_unknown": "外部预测 / 来源未知",
+                "untrained_baseline": "未训练工程基线",
+                "trained_model_declared": "已训练模型（提交者声明）",
+            }
+            provenance = st.selectbox("结果来源声明", list(provenance_labels), format_func=provenance_labels.get,
+                                      key=f"provenance-{benchmark_id}")
+            st.caption("平台验证测试评分，不验证训练过程。")
+        architecture = None
+        model_ok = True
+        if mode == "model":
+            model_ok = sandbox_available()
+            architecture = st.selectbox("已审核模型结构", list(ARCHITECTURES[b["kind"]]), format_func=ARCHITECTURES[b["kind"]].get)
+            st.caption("仅支持只读 float32 safetensors 与上列结构；其他模型请先生成预测。")
+            if head != "shared":
+                st.warning("已审核模型仅支持共享输出头；当前条件请上传预测文件。")
+            if model_ok:
+                st.caption("模型隔离检查已通过。")
+            else:
+                st.warning("当前环境不支持隔离模型运行，请上传预测文件。")
+        else:
+            st.caption("支持 JSON 或 NPZ/ZIP 预测文件。客户端划分由平台完成。")
+            if registration_volume:
+                st.caption("可附带对齐固定网格的配准后影像与变形标签，仅用于可视化。")
+    st.subheader("上传阶段结果")
     scope = st.radio("可提供的阶段", ["仅最终阶段", "多个 / 部分阶段"], horizontal=True)
     stages = [len(order)] if scope == "仅最终阶段" else st.multiselect("已有阶段位置", list(range(1, len(order) + 1)), default=[len(order)])
-    st.caption("缺少阶段将保留为空；BWT、遗忘或迁移指标只有满足对应条件才计算。")
-    st.info("提交后由独立评分服务读取冻结测试集，计算任务主指标及 Final average、BWT、Forgetting、FWT、BWTR；条件不足的指标明确显示为不可计算。")
+    st.caption("评分将输出任务主指标、最终平均、后向迁移、遗忘、前向迁移和相对后向迁移；条件不足时显示为不可计算。")
     files = []
     for stage in sorted(stages):
         seen_names = " → ".join(order[:stage])
@@ -354,14 +399,15 @@ def result_view(job):
     labels = {"Final average": "最终任务宏平均", "BWT": "后向迁移 BWT", "Forgetting": "遗忘", "FWT": "前向迁移 FWT", "BWTR": "相对后向迁移 BWTR"}
     for col, metric in zip(columns, labels):
         col.metric(labels[metric], score_text(summary[metric]["value"], b["unit"]))
-        col.caption(summary[metric]["reason"])
-    st.caption("上述指标由独立评分服务从每阶段测试矩阵计算；— 表示条件不足，不用 0 补齐。")
+        if summary[metric]["value"] is None:
+            col.caption("条件不足")
+    st.caption("— 表示当前阶段或参照条件不足；详细原因见阶段评测。")
     detail_label = "类别名称" if b["kind"] == "classification" else "病例结果与可视化"
-    tab_matrix, tab_clients, tab_cases, tab_protocol = st.tabs(["阶段—任务矩阵", "逻辑客户端", detail_label, "协议与导出"])
+    tab_matrix, tab_clients, tab_cases, tab_protocol = st.tabs(["阶段评测", "客户端对比", detail_label, "评测信息"])
     with tab_matrix:
         client_id = st.selectbox("查看结果层级", list(result["matrices"]), format_func=lambda x: "全体测试样本" if x == "global" else f"逻辑客户端 {x}")
         heatmap(result["matrices"][client_id], config["order"], [f"阶段 {s}" for s in range(1, len(config["order"]) + 1)], b["direction"], b["metric"] + (" ↓" if b["direction"] == "lower" else " ↑"))
-        st.caption("— 表示未提交阶段、协议不允许评测或该客户端无样本；不是 0。任务 ID 与阶段位置分别保存。")
+        st.caption("— 表示未提交、不允许评测或无样本，不代表 0。")
         detail = pd.DataFrame([{"指标": k, "值": score_text(v["value"], b["unit"]), "条件 / 原因": v["reason"]} for k, v in result["continual"][client_id].items()])
         st.dataframe(detail, hide_index=True, width="stretch")
     with tab_clients:
@@ -376,31 +422,34 @@ def result_view(job):
         if stats:
             frame = pd.DataFrame(stats).rename(columns={"task_id": "任务", "client_macro": "客户端宏平均", "sample_weighted_accuracy": "按样本数加权准确率", "worst_client": "最低性能客户端", "client_std": "客户端标准差", "client_gap": "客户端极差", "available_clients": "有样本客户端", "total_clients": "客户端总数", "stage": "阶段"})
             st.dataframe(frame, hide_index=True, width="stretch")
-            st.caption("分类加权项使用每客户端样本准确率 × 样本数；分割和配准不套用分类加权准确率。TRE 越低越好，因此最低性能客户端对应最大 TRE。")
+            st.caption("分类按客户端样本数加权；TRE 越低越好。")
             dist = pd.DataFrame([r for r in result.get("distributions", []) if r.get("stage") == stage])
             if dist.empty:
                 st.info("此阶段没有可展示的客户端样本量。")
             else:
                 chart_data = dist.rename(columns={"client_id": "逻辑客户端", "n_samples": "样本数", "task_id": "任务"})
-                chart = alt.Chart(chart_data).mark_bar().encode(x="逻辑客户端:N", y="样本数:Q",
-                    color=alt.Color("任务:N", scale=alt.Scale(range=["#486b81", "#6d9380", "#8796a5", "#a58b5b", "#627e73", "#a7bbc6"])),
+                chart = alt.Chart(chart_data).mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3).encode(x="逻辑客户端:N", y="样本数:Q",
+                    color=alt.Color("任务:N", scale=alt.Scale(range=["#2563EB", "#60A5FA", "#0F766E", "#7C3AED", "#475467", "#93C5FD"])),
                     tooltip=["逻辑客户端", "任务", "样本数"]).properties(height=250)
                 st.altair_chart(chart, width="stretch")
-                st.dataframe(dist, hide_index=True, width="stretch")
+                st.dataframe(dist.rename(columns={"client_id": "逻辑客户端", "n_samples": "样本数", "task_id": "任务", "stage": "阶段"}), hide_index=True, width="stretch")
         else:
             st.info("此阶段未提交，没有可展示的客户端统计。")
     with tab_cases:
-        stage = st.selectbox("可视化阶段", sorted(config["stages"]), index=len(config["stages"]) - 1, key=f"case-stage-{job['id']}")
+        stage_control, task_control = st.columns(2, gap="medium")
+        with stage_control:
+            stage = st.selectbox("可视化阶段", sorted(config["stages"]), index=len(config["stages"]) - 1, key=f"case-stage-{job['id']}")
         cases_result = result.get("cases", []) if b["kind"] != "classification" else []
         available_tasks = [tid for tid in config["order"] if any(c["task_id"] == tid and c["stage"] == stage for c in cases_result)]
-        task_id = st.selectbox("类别任务" if b["kind"] == "classification" else "病例任务", available_tasks or config["order"], key=f"case-task-{job['id']}")
+        with task_control:
+            task_id = st.selectbox("类别任务" if b["kind"] == "classification" else "病例任务", available_tasks or config["order"], key=f"case-task-{job['id']}")
         cases = [c for c in cases_result if c["task_id"] == task_id and c["stage"] == stage]
         task = next(t for t in b["tasks"] if t["id"] == task_id)
         if b["kind"] == "classification":
             registered = lookup.get(b["id"], {})
             class_names = b.get("class_names") or (registered.get("class_names", {}) if registered.get("version") == b.get("version") else {})
             st.subheader("类别名称")
-            st.dataframe(pd.DataFrame([{"Class ID": value, "类别名称": class_names.get(str(value), f"类别 {value}")} for value in task.get("classes", [])]), hide_index=True, width="stretch")
+            st.dataframe(pd.DataFrame([{"类别编号": value, "类别名称": class_names.get(str(value), f"类别 {value}")} for value in task.get("classes", [])]), hide_index=True, width="stretch")
             st.caption("分类只发布任务与逻辑客户端聚合准确率；不显示或下载逐样本正误、样本 ID、病例 ID 或隐藏标签频数。")
         previews = [v for v in result.get("visualizations", []) if v["task_id"] == task_id and v["stage"] == stage]
         if b["kind"] in ("segmentation", "registration"):
@@ -423,7 +472,7 @@ def result_view(job):
                         left.image(original, caption="原始测试切片" + suffix, width="stretch")
                         right.image(overlay, caption="预测遮罩叠加（绿色）" + suffix, width="stretch")
                         st.metric("该病例前景 Dice", score_text(preview["score"]))
-                        st.caption("当前显示的原始影像和预测 labelmap 会进入本机浏览器内存；隐藏测试真值不进入浏览器。三维预览最多每阶段、每任务 3 例，可确定性降采样；静态切片按预测前景量选取。")
+                        st.caption("浏览器只接收原始影像与预测，不接收隐藏测试真值。")
                     else:
                         if preview["kind"] == "registration-volume":
                             try:
@@ -439,7 +488,7 @@ def result_view(job):
                                 column.image(volume[center], caption=f"{name} · Z={center}", width="stretch")
                             moving, prediction = arrays["moving_points"], arrays["predicted_points"]
                             if "registered_volume" not in arrays:
-                                st.info("未提交 registered volume；三维组件默认对比 Fixed + Moving。")
+                                st.info("未提交配准后影像；三维查看器默认对比固定影像和移动影像。")
                         else:
                             moving, prediction = arrays["moving"], arrays["prediction"]
                         if moving.ndim != 2 or prediction.shape != moving.shape or moving.shape[1] < 2:
@@ -452,9 +501,9 @@ def result_view(job):
                         st.altair_chart(chart.properties(height=420), width="stretch")
                         st.metric("该病例 TRE", score_text(preview["score"], b["unit"]))
                         if preview["kind"] == "registration-volume":
-                            st.caption("用于显示的 fixed、moving、可选 registered 和 warped prediction 会进入本机浏览器内存；隐藏 fixed points 和 fixed truth segmentation 不进入预览文件或浏览器。平台只在固定显示网格做定性比较，不执行重采样或形变；TRE 只由预测点评分。")
+                            st.caption("浏览器不接收隐藏固定点或真值分割；TRE 仅由预测标志点计算。")
                         else:
-                            st.caption("该协议没有三维影像，仅显示 moving points 到 predicted points 的 XY 投影；隐藏 fixed points 只用于服务端 TRE 评分。")
+                            st.caption("该协议没有三维影像，仅显示移动点至预测配准点的 XY 投影；隐藏固定点只用于 TRE 评分。")
                 except (OSError, ValueError, KeyError):
                     st.warning("私有可视化文件不可读；数值评分仍以已保存结果为准。")
             else:
@@ -462,7 +511,10 @@ def result_view(job):
         if b["kind"] != "classification":
             st.subheader("病例数值")
             if cases:
-                st.dataframe(pd.DataFrame(cases).drop(columns=["case_index"], errors="ignore"), hide_index=True, width="stretch", height=340)
+                case_frame = pd.DataFrame(cases).drop(columns=["case_index"], errors="ignore").rename(columns={
+                    "n_samples": "样本数", "score": b["metric"], "per_class": "分类别指标", "stage": "阶段",
+                    "task_id": "任务", "case_id": "病例", "client_id": "逻辑客户端"})
+                st.dataframe(case_frame, hide_index=True, width="stretch", height=340)
             else:
                 st.info("该任务在选定阶段没有病例结果。")
     with tab_protocol:
@@ -551,10 +603,14 @@ def compare():
             rows.append({"方法": f"{result['config']['method']} · {jid[:6]}",
                          "来源": provenance_labels.get(provenance, "未知来源"), "任务": tid, b["metric"]: value})
     df = pd.DataFrame(rows)
-    st.dataframe(df, hide_index=True, width="stretch")
-    chart = alt.Chart(df).mark_bar().encode(x=alt.X("任务:N", axis=alt.Axis(labelAngle=0)), y=alt.Y(f"{b['metric']}:Q"),
-                                            color=alt.Color("方法:N", scale=alt.Scale(range=["#486b81", "#6d9380", "#8796a5", "#a58b5b"])),
-                                            xOffset="方法:N", tooltip=list(df.columns)).properties(height=320)
+    leaderboard = df.pivot(index=["方法", "来源"], columns="任务", values=b["metric"]).reset_index()
+    leaderboard.columns.name = None
+    st.dataframe(leaderboard, hide_index=True, width="stretch")
+    chart = alt.Chart(df).mark_bar(cornerRadiusEnd=4).encode(
+        x=alt.X(f"{b['metric']}:Q", title=b["metric"]), y=alt.Y("任务:N", title=None),
+        color=alt.Color("方法:N", scale=alt.Scale(range=["#2563EB", "#60A5FA", "#0F766E", "#7C3AED"])),
+        yOffset="方法:N", tooltip=list(df.columns)).properties(height=max(300, len(b["tasks"]) * 90)).configure_view(stroke=None).configure_axis(
+            domain=False, gridColor="#E3E8EF", tickColor="#D4DBE5", labelColor="#475467", titleColor="#344054")
     st.altair_chart(chart, width="stretch")
     st.caption("比较最终阶段各任务；来源类别与方法名分开显示。缺少最终阶段的记录保留为空，不拿最后可见阶段代替最终阶段。")
 

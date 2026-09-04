@@ -20,6 +20,13 @@ class BrowserAppCheck(unittest.TestCase):
         groups = (app.title, app.subheader, app.caption, app.info, app.warning, app.markdown)
         return "\n".join(str(element.value) for group in groups for element in group)
 
+    def test_thesis_visual_system_is_centralized_and_wide(self):
+        source = (Path(__file__).resolve().parents[1] / "app.py").read_text()
+        for token in ("--page-bg:#F6F8FB", "--primary:#2563EB", "--viewer-bg:#070B12", "max-width:1760px"):
+            self.assertIn(token, source)
+        self.assertIn('st.columns(3, gap="medium")', source)
+        self.assertNotIn("max-width:1180px", source)
+
     def test_upload_result_navigation_and_invalid_file(self):
         with tempfile.TemporaryDirectory(prefix="medcl-ui-test-") as directory:
             root = initialize(Path(directory))
@@ -79,7 +86,7 @@ class BrowserAppCheck(unittest.TestCase):
                 unseen = next(box for box in app.checkbox if box.label == "同时评测未见任务")
                 unseen.check().run()
                 self.assertTrue(next(box for box in app.checkbox if box.label == "同时评测未见任务").value)
-                head = next(box for box in app.selectbox if box.label == "输出头与任务信息条件")
+                head = next(box for box in app.selectbox if box.label == "输出头与任务信息")
                 head.select("task-specific").run()
                 unseen = next(box for box in app.checkbox if box.label == "同时评测未见任务")
                 self.assertFalse(unseen.value)

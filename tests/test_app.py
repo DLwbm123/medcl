@@ -15,10 +15,16 @@ from medcl.worker import run_worker
 
 
 class BrowserAppCheck(unittest.TestCase):
+    @staticmethod
+    def visible_text(app):
+        groups = (app.title, app.subheader, app.caption, app.info, app.warning, app.markdown)
+        return "\n".join(str(element.value) for group in groups for element in group)
+
     def test_upload_result_navigation_and_invalid_file(self):
         with tempfile.TemporaryDirectory(prefix="medcl-ui-test-") as directory:
             root = initialize(Path(directory))
-            with patch.dict(os.environ, {"MEDCL_STATE_DIR": str(root), "MEDCL_CONFIG": str(root / "no-assets.json")}):
+            with patch.dict(os.environ, {"MEDCL_STATE_DIR": str(root), "MEDCL_CONFIG": str(root / "no-assets.json"),
+                                             "MEDCL_SHOW_DEMOS": "1"}):
                 heartbeat(root)
                 app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
                 self.assertFalse(app.exception)
@@ -48,10 +54,24 @@ class BrowserAppCheck(unittest.TestCase):
                 self.assertTrue(any("JSON 文件无效" in error.value for error in app.error))
                 self.assertEqual(len(list_jobs(root)), 1)
 
+                with patch.dict(os.environ, {"MEDCL_SHOW_DEMOS": "0"}):
+                    normal = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
+                    self.assertFalse(normal.exception)
+                    self.assertFalse(any(button.key and button.key.startswith("configure-demo-") for button in normal.button))
+                    next(button for button in normal.button if button.label == "进入分割任务").click().run()
+                    text = self.visible_text(normal)
+                    self.assertIn("当前没有可用的评测协议", text)
+                    self.assertNotIn("待接入", text)
+                    self.assertNotIn("合成模拟", text)
+                    self.assertFalse(any(label in text for label in ("一级 /", "二级 /", "三级 /", "四级 /", "01 /", "02 /", "03 /")))
+                    next(control for control in normal.segmented_control if control.label == "主导航").set_value("评测记录").run()
+                    self.assertTrue(any("还没有评测记录" in notice.value for notice in normal.info))
+
     def test_unseen_state_resets_when_output_head_changes(self):
         with tempfile.TemporaryDirectory(prefix="medcl-ui-state-") as directory:
             root = initialize(Path(directory))
-            with patch.dict(os.environ, {"MEDCL_STATE_DIR": str(root), "MEDCL_CONFIG": str(root / "no-assets.json")}):
+            with patch.dict(os.environ, {"MEDCL_STATE_DIR": str(root), "MEDCL_CONFIG": str(root / "no-assets.json"),
+                                             "MEDCL_SHOW_DEMOS": "1"}):
                 heartbeat(root)
                 app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
                 next(button for button in app.button if button.label == "进入分割任务").click().run()

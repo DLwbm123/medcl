@@ -21,12 +21,23 @@ class BrowserAppCheck(unittest.TestCase):
         return "\n".join(str(element.value) for group in groups for element in group)
 
     def test_thesis_visual_system_is_centralized_and_wide(self):
-        source = (Path(__file__).resolve().parents[1] / "app.py").read_text()
-        for token in ("--page-bg:#F5F8FC", "--primary:#355F8A", "--viewer-bg:#070B12", "max-width:1760px",
-                      'NAV = ["首页", "任务中心", "评测记录", "方法比较"]', "功能示意 · 非实验结果"):
-            self.assertIn(token, source)
-        self.assertIn('st.columns(3, gap="medium")', source)
-        self.assertNotIn("max-width:1180px", source)
+        # MedCL homepage module/style contract v1.
+        root = Path(__file__).resolve().parents[1]
+        app_source = (root / "app.py").read_text()
+        home_source = (root / "medcl" / "homepage_ui.py").read_text()
+        assets = root / "medcl" / "ui_assets" / "homepage"
+        css = (assets / "homepage.css").read_text()
+        self.assertIn('NAV = ["首页", "任务中心", "评测记录", "方法比较"]', app_source)
+        self.assertIn("_home_ui.render_homepage", app_source)
+        self.assertIn("_home_ui.render_header", app_source)
+        self.assertIn("功能示意 · 非实验结果 · 非真实病例", home_source)
+        self.assertIn("st.columns(3, gap=", home_source)
+        self.assertIn("max-width:1640px", css)
+        self.assertIn("__MEDICAL_BACKGROUND__", css)
+        self.assertNotIn("url(https://", css)
+        for filename in ("medical-background.webp", "illustration-slice.webp",
+                         "illustration-overlay.webp", "illustration-view.webp", "illustration-volume.webp"):
+            self.assertTrue((assets / filename).is_file(), filename)
 
     def test_home_ctas_use_real_navigation(self):
         with tempfile.TemporaryDirectory(prefix="medcl-home-test-") as directory:
@@ -36,7 +47,7 @@ class BrowserAppCheck(unittest.TestCase):
                 app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
                 self.assertFalse(app.exception)
                 self.assertEqual(next(control for control in app.segmented_control if control.label == "主导航").value, "首页")
-                next(button for button in app.button if button.label == "开始评测 →").click().run()
+                next(button for button in app.button if button.key == "medcl-home-start").click().run()
                 self.assertEqual(next(control for control in app.segmented_control if control.label == "主导航").value, "任务中心")
                 next(control for control in app.segmented_control if control.label == "主导航").set_value("首页").run()
                 next(button for button in app.button if button.label == "查看评测记录").click().run()

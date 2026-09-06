@@ -3,6 +3,9 @@
 from html import escape
 import os
 
+# MedCL homepage fidelity pass v1 (presentation only).
+from medcl import homepage_ui as _home_ui
+
 import altair as alt
 import numpy as np
 import pandas as pd
@@ -89,6 +92,8 @@ hr {border-color:var(--border)!important;}
 @media(max-width:560px){.st-key-topbar{padding-left:8px;padding-right:8px}.st-key-topbar [data-testid="stHorizontalBlock"]{gap:.5rem}.hero-title{font-size:42px}.hero-subtitle{font-size:25px}.hero-description{font-size:15px}.capabilities{grid-template-columns:1fr 1fr}.hero-visual{display:none}.section-heading h2{font-size:21px}}
 </style>''')
 
+_home_ui.install_styles(st)
+
 initialize()
 SHOW_DEMOS = os.environ.get("MEDCL_SHOW_DEMOS") == "1"
 STATUS = {"queued": "排队中", "running": "评测中", "completed": "已完成", "failed": "失败"}
@@ -135,12 +140,7 @@ except Exception:
     st.stop()
 lookup = {b["id"]: b for b in benchmarks}
 
-with st.container(key="topbar"):
-    brand_column, nav_column = st.columns([1.05, 1], vertical_alignment="center")
-    with brand_column:
-        st.html('<div class="brand"><div class="brand-mark">M</div><div><strong>MedCL</strong><small>医学影像持续学习评测平台</small></div></div>')
-    with nav_column:
-        page = required_segmented_control("主导航", NAV, "nav", "collapsed")
+page = _home_ui.render_header(st, NAV, required_segmented_control)
 
 
 def title(name, detail):
@@ -166,11 +166,9 @@ def section_heading(name, detail):
 
 
 def task_icon(kind):
-    return {
-        "segmentation": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg>',
-        "classification": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><path d="m3.5 6 .9.9L6.2 5M3.5 12l.9.9 1.8-1.9M3.5 18l.9.9 1.8-1.9"/></svg>',
-        "registration": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg>',
-    }[kind]
+    glyphs = {"segmentation": "cube", "classification": "list", "registration": "target"}
+    colors = {"segmentation": "#355F8A", "classification": "#16806E", "registration": "#7651B5"}
+    return _home_ui.icon(glyphs[kind], colors[kind], 24)
 
 
 def render_task_cards(prefix):
@@ -192,78 +190,12 @@ def render_task_cards(prefix):
 
 
 def homepage():
-    with st.container(key="home-hero"):
-        copy_column, visual_column = st.columns([1.12, .88], gap="large", vertical_alignment="center")
-        with copy_column:
-            st.html('''<div class="hero-copy">
-              <div class="hero-eyebrow">Continual learning for medical imaging</div>
-              <div class="hero-title">MedCL</div>
-              <div class="hero-subtitle">医学影像持续学习评测平台</div>
-              <p class="hero-description">面向分割、分类与配准任务，统一整理持续学习评测结果，查看阶段表现、任务差异与病例可视化。</p>
-            </div>''')
-            primary, secondary, _ = st.columns([1, 1.15, 1.25], gap="small")
-            primary.button("开始评测 →", on_click=reset_task_center, type="primary", width="stretch")
-            secondary.button("查看评测记录", on_click=navigate, args=("评测记录",), width="stretch")
-            st.html('''<div class="capabilities">
-              <div class="capability"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><div><strong>任务协议</strong>冻结评测条件</div></div>
-              <div class="capability"><svg viewBox="0 0 24 24"><path d="M4 19V9m6 10V4m6 15v-7m4 7H2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><div><strong>统一指标</strong>保留不可计算语义</div></div>
-              <div class="capability"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><div><strong>阶段矩阵</strong>比较持续学习表现</div></div>
-              <div class="capability"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7zM4 7l8 4 8-4m-8 4v10" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><div><strong>病例可视化</strong>查看预测与配准结果</div></div>
-            </div>''')
-        with visual_column:
-            st.html('''<div class="hero-visual" aria-label="持续学习矩阵与病例可视化功能示意">
-              <div class="demo-panel matrix-demo">
-                <div class="demo-title"><span>阶段—任务矩阵</span><span class="demo-label">功能示意 · 非实验结果</span></div>
-                <div class="matrix-grid"><span></span><span>任务 1</span><span>任务 2</span><span>任务 3</span>
-                  <span>阶段 1</span><i class="matrix-cell l3"></i><i class="matrix-cell na"></i><i class="matrix-cell na"></i>
-                  <span>阶段 2</span><i class="matrix-cell l2"></i><i class="matrix-cell l3"></i><i class="matrix-cell na"></i>
-                  <span>阶段 3</span><i class="matrix-cell l1"></i><i class="matrix-cell l2"></i><i class="matrix-cell l3"></i>
-                </div>
-              </div>
-              <div class="demo-panel case-demo">
-                <div class="demo-title"><span>病例可视化</span><span class="demo-label">合成装饰素材</span></div>
-                <div class="case-grid">
-                  <div class="case-tile"><svg viewBox="0 0 100 72"><ellipse cx="50" cy="36" rx="33" ry="28" fill="#263545"/><ellipse cx="50" cy="36" rx="24" ry="21" fill="#A6B2BD"/><ellipse cx="50" cy="36" rx="10" ry="16" fill="#4B5B69"/><circle cx="38" cy="34" r="5" fill="#D2D9DF"/><circle cx="62" cy="34" r="5" fill="#D2D9DF"/></svg>影像示意</div>
-                  <div class="case-tile"><svg viewBox="0 0 100 72"><ellipse cx="50" cy="36" rx="33" ry="28" fill="#263545"/><ellipse cx="50" cy="36" rx="24" ry="21" fill="#A6B2BD"/><path d="M40 26c13-8 25 2 23 15-2 11-14 18-24 11-8-6-8-20 1-26z" fill="#42B8A1" fill-opacity=".78"/></svg>预测叠加</div>
-                  <div class="case-tile"><svg viewBox="0 0 100 72"><path d="M31 15c13-10 34-9 43 4 9 15 2 38-14 44-15 6-35-1-39-17-3-12 1-23 10-31z" fill="#4B7199" fill-opacity=".35" stroke="#83A8C9"/><path d="M41 24c12-8 28 1 29 15 1 12-9 22-21 22-12 0-21-10-20-22 1-7 5-12 12-15z" fill="#42B8A1" fill-opacity=".58" stroke="#6ED8C4"/></svg>三维预览</div>
-                </div>
-              </div>
-            </div>''')
-
-    section_heading("选择评测任务", "从三类任务进入已有评测协议；没有真实协议时保留清楚的空状态。")
-    render_task_cards("home")
-
-    recent_column, overview_column = st.columns([1.65, 1], gap="large")
-    jobs = visible_jobs()
-    with recent_column:
-        section_heading("最近评测", "最近提交的可见记录，时间统一显示为 UTC。")
-        if not jobs:
-            st.info("还没有可见评测记录。")
-            st.button("创建第一条评测", on_click=reset_task_center, type="primary")
-        for job in jobs[:5]:
-            config = job["config"]
-            benchmark = config["benchmark"]
-            detail, action = st.columns([5, 1], vertical_alignment="center")
-            with detail:
-                created = job["created_at"].replace("T", " ").replace("+00:00", "")[:16]
-                st.html(f'<div class="recent-item"><div class="recent-method">{escape(config["method"])}</div><div class="recent-meta">{created} UTC · {escape(benchmark["title"])} · {KINDS[benchmark["kind"]]} · {STATUS[job["status"]]}</div></div>')
-            action.button("查看", key=f"home-job-{job['id']}", on_click=open_job, args=(job["id"],), width="stretch")
-    with overview_column:
-        section_heading("平台概览", "基于当前协议和可见记录实时汇总。")
-        real_protocols = [benchmark for benchmark in benchmarks if not benchmark.get("synthetic") and readiness(benchmark)[0]]
-        registered_kinds = {benchmark["kind"] for benchmark in benchmarks if not benchmark.get("synthetic")}
-        overview = [
-            ("可用真实协议", len(real_protocols)),
-            ("已登记任务类型", len(registered_kinds)),
-            ("已完成评测", sum(job["status"] == "completed" for job in jobs)),
-            ("排队 / 运行中", sum(job["status"] in ("queued", "running") for job in jobs)),
-        ]
-        for pair in (overview[:2], overview[2:]):
-            columns = st.columns(2, gap="small")
-            for column, (label, value) in zip(columns, pair):
-                column.metric(label, value)
-        st.caption("已登记任务类型仅表示协议元数据存在，不代表三类任务都已完成真实数据接入。")
-    st.caption("MedCL 是本地单用户研究评测工具，不用于临床诊断或公网多租户服务。")
+    _home_ui.render_homepage(
+        st, benchmarks=benchmarks, jobs=visible_jobs(), readiness=readiness,
+        kinds=KINDS, statuses=STATUS, on_start=reset_task_center,
+        on_records=lambda: navigate("评测记录"), on_task=select_task,
+        on_job=open_job, show_demos=SHOW_DEMOS,
+    )
 
 
 def score_text(value, unit="fraction"):

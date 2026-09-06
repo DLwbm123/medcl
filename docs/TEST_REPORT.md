@@ -1,3 +1,42 @@
+# MedCL 首页视觉保真修正验收 · 2026-09-06
+
+结论：已按 `medcl-homepage-fidelity-fix` 增量包原样接入首页模块、医学背景、脑形 Logo、统一图标、CSS 和测试，没有重新设计或把医学背景替换为纯渐变。开始基线为 `f5d2c23d264768f931896c6cb06ef9dcc2f86d5a`，分支为 `codex/medcl-evaluation-platform`。
+
+## 应用与测试
+
+更新器先以 `--check --diff` 验证 `app.py` 和 `tests/test_app.py` 的 Git blob 与审阅基线一致，再以 `--apply` 写入。原文件备份位于 Git 私有目录 `.git/medcl-ui-backups/`，不进入版本控制；交付包本身也没有复制到仓库。
+
+完整平台测试：
+
+```text
+/opt/miniconda3/bin/python -m unittest discover -s tests -v
+Ran 55 tests in 15.519s
+OK
+```
+
+其中新增 16 项首页模块测试；包外的 13 项更新器契约测试另行执行，结果为 `Ran 13 tests in 0.063s · OK`。两组合计覆盖包声明的 29 项针对性检查，但不替代上述完整平台回归。
+
+## 实际浏览器验收
+
+使用独立临时 `MEDCL_STATE_DIR` 实际运行 `python3 run.py --no-browser`，没有读取或写入日常数据库。浏览器确认：
+
+1. 医学背景、脑形 Logo、四个导航图标、三类任务图标、四项概览图标和病例示意均正确加载；没有退回纯渐变或椭圆占位图。
+2. “开始评测”进入任务中心的三类任务起点；分类任务卡进入类别增量流程；四项导航均为原生可操作控件。
+3. 正常模式显示真实空状态和实时零值，不混入合成记录。另在隔离开发模式创建两条明确标记的合成验收记录，首页“查看”准确打开所点击的分割记录。
+4. 1600×900、1920×1080、1366×768、390×844 的实际 Streamlit 页面均无横向溢出；桌面保持左文右图和三列任务，窄屏保持背景并按单列自然滚动。
+5. 本地 CSS、SVG data URI 和 WebP 资产均来自固定白名单；测试确认没有 HTTP/CDN/外部字体引用。
+
+实际页面截图：
+
+- `docs/screenshots/homepage-fidelity-1600x900.png`
+- `docs/screenshots/homepage-fidelity-1920x1080.png`
+- `docs/screenshots/homepage-fidelity-1366x768.png`
+- `docs/screenshots/homepage-fidelity-390x844.png`
+
+截图为正常模式的实际 Streamlit 页面，只显示真实空状态；不包含真实医学影像、患者信息、私有路径或测试数据库。评分、协议、隐私、worker、沙箱和 Cornerstone TypeScript 均未修改。
+
+---
+
 # MedCL 首页展示重构验收 · 2026-09-06
 
 结论：依据已批准的首页参考图完成了克制的展示层重构。平台现在默认进入首页，使用宽屏浅色外壳、真实导航、左文右图主视觉、三类任务入口、最近评测和实时平台概览；医学影像查看器仍为深色工作区。首页矩阵与病例图只使用本地 CSS/SVG，并明确标为功能示意，不写入评测记录或统计。指标、评分、上传、沙箱、数据协议和 Cornerstone TypeScript 均未修改。

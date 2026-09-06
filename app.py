@@ -20,39 +20,53 @@ from medcl.submissions import ARCHITECTURES, submit
 st.set_page_config(page_title="MedCL · 医学影像持续学习评测", page_icon="🔬", layout="wide")
 st.html('''<style>
 :root {
-  --page-bg:#F6F8FB;--surface:#FFFFFF;--surface-subtle:#F9FAFC;
-  --text:#17212B;--text-secondary:#667085;--text-tertiary:#8A94A3;
-  --border:#E3E8EF;--border-strong:#D4DBE5;
-  --primary:#2563EB;--primary-hover:#1D4ED8;--primary-soft:#EEF4FF;
+  --page-bg:#F5F8FC;--surface:#FFFFFF;--surface-subtle:#F8FAFD;
+  --text:#172B43;--text-secondary:#66768A;--text-tertiary:#8794A5;
+  --border:#DDE5EE;--border-strong:#C9D5E2;
+  --primary:#355F8A;--primary-hover:#294E75;--primary-soft:#EDF4FB;
   --success:#15803D;--success-soft:#ECFDF3;
   --warning:#A16207;--warning-soft:#FFFBEB;
   --danger:#B42318;--danger-soft:#FEF3F2;--viewer-bg:#070B12;
 }
 html,body,.stApp,input,button,textarea {font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);}
 .stApp,[data-testid="stAppViewContainer"] {background:var(--page-bg);}
-.stMainBlockContainer {max-width:1760px;padding:1.25rem 2.5rem 4rem;}
-[data-testid="stHeader"] {background:transparent;}
+.stMainBlockContainer {width:92vw;max-width:1760px;padding:0 0 4rem;}
+[data-testid="stHeader"] {height:0;background:transparent;}
 [data-testid="stToolbar"],[data-testid="stDecoration"],footer {display:none!important;}
-h1 {font-size:2.35rem!important;font-weight:720!important;letter-spacing:-.045em!important;line-height:1.12!important;margin:.35rem 0 .4rem!important;color:var(--text)!important;}
-h2 {font-size:1.45rem!important;font-weight:680!important;letter-spacing:-.025em!important;color:var(--text)!important;}
-h3 {font-size:1.12rem!important;font-weight:650!important;color:var(--text)!important;}
+h1 {font-size:1.85rem!important;font-weight:700!important;letter-spacing:-.025em!important;line-height:1.2!important;margin:.35rem 0 .4rem!important;color:var(--text)!important;}
+h2 {font-size:1.45rem!important;font-weight:680!important;letter-spacing:-.015em!important;color:var(--text)!important;}
+h3 {font-size:1.1rem!important;font-weight:650!important;color:var(--text)!important;}
 h4 {font-size:.9rem!important;font-weight:680!important;color:#344054!important;letter-spacing:.01em!important;margin-top:.3rem!important;}
 p,li {line-height:1.65;} label p {color:#344054!important;font-weight:520!important;}
 [data-testid="stCaptionContainer"] p {color:var(--text-secondary)!important;font-size:.875rem!important;line-height:1.55!important;}
-.topbar {display:flex;align-items:center;min-height:64px;border-bottom:1px solid var(--border);padding:0 0 14px;margin-bottom:16px;}
+.st-key-topbar {background:var(--surface);border-bottom:1px solid var(--border);padding:11px 18px;margin:0 calc(50% - 50vw) 18px;}
+.st-key-topbar>div {width:92vw;max-width:1760px;margin:auto;}
 .brand {display:flex;align-items:center;gap:12px;}
-.brand-mark {border:1px solid #BFD0FF;background:var(--primary-soft);width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:19px;font-weight:750;color:var(--primary);}
-.brand strong {font-size:22px;letter-spacing:-.035em;color:var(--text);}.brand small{display:block;color:var(--text-secondary);font-size:12px;margin-top:1px;}
+.brand-mark {border:1px solid #BCD0E3;background:var(--primary-soft);width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:18px;font-weight:750;color:var(--primary);}
+.brand strong {font-size:21px;letter-spacing:-.025em;color:var(--text);}.brand small{display:inline-block;color:var(--text-secondary);font-size:13px;margin-left:12px;padding-left:12px;border-left:1px solid var(--border);}
 [data-testid="stButtonGroup"] [role="radiogroup"] {background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,.03);}
 [data-testid="stButtonGroup"] button {border:0!important;border-radius:7px!important;min-height:36px!important;color:var(--text-secondary)!important;}
 [data-testid="stButtonGroup"] button[aria-checked="true"] {background:var(--text)!important;color:#fff!important;box-shadow:0 1px 2px rgba(16,24,40,.18)!important;}
 [data-testid="stButtonGroup"] button[aria-checked="true"] p {color:#fff!important;}
-[data-testid="stVerticalBlockBorderWrapper"] {background:var(--surface);border:1px solid var(--border)!important;border-radius:14px!important;box-shadow:0 1px 2px rgba(16,24,40,.025);transition:border-color .15s ease,box-shadow .15s ease;}
-[data-testid="stVerticalBlockBorderWrapper"]:hover {border-color:var(--border-strong)!important;box-shadow:0 8px 24px rgba(16,24,40,.055);}
-.task-heading {display:flex;align-items:center;gap:12px;margin:2px 0 8px;}.task-heading h3{font-size:1.16rem;margin:0;}.task-heading small{display:block;color:var(--text-secondary);font-size:12px;margin-top:2px;}
-.task-symbol {width:38px;height:38px;border-radius:10px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-weight:750;font-size:15px;flex:0 0 auto;}
+.st-key-topbar [data-testid="stButtonGroup"] [role="radiogroup"] {justify-content:flex-end;background:transparent;border:0;border-radius:0;padding:0;box-shadow:none;}
+.st-key-topbar [data-testid="stButtonGroup"] button {border-bottom:2px solid transparent!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;}
+.st-key-topbar [data-testid="stButtonGroup"] button[aria-checked="true"] {color:var(--primary)!important;border-bottom-color:var(--primary)!important;}
+.st-key-topbar [data-testid="stButtonGroup"] button[aria-checked="true"] p {color:var(--primary)!important;}
+[data-testid="stVerticalBlockBorderWrapper"] {background:var(--surface);border:1px solid var(--border)!important;border-radius:11px!important;box-shadow:0 1px 2px rgba(16,24,40,.025);}
+.st-key-home-hero {min-height:380px;padding:32px 42px 28px;border:1px solid #D8E4F0;border-radius:16px;background:linear-gradient(118deg,#F8FBFF 0%,#EEF5FC 58%,#E7F0FA 100%);box-shadow:0 12px 32px rgba(46,79,112,.07);margin-bottom:24px;}
+.hero-copy {padding-top:6px;max-width:760px;}.hero-eyebrow{color:var(--primary);font-size:12px;font-weight:700;letter-spacing:.19em;text-transform:uppercase;margin-bottom:12px;}
+.hero-title{font-size:60px;line-height:1;font-weight:760;letter-spacing:-.045em;color:#173E70;margin:0 0 12px;}.hero-subtitle{font-size:34px;line-height:1.25;font-weight:720;letter-spacing:-.025em;color:#132841;margin:0 0 16px;}.hero-description{max-width:690px;color:#53677E;font-size:16px;line-height:1.75;margin:0 0 16px;}
+.capabilities{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px;}.capability{display:flex;gap:8px;align-items:flex-start;color:#4D6178;font-size:12px;line-height:1.45;}.capability svg{width:20px;height:20px;flex:0 0 auto;color:var(--primary);}.capability strong{display:block;color:#253C56;font-size:12px;margin-bottom:1px;}
+.hero-visual{position:relative;min-height:285px;padding:6px 4px 0 18px;}.demo-panel{background:rgba(255,255,255,.94);border:1px solid rgba(205,218,232,.9);border-radius:12px;box-shadow:0 16px 38px rgba(55,85,118,.12);}.matrix-demo{width:88%;padding:14px 16px 16px;transform:rotate(-1deg);}.demo-title{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:680;color:#20364F;margin-bottom:9px;}.demo-label{font-size:10px;font-weight:600;color:#6D7F92;background:#F3F7FB;border-radius:999px;padding:3px 7px;}.matrix-grid{display:grid;grid-template-columns:46px repeat(3,1fr);gap:5px;align-items:center;}.matrix-grid span{font-size:10px;color:#708196;text-align:center;}.matrix-cell{height:27px;border-radius:4px;background:#EEF3F8;}.matrix-cell.l1{background:#DCE9F5}.matrix-cell.l2{background:#AFC9E1}.matrix-cell.l3{background:#5F88B1}.matrix-cell.na{background:repeating-linear-gradient(135deg,#F2F5F8,#F2F5F8 5px,#E8EDF2 5px,#E8EDF2 10px)}
+.case-demo{position:absolute;right:0;bottom:0;width:82%;padding:11px 12px 12px;transform:rotate(1deg);}.case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}.case-tile{background:#091321;border-radius:7px;padding:5px;color:#A8B7C8;text-align:center;font-size:9px;}.case-tile svg{display:block;width:100%;height:58px;margin-bottom:4px;border-radius:4px;background:#0D1826;}
+.section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin:5px 0 12px;}.section-heading h2{font-size:23px;margin:0;color:var(--text);}.section-heading p{font-size:13px;color:var(--text-secondary);margin:4px 0 0;}
+.task-heading {display:flex;align-items:center;gap:12px;margin:2px 0 8px;}.task-heading h3{font-size:1.13rem;margin:0;}.task-heading small{display:block;color:var(--text-secondary);font-size:12px;margin-top:2px;}
+.task-symbol {width:42px;height:42px;border-radius:10px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;flex:0 0 auto;}.task-symbol svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;}.task-symbol.classification{color:#16806E;background:#E9F8F4}.task-symbol.registration{color:#7651B5;background:#F2ECFC}.task-status{font-size:12px;color:var(--text-secondary);margin:8px 0 0;}.task-status.ready{color:var(--success);}
+.task-detail{color:#34495F;font-size:14px;line-height:1.55;margin:10px 0 0;}
+.st-key-home-task-segmentation,.st-key-home-task-classification,.st-key-home-task-registration,.st-key-center-task-segmentation,.st-key-center-task-classification,.st-key-center-task-registration{gap:8px;padding:13px;}
+.recent-item{border-bottom:1px solid var(--border);padding:6px 0 10px;}.recent-item:last-child{border-bottom:0;}.recent-method{font-size:14px;font-weight:650;color:var(--text);}.recent-meta{font-size:12px;color:var(--text-secondary);margin-top:2px;}
 .inline-note {border-left:3px solid var(--primary);background:var(--primary-soft);color:#344054;border-radius:0 8px 8px 0;padding:9px 12px;margin:8px 0 14px;font-size:13px;line-height:1.55;}
-[data-testid="stMetric"] {background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:16px 18px;min-height:108px;box-shadow:0 1px 2px rgba(16,24,40,.025);}
+[data-testid="stMetric"] {background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;min-height:98px;box-shadow:none;}
 [data-testid="stMetricLabel"] p {color:var(--text-secondary)!important;font-size:.82rem!important;font-weight:560!important;}
 [data-testid="stMetricValue"] {font-size:1.9rem!important;font-weight:680!important;letter-spacing:-.035em!important;color:var(--text)!important;}
 .badge {display:inline-flex;align-items:center;border:1px solid var(--border);background:var(--surface-subtle);color:#475467;padding:3px 9px;font-size:12px;border-radius:999px;margin-right:6px;}
@@ -62,32 +76,50 @@ p,li {line-height:1.65;} label p {color:#344054!important;font-weight:520!import
 .stButton button[kind="primary"],.stDownloadButton button[kind="primary"] {background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important;}
 .stButton button[kind="primary"]:hover,.stDownloadButton button[kind="primary"]:hover {background:var(--primary-hover)!important;border-color:var(--primary-hover)!important;}
 .stButton button:focus-visible,.stDownloadButton button:focus-visible {outline:3px solid #BFDBFE!important;outline-offset:2px!important;}
-[data-testid="stAlert"] {background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:10px!important;padding:.72rem .9rem!important;color:#344054!important;box-shadow:none!important;}
-[data-testid="stAlertContainer"] {background:transparent!important;padding:0!important;}
+[data-testid="stAlert"] {border-radius:9px!important;padding:.72rem .9rem!important;box-shadow:none!important;}
 [data-testid="stFileUploaderDropzone"],input,textarea,[data-baseweb="select"]>div {background:var(--surface)!important;border-color:var(--border-strong)!important;border-radius:10px!important;}
+[data-testid="stFileUploaderDropzone"]:focus-within,input:focus,textarea:focus,[data-baseweb="select"]>div:focus-within {outline:3px solid #CFE0F1!important;outline-offset:1px;}
 [data-testid="stDataFrame"],[data-testid="stVegaLiteChart"] {background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px;overflow:hidden;}
 [data-baseweb="tab-list"] {gap:22px;border-bottom:1px solid var(--border);}
 [data-baseweb="tab"] {padding:12px 2px!important;color:var(--text-secondary)!important;font-weight:600!important;}
 [aria-selected="true"][data-baseweb="tab"] {color:var(--primary)!important;}
 [data-testid="stExpander"] {background:var(--surface);border-color:var(--border)!important;border-radius:10px!important;}
 hr {border-color:var(--border)!important;}
-@media(max-width:900px){.stMainBlockContainer{padding:1rem 1.25rem 3rem}h1{font-size:1.9rem!important}.task-step{padding:7px 10px}}
+@media(max-width:900px){.stMainBlockContainer{width:calc(100vw - 32px);padding:0 0 3rem}.st-key-topbar>div{width:calc(100vw - 32px)}.brand small{display:none}.st-key-home-hero{padding:30px 24px;min-height:0}.hero-title{font-size:46px}.hero-subtitle{font-size:28px}.capabilities{grid-template-columns:repeat(2,1fr)}.hero-visual{min-height:280px;padding-left:0}.task-step{padding:7px 10px}}
+@media(max-width:560px){.st-key-topbar{padding-left:8px;padding-right:8px}.st-key-topbar [data-testid="stHorizontalBlock"]{gap:.5rem}.hero-title{font-size:42px}.hero-subtitle{font-size:25px}.hero-description{font-size:15px}.capabilities{grid-template-columns:1fr 1fr}.hero-visual{display:none}.section-heading h2{font-size:21px}}
 </style>''')
 
 initialize()
 SHOW_DEMOS = os.environ.get("MEDCL_SHOW_DEMOS") == "1"
 STATUS = {"queued": "排队中", "running": "评测中", "completed": "已完成", "failed": "失败"}
-NAV = ["任务中心", "评测记录", "方法比较"]
+NAV = ["首页", "任务中心", "评测记录", "方法比较"]
+
+
+def required_segmented_control(label, options, key, label_visibility="visible"):
+    if st.session_state.get(key) not in options:
+        st.session_state[key] = options[0]
+    return st.segmented_control(label, options, key=key, label_visibility=label_visibility, width="stretch")
 
 
 def navigate(page):
     st.session_state.nav = page
 
 
-def required_segmented_control(label, options, key):
-    if st.session_state.get(key) not in options:
-        st.session_state[key] = options[0]
-    return st.segmented_control(label, options, key=key, width="stretch")
+def reset_task_center():
+    st.session_state.nav = "任务中心"
+    st.session_state.pop("selected_kind", None)
+    st.session_state.pop("selected_benchmark", None)
+
+
+def select_task(kind):
+    st.session_state.nav = "任务中心"
+    st.session_state.selected_kind = kind
+    st.session_state.pop("selected_benchmark", None)
+
+
+def open_job(job_id):
+    st.session_state.selected_job = job_id
+    st.session_state.nav = "评测记录"
 
 
 @st.cache_data(ttl=30)
@@ -103,10 +135,12 @@ except Exception:
     st.stop()
 lookup = {b["id"]: b for b in benchmarks}
 
-st.html('<div class="topbar"><div class="brand"><div class="brand-mark">M</div><div><strong>MedCL</strong><small>医学影像持续学习评测</small></div></div></div>')
-if st.session_state.get("nav") not in NAV:
-    st.session_state.nav = NAV[0]
-page = st.segmented_control("主导航", NAV, key="nav", label_visibility="collapsed", width="stretch")
+with st.container(key="topbar"):
+    brand_column, nav_column = st.columns([1.05, 1], vertical_alignment="center")
+    with brand_column:
+        st.html('<div class="brand"><div class="brand-mark">M</div><div><strong>MedCL</strong><small>医学影像持续学习评测平台</small></div></div>')
+    with nav_column:
+        page = required_segmented_control("主导航", NAV, "nav", "collapsed")
 
 
 def title(name, detail):
@@ -127,6 +161,111 @@ def visible_jobs():
     return [job for job in list_jobs() if SHOW_DEMOS or not job["config"]["benchmark"].get("synthetic")]
 
 
+def section_heading(name, detail):
+    st.html(f'<div class="section-heading"><div><h2>{escape(name)}</h2><p>{escape(detail)}</p></div></div>')
+
+
+def task_icon(kind):
+    return {
+        "segmentation": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg>',
+        "classification": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><path d="m3.5 6 .9.9L6.2 5M3.5 12l.9.9 1.8-1.9M3.5 18l.9.9 1.8-1.9"/></svg>',
+        "registration": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg>',
+    }[kind]
+
+
+def render_task_cards(prefix):
+    cards = {
+        "segmentation": ("医学影像分割", "多场景持续学习", "器官与病灶分割，支持域、类别和任务增量评测。"),
+        "classification": ("医学影像分类", "类别增量评测", "展示类别语义、整体准确率与逻辑客户端聚合结果。"),
+        "registration": ("医学影像配准", "任务增量评测", "对比固定、移动与配准后影像，并计算标志点 TRE。"),
+    }
+    columns = st.columns(3, gap="medium")
+    for column, (kind, (name, label, detail)) in zip(columns, cards.items()):
+        available = sum(not benchmark.get("synthetic") and readiness(benchmark)[0]
+                        for benchmark in benchmarks if benchmark["kind"] == kind)
+        state = f"{available} 个可用真实协议" if available else "暂无可用真实协议"
+        with column:
+            with st.container(border=True, key=f"{prefix}-task-{kind}"):
+                st.html(f'<div class="task-heading"><span class="task-symbol {kind}">{task_icon(kind)}</span><div><h3>{escape(name)}</h3><small>{escape(label)}</small></div></div><p class="task-detail">{escape(detail)}</p><div class="task-status {"ready" if available else ""}">{escape(state)}</div>')
+                st.button(f"进入{KINDS[kind]}任务", key=f"{prefix}-enter-{kind}", on_click=select_task,
+                          args=(kind,), type="primary" if kind == "segmentation" else "secondary", width="stretch")
+
+
+def homepage():
+    with st.container(key="home-hero"):
+        copy_column, visual_column = st.columns([1.12, .88], gap="large", vertical_alignment="center")
+        with copy_column:
+            st.html('''<div class="hero-copy">
+              <div class="hero-eyebrow">Continual learning for medical imaging</div>
+              <div class="hero-title">MedCL</div>
+              <div class="hero-subtitle">医学影像持续学习评测平台</div>
+              <p class="hero-description">面向分割、分类与配准任务，统一整理持续学习评测结果，查看阶段表现、任务差异与病例可视化。</p>
+            </div>''')
+            primary, secondary, _ = st.columns([1, 1.15, 1.25], gap="small")
+            primary.button("开始评测 →", on_click=reset_task_center, type="primary", width="stretch")
+            secondary.button("查看评测记录", on_click=navigate, args=("评测记录",), width="stretch")
+            st.html('''<div class="capabilities">
+              <div class="capability"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><div><strong>任务协议</strong>冻结评测条件</div></div>
+              <div class="capability"><svg viewBox="0 0 24 24"><path d="M4 19V9m6 10V4m6 15v-7m4 7H2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><div><strong>统一指标</strong>保留不可计算语义</div></div>
+              <div class="capability"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><div><strong>阶段矩阵</strong>比较持续学习表现</div></div>
+              <div class="capability"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7zM4 7l8 4 8-4m-8 4v10" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><div><strong>病例可视化</strong>查看预测与配准结果</div></div>
+            </div>''')
+        with visual_column:
+            st.html('''<div class="hero-visual" aria-label="持续学习矩阵与病例可视化功能示意">
+              <div class="demo-panel matrix-demo">
+                <div class="demo-title"><span>阶段—任务矩阵</span><span class="demo-label">功能示意 · 非实验结果</span></div>
+                <div class="matrix-grid"><span></span><span>任务 1</span><span>任务 2</span><span>任务 3</span>
+                  <span>阶段 1</span><i class="matrix-cell l3"></i><i class="matrix-cell na"></i><i class="matrix-cell na"></i>
+                  <span>阶段 2</span><i class="matrix-cell l2"></i><i class="matrix-cell l3"></i><i class="matrix-cell na"></i>
+                  <span>阶段 3</span><i class="matrix-cell l1"></i><i class="matrix-cell l2"></i><i class="matrix-cell l3"></i>
+                </div>
+              </div>
+              <div class="demo-panel case-demo">
+                <div class="demo-title"><span>病例可视化</span><span class="demo-label">合成装饰素材</span></div>
+                <div class="case-grid">
+                  <div class="case-tile"><svg viewBox="0 0 100 72"><ellipse cx="50" cy="36" rx="33" ry="28" fill="#263545"/><ellipse cx="50" cy="36" rx="24" ry="21" fill="#A6B2BD"/><ellipse cx="50" cy="36" rx="10" ry="16" fill="#4B5B69"/><circle cx="38" cy="34" r="5" fill="#D2D9DF"/><circle cx="62" cy="34" r="5" fill="#D2D9DF"/></svg>影像示意</div>
+                  <div class="case-tile"><svg viewBox="0 0 100 72"><ellipse cx="50" cy="36" rx="33" ry="28" fill="#263545"/><ellipse cx="50" cy="36" rx="24" ry="21" fill="#A6B2BD"/><path d="M40 26c13-8 25 2 23 15-2 11-14 18-24 11-8-6-8-20 1-26z" fill="#42B8A1" fill-opacity=".78"/></svg>预测叠加</div>
+                  <div class="case-tile"><svg viewBox="0 0 100 72"><path d="M31 15c13-10 34-9 43 4 9 15 2 38-14 44-15 6-35-1-39-17-3-12 1-23 10-31z" fill="#4B7199" fill-opacity=".35" stroke="#83A8C9"/><path d="M41 24c12-8 28 1 29 15 1 12-9 22-21 22-12 0-21-10-20-22 1-7 5-12 12-15z" fill="#42B8A1" fill-opacity=".58" stroke="#6ED8C4"/></svg>三维预览</div>
+                </div>
+              </div>
+            </div>''')
+
+    section_heading("选择评测任务", "从三类任务进入已有评测协议；没有真实协议时保留清楚的空状态。")
+    render_task_cards("home")
+
+    recent_column, overview_column = st.columns([1.65, 1], gap="large")
+    jobs = visible_jobs()
+    with recent_column:
+        section_heading("最近评测", "最近提交的可见记录，时间统一显示为 UTC。")
+        if not jobs:
+            st.info("还没有可见评测记录。")
+            st.button("创建第一条评测", on_click=reset_task_center, type="primary")
+        for job in jobs[:5]:
+            config = job["config"]
+            benchmark = config["benchmark"]
+            detail, action = st.columns([5, 1], vertical_alignment="center")
+            with detail:
+                created = job["created_at"].replace("T", " ").replace("+00:00", "")[:16]
+                st.html(f'<div class="recent-item"><div class="recent-method">{escape(config["method"])}</div><div class="recent-meta">{created} UTC · {escape(benchmark["title"])} · {KINDS[benchmark["kind"]]} · {STATUS[job["status"]]}</div></div>')
+            action.button("查看", key=f"home-job-{job['id']}", on_click=open_job, args=(job["id"],), width="stretch")
+    with overview_column:
+        section_heading("平台概览", "基于当前协议和可见记录实时汇总。")
+        real_protocols = [benchmark for benchmark in benchmarks if not benchmark.get("synthetic") and readiness(benchmark)[0]]
+        registered_kinds = {benchmark["kind"] for benchmark in benchmarks if not benchmark.get("synthetic")}
+        overview = [
+            ("可用真实协议", len(real_protocols)),
+            ("已登记任务类型", len(registered_kinds)),
+            ("已完成评测", sum(job["status"] == "completed" for job in jobs)),
+            ("排队 / 运行中", sum(job["status"] in ("queued", "running") for job in jobs)),
+        ]
+        for pair in (overview[:2], overview[2:]):
+            columns = st.columns(2, gap="small")
+            for column, (label, value) in zip(columns, pair):
+                column.metric(label, value)
+        st.caption("已登记任务类型仅表示协议元数据存在，不代表三类任务都已完成真实数据接入。")
+    st.caption("MedCL 是本地单用户研究评测工具，不用于临床诊断或公网多租户服务。")
+
+
 def score_text(value, unit="fraction"):
     return "—" if value is None else f"{value:.3f} mm" if unit == "mm" else f"{value:.4f}"
 
@@ -142,7 +281,7 @@ def heatmap(matrix, columns, rows, direction="higher", title_text=""):
                                 y=alt.Y("阶段 / 客户端:N", sort=rows, axis=alt.Axis(title=None)),
                                 tooltip=["任务", "阶段 / 客户端", "显示", "状态"])
     rect = base.mark_rect(stroke="#ffffff", strokeWidth=3, cornerRadius=4).encode(
-        color=alt.condition("isValid(datum.分数)", alt.Color("分数:Q", scale=alt.Scale(domain=domain, range=["#EEF4FF", "#2563EB"] if direction == "higher" else ["#2563EB", "#EEF4FF"]), legend=None), alt.value("#F2F4F7")))
+        color=alt.condition("isValid(datum.分数)", alt.Color("分数:Q", scale=alt.Scale(domain=domain, range=["#EDF4FB", "#355F8A"] if direction == "higher" else ["#355F8A", "#EDF4FB"]), legend=None), alt.value("#F2F4F7")))
     text = base.mark_text(fontSize=14).encode(text="显示:N", color=alt.condition(
         f"isValid(datum.分数) && datum.分数 {'>' if direction == 'higher' else '<'} {sum(domain)/2}", alt.value("white"), alt.value("#314957")))
     chart = (rect + text).properties(height=max(170, len(rows) * 52), title=title_text).configure_view(stroke=None).configure_axis(
@@ -162,21 +301,7 @@ def task_center():
     title("任务中心", "选择医学影像任务和持续学习场景。")
     selected_kind = st.session_state.get("selected_kind")
     if selected_kind not in KINDS:
-        st.subheader("选择任务类型")
-        cards = {
-            "segmentation": ("分", "医学影像分割", "多场景持续学习", "域增量、类增量与任务增量；支持全监督和弱监督结果展示。"),
-            "classification": ("类", "医学影像分类", "类别增量评测", "展示类别名称、整体准确率与逻辑客户端聚合结果。"),
-            "registration": ("配", "医学影像配准", "任务增量评测", "对比固定、移动与配准后影像，展示标志点 TRE。"),
-        }
-        columns = st.columns(3, gap="medium")
-        for column, (kind, (symbol, name, label, detail)) in zip(columns, cards.items()):
-            with column:
-                with st.container(border=True):
-                    st.html(f'<div class="task-heading"><span class="task-symbol">{symbol}</span><div><h3>{name}</h3><small>{label}</small></div></div>')
-                    st.write(detail)
-                    if st.button(f"进入{KINDS[kind]}任务", key=f"enter-{kind}", type="primary" if kind == "segmentation" else "secondary", width="stretch"):
-                        st.session_state.selected_kind = kind
-                        st.rerun()
+        render_task_cards("center")
         completed = sum(job["status"] == "completed" for job in visible_jobs())
         if completed:
             st.caption(f"已完成评测 {completed} 条。")
@@ -378,6 +503,16 @@ def segmentation_fallback(image, prediction):
     return original, overlay, index
 
 
+def viewer_fallback_open(state):
+    if not isinstance(state, dict):
+        return True
+    error = state.get("viewer_error_code")
+    if error:
+        message = "浏览器不支持 WebGL2" if error == "WEBGL_UNAVAILABLE" else "三维查看器未能完成初始化"
+        st.warning(message + "；二维预览已展开。")
+    return state.get("viewer_ready") is not True
+
+
 def result_view(job):
     result = compatible_result(job["result"])
     config = result["config"]
@@ -401,13 +536,18 @@ def result_view(job):
     if SHOW_DEMOS:
         st.caption(config["conditions"])
     summary = result["continual"]["global"]
-    columns = st.columns(5)
     labels = {"Final average": "最终任务宏平均", "BWT": "后向迁移 BWT", "Forgetting": "遗忘", "FWT": "前向迁移 FWT", "BWTR": "相对后向迁移 BWTR"}
-    for col, metric in zip(columns, labels):
+    primary_metrics = ["Final average"] + [metric for metric in ("BWT", "Forgetting") if summary[metric]["value"] is not None]
+    columns = st.columns(len(primary_metrics))
+    for col, metric in zip(columns, primary_metrics):
         col.metric(labels[metric], score_text(summary[metric]["value"], b["unit"]))
-        if summary[metric]["value"] is None:
-            col.caption("条件不足")
-    st.caption("— 表示当前阶段或参照条件不足；详细原因见阶段评测。")
+    if len(primary_metrics) == 1:
+        st.caption("仅有最终阶段或历史阶段不足，无法计算 BWT 与遗忘；阶段评测中保留完整原因。")
+    extended_metrics = [metric for metric in ("FWT", "BWTR") if summary[metric]["value"] is not None]
+    if extended_metrics:
+        with st.expander("扩展持续学习指标"):
+            for col, metric in zip(st.columns(len(extended_metrics)), extended_metrics):
+                col.metric(labels[metric], score_text(summary[metric]["value"], b["unit"]))
     detail_label = "类别名称" if b["kind"] == "classification" else "病例结果与可视化"
     tab_matrix, tab_clients, tab_cases, tab_protocol = st.tabs(["阶段评测", "客户端对比", detail_label, "评测信息"])
     with tab_matrix:
@@ -435,7 +575,7 @@ def result_view(job):
             else:
                 chart_data = dist.rename(columns={"client_id": "逻辑客户端", "n_samples": "样本数", "task_id": "任务"})
                 chart = alt.Chart(chart_data).mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3).encode(x="逻辑客户端:N", y="样本数:Q",
-                    color=alt.Color("任务:N", scale=alt.Scale(range=["#2563EB", "#60A5FA", "#0F766E", "#7C3AED", "#475467", "#93C5FD"])),
+                    color=alt.Color("任务:N", scale=alt.Scale(range=["#355F8A", "#7FA7C8", "#16806E", "#7651B5", "#52677E", "#A8C2DA"])),
                     tooltip=["逻辑客户端", "任务", "样本数"]).properties(height=250)
                 st.altair_chart(chart, width="stretch")
                 st.dataframe(dist.rename(columns={"client_id": "逻辑客户端", "n_samples": "样本数", "task_id": "任务", "stage": "阶段"}), hide_index=True, width="stretch")
@@ -465,33 +605,37 @@ def result_view(job):
                 try:
                     arrays = preview_arrays(job["id"], preview)
                     if b["kind"] == "segmentation":
+                        viewer_state = None
                         if preview["kind"] == "segmentation-volume":
                             try:
-                                render_volume(envelope_from_preview(preview, arrays), key=f"volume-{job['id']}-{stage}-{task_id}-{preview['case_id']}")
+                                viewer_state = render_volume(envelope_from_preview(preview, arrays), key=f"volume-{job['id']}-{stage}-{task_id}-{preview['case_id']}")
                             except (OSError, RuntimeError, TypeError, ValueError):
                                 st.warning("三维组件未能挂载；下方仍保留不含真值的静态切片。")
                             original, overlay, slice_index = segmentation_fallback(arrays["image_volume"], arrays["prediction_volume"])
                         else:
                             original, overlay, slice_index = arrays["original"], arrays["overlay"], None
-                        left, right = st.columns(2)
-                        suffix = f" · Z={slice_index}" if slice_index is not None else ""
-                        left.image(original, caption="原始测试切片" + suffix, width="stretch")
-                        right.image(overlay, caption="预测遮罩叠加（绿色）" + suffix, width="stretch")
+                        with st.expander("二维预览", expanded=preview["kind"] != "segmentation-volume" or viewer_fallback_open(viewer_state)):
+                            left, right = st.columns(2)
+                            suffix = f" · Z={slice_index}" if slice_index is not None else ""
+                            left.image(original, caption="原始测试切片" + suffix, width="stretch")
+                            right.image(overlay, caption="预测遮罩叠加（绿色）" + suffix, width="stretch")
                         st.metric("该病例前景 Dice", score_text(preview["score"]))
                         st.caption("浏览器只接收原始影像与预测，不接收隐藏测试真值。")
                     else:
+                        viewer_state = None
                         if preview["kind"] == "registration-volume":
                             try:
-                                render_volume(envelope_from_preview(preview, arrays), key=f"volume-{job['id']}-{stage}-{task_id}-{preview['case_id']}")
+                                viewer_state = render_volume(envelope_from_preview(preview, arrays), key=f"volume-{job['id']}-{stage}-{task_id}-{preview['case_id']}")
                             except (OSError, RuntimeError, TypeError, ValueError):
                                 st.warning("三维组件未能挂载；下方仍保留静态中心切片。")
                             center = arrays["fixed_volume"].shape[0] // 2
                             names = [("固定影像", arrays["fixed_volume"]), ("移动影像", arrays["moving_volume"])]
                             if "registered_volume" in arrays:
                                 names.append(("提交的配准后影像", arrays["registered_volume"]))
-                            columns = st.columns(len(names))
-                            for column, (name, volume) in zip(columns, names):
-                                column.image(volume[center], caption=f"{name} · Z={center}", width="stretch")
+                            with st.expander("二维预览", expanded=viewer_fallback_open(viewer_state)):
+                                columns = st.columns(len(names))
+                                for column, (name, volume) in zip(columns, names):
+                                    column.image(volume[center], caption=f"{name} · Z={center}", width="stretch")
                             moving, prediction = arrays["moving_points"], arrays["predicted_points"]
                             if "registered_volume" not in arrays:
                                 st.info("未提交配准后影像；三维查看器默认对比固定影像和移动影像。")
@@ -614,11 +758,11 @@ def compare():
     st.dataframe(leaderboard, hide_index=True, width="stretch")
     chart = alt.Chart(df).mark_bar(cornerRadiusEnd=4).encode(
         x=alt.X(f"{b['metric']}:Q", title=b["metric"]), y=alt.Y("任务:N", title=None),
-        color=alt.Color("方法:N", scale=alt.Scale(range=["#2563EB", "#60A5FA", "#0F766E", "#7C3AED"])),
+        color=alt.Color("方法:N", scale=alt.Scale(range=["#355F8A", "#7FA7C8", "#16806E", "#7651B5"])),
         yOffset="方法:N", tooltip=list(df.columns)).properties(height=max(300, len(b["tasks"]) * 90)).configure_view(stroke=None).configure_axis(
             domain=False, gridColor="#E3E8EF", tickColor="#D4DBE5", labelColor="#475467", titleColor="#344054")
     st.altair_chart(chart, width="stretch")
     st.caption("比较最终阶段各任务；来源类别与方法名分开显示。缺少最终阶段的记录保留为空，不拿最后可见阶段代替最终阶段。")
 
 
-{"任务中心": task_center, "评测记录": records, "方法比较": compare}[page]()
+{"首页": homepage, "任务中心": task_center, "评测记录": records, "方法比较": compare}[page]()

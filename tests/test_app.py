@@ -22,10 +22,25 @@ class BrowserAppCheck(unittest.TestCase):
 
     def test_thesis_visual_system_is_centralized_and_wide(self):
         source = (Path(__file__).resolve().parents[1] / "app.py").read_text()
-        for token in ("--page-bg:#F6F8FB", "--primary:#2563EB", "--viewer-bg:#070B12", "max-width:1760px"):
+        for token in ("--page-bg:#F5F8FC", "--primary:#355F8A", "--viewer-bg:#070B12", "max-width:1760px",
+                      'NAV = ["首页", "任务中心", "评测记录", "方法比较"]', "功能示意 · 非实验结果"):
             self.assertIn(token, source)
         self.assertIn('st.columns(3, gap="medium")', source)
         self.assertNotIn("max-width:1180px", source)
+
+    def test_home_ctas_use_real_navigation(self):
+        with tempfile.TemporaryDirectory(prefix="medcl-home-test-") as directory:
+            root = initialize(Path(directory))
+            with patch.dict(os.environ, {"MEDCL_STATE_DIR": str(root), "MEDCL_CONFIG": str(root / "no-assets.json"),
+                                             "MEDCL_SHOW_DEMOS": "0"}):
+                app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
+                self.assertFalse(app.exception)
+                self.assertEqual(next(control for control in app.segmented_control if control.label == "主导航").value, "首页")
+                next(button for button in app.button if button.label == "开始评测 →").click().run()
+                self.assertEqual(next(control for control in app.segmented_control if control.label == "主导航").value, "任务中心")
+                next(control for control in app.segmented_control if control.label == "主导航").set_value("首页").run()
+                next(button for button in app.button if button.label == "查看评测记录").click().run()
+                self.assertEqual(next(control for control in app.segmented_control if control.label == "主导航").value, "评测记录")
 
     def test_upload_result_navigation_and_invalid_file(self):
         with tempfile.TemporaryDirectory(prefix="medcl-ui-test-") as directory:
@@ -45,11 +60,15 @@ class BrowserAppCheck(unittest.TestCase):
                 self.assertFalse(app.exception)
                 self.assertEqual(len(list_jobs(root)), 1)
                 run_worker(root, once=True)
-                next(control for control in app.segmented_control if control.label == "主导航").set_value("评测记录").run()
+                job_id = list_jobs(root)[0]["id"]
+                next(control for control in app.segmented_control if control.label == "主导航").set_value("首页").run()
+                next(button for button in app.button if button.key == f"home-job-{job_id}").click().run()
+                self.assertEqual(app.session_state["selected_job"], job_id)
                 self.assertFalse(app.exception)
                 self.assertTrue(any("合成工程验收" in warning.value for warning in app.warning))
                 self.assertEqual(len(app.download_button), 3)
-                self.assertIn("—", [metric.value for metric in app.metric])
+                self.assertNotIn("—", [metric.value for metric in app.metric])
+                self.assertIn("仅有最终阶段", self.visible_text(app))
                 next(control for control in app.segmented_control if control.label == "主导航").set_value("方法比较").run()
                 self.assertTrue(any("至少需要两条" in notice.value for notice in app.info))
                 next(control for control in app.segmented_control if control.label == "主导航").set_value("任务中心").run()

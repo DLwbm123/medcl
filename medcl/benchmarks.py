@@ -19,7 +19,7 @@ _VERSION = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}")
 _IDENTITY_DIRECTION = (1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
 _METRICS = {
     "classification": ("Accuracy", "higher", "fraction"),
-    "segmentation": ("Foreground Dice", "higher", "fraction"),
+    "segmentation": ("Dice (including background)", "higher", "fraction"),
     "registration": ("TRE", "lower", "mm"),
 }
 _FORMATS = {
@@ -131,7 +131,7 @@ def validate_task(benchmark: dict, task: dict) -> None:
             raise ValueError("classes 必须是 all_classes 的子集")
         if kind == "segmentation":
             if 0 not in all_classes or 0 in classes:
-                raise ValueError("分割 all_classes 必须含背景 0，主指标 classes 不得含背景")
+                raise ValueError("分割 all_classes 必须含背景 0，任务 classes 只登记前景类别")
             shift = task.get("label_shift", 0)
             if type(shift) is not int or shift < 0:
                 raise ValueError("label_shift 必须是非负整数")
@@ -254,7 +254,7 @@ def demo_protocol(kind: str) -> dict:
         "version": "synthetic-v1", "synthetic": True,
         "description": "程序生成的手算 / 工程验收数据；不代表医学数据、训练效果或论文结果。",
         "source": "MedCL deterministic synthetic fixture v1",
-        "metric": {"classification": "Accuracy", "segmentation": "Foreground Dice", "registration": "TRE"}[kind],
+        "metric": {"classification": "Accuracy", "segmentation": "Dice (including background)", "registration": "TRE"}[kind],
         "direction": "lower" if kind == "registration" else "higher",
         "unit": "mm" if kind == "registration" else "fraction",
         "allow_unseen": kind == "segmentation",
@@ -273,7 +273,7 @@ def demo_protocol(kind: str) -> dict:
 
 def pending_protocols() -> list[dict]:
     entries = [
-        ("prostate-domain6", "前列腺分割 · 六中心", "segmentation", "domain", "病例级前景 Dice；需管理员接入冻结测试 HDF5。"),
+        ("prostate-domain6", "前列腺分割 · 六中心", "segmentation", "domain", "病例级含背景宏平均 Dice；需管理员接入冻结测试 HDF5。"),
         ("mmwhs-class3", "心脏分割 · 三阶段类别增量", "segmentation", "class", "MYO/LV/LA → RA/RV → AO/PA；需确认全局类别映射及输出头。"),
         ("organ-task4", "器官分割 · 四任务", "segmentation", "task", "左心房、前列腺、肝脏、脑肿瘤；需接入各任务测试集。"),
         ("pathmnist-class3", "PathMNIST · 三阶段类别增量", "classification", "class", "平台自定义类别分组，不冒充 FedSubMerge 原论文协议。"),
@@ -282,7 +282,7 @@ def pending_protocols() -> list[dict]:
     return [{"id": bid, "title": title, "kind": kind, "incremental": inc,
              "version": "not-connected", "synthetic": False, "description": desc,
              "source": "待管理员确认", "tasks": [], "pending": True,
-             "metric": "TRE" if kind == "registration" else "Accuracy" if kind == "classification" else "Foreground Dice",
+             "metric": "TRE" if kind == "registration" else "Accuracy" if kind == "classification" else "Dice (including background)",
              "direction": "lower" if kind == "registration" else "higher", "unit": "mm" if kind == "registration" else "fraction",
             "allow_unseen": False, "output_semantics": "pending", "allowed_output_heads": ["shared"]}
             for bid, title, kind, inc, desc in entries]

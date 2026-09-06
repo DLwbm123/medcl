@@ -38,6 +38,9 @@ class KernelChecks(unittest.TestCase):
         target = np.array([[[1, 0], [0, 0]], [[1, 0], [0, 0]]])
         cases = score_cases("segmentation", prediction, target, [(0, 2)], classes=(1,))
         self.assertAlmostEqual(cases[0]["score"], (2 + 1e-5) / (6 + 1e-5))
+        included = score_cases("segmentation", prediction, target, [(0, 2)], classes=(0, 1))[0]
+        background = (6 + 1e-5) / (10 + 1e-5)
+        self.assertAlmostEqual(included["score"], (background + (2 + 1e-5) / (6 + 1e-5)) / 2)
         self.assertEqual(score_cases("segmentation", np.zeros((1, 2, 2, 2), dtype=int),
                                      np.zeros((1, 2, 2, 2), dtype=int), [(0, 1)], classes=(1,))[0]["score"], 1.0)
 

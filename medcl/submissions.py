@@ -332,7 +332,7 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
         "supervision_source": "提交者声明的外部训练监督类型；平台仅在同一冻结测试集评分，不读取训练集或训练日志" if benchmark["kind"] == "segmentation" else "不适用",
         "client_split": {"id": f"case-round-robin-v1-c{clients}", "version": "1",
                          "source": "平台固定逻辑划分：各任务匿名病例索引 mod 客户端数；分类无病例标识时按图像索引。非论文客户端划分。"},
-        "conditions": {"segmentation": "病例级前景类 Dice (eps=1e-5)，另列含背景宏均值；同空=1",
+        "conditions": {"segmentation": "病例内背景与前景类别宏平均 Dice (eps=1e-5)，再对病例宏平均；同空=1",
                        "classification": "任务级样本准确率；固定全局类别编码；仅已见类别输出；不发布逐样本正误",
                        "registration": "固定空间对应点 TRE；有序坐标乘协议 spacing 后求欧氏距离；mm"}[benchmark["kind"]],
         "test_assets": [{"task_id": task["id"], "files": [{"size": by_path[str(p)]["size"], "mtime_ns": by_path[str(p)]["mtime_ns"]} for p in asset_paths(task)]} for task in benchmark["tasks"]],

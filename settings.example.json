@@ -10,7 +10,7 @@
       "synthetic": false,
       "description": "管理员核对六个固定测试 HDF5、病例边界和标签编码后接入。",
       "source": "请填写有权使用的数据来源和固定测试划分版本",
-      "metric": "Foreground Dice",
+      "metric": "Dice (including background)",
       "direction": "higher",
       "unit": "fraction",
       "allow_unseen": true,

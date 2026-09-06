@@ -54,8 +54,8 @@ def _kind(kind):
 def score_cases(kind, prediction, target, case_ranges, classes=(), spacing=None):
     """Score each case; empty cases remain present with a None score.
 
-    Segmentation averages exactly the explicit classes; exclude background in
-    the protocol's classes for the primary score. Dice uses eps=1e-5 in both
+    Segmentation averages exactly the explicit classes; callers include label
+    0 when background belongs in the primary score. Dice uses eps=1e-5 in both
     numerator and denominator. Registration requires floating-point, already
     transformed fixed-space correspondences and explicit positive spacing.
     """

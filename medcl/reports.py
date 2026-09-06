@@ -212,9 +212,14 @@ def aggregate_report(results: list[dict]) -> bytes:
             category = "synthetic"
         elif category not in {"untrained_baseline", "trained_model_declared", "external_predictions_unknown"}:
             category = "external_predictions_unknown"
-        metric = {"classification": ("Accuracy", "higher", "fraction"),
-                  "segmentation": ("Foreground Dice", "higher", "fraction"),
-                  "registration": ("TRE", "lower", "mm")}.get(benchmark.get("kind"))
+        if benchmark.get("kind") == "segmentation":
+            name = {EVALUATOR_VERSION: "Dice (including background)",
+                    "medcl-evaluator-0.2.0": "Foreground Dice",
+                    "legacy-unknown": "Foreground Dice"}.get(config.get("evaluator_version", "legacy-unknown"))
+            metric = (name, "higher", "fraction") if name else None
+        else:
+            metric = {"classification": ("Accuracy", "higher", "fraction"),
+                      "registration": ("TRE", "lower", "mm")}.get(benchmark.get("kind"))
         if metric is None or tuple(benchmark.get(key) for key in ("metric", "direction", "unit")) != metric:
             raise ValueError("公开聚合的指标协议无效")
         cells = []

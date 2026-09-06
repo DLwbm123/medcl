@@ -266,7 +266,6 @@ def evaluate(job_id: str, root: Path | None = None) -> dict:
                 if kind == "segmentation" and case["per_class"] is not None:
                     case["benchmark_mean"] = case["score"]
                     case["background"] = case["per_class"]["0"]
-                    case["score"] = float(np.mean([case["per_class"][str(c)] for c in task["classes"]]))
                 case.update(stage=stage, task_id=task_id,
                             client_id=f"C{index % config['clients'] + 1:02d}")
                 if kind != "classification":

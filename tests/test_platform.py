@@ -125,6 +125,20 @@ class PlatformChecks(unittest.TestCase):
                     self.assertEqual(set(load_preview(job_dir(jid, self.root), preview)), expected)
                 if kind == "segmentation":
                     self.assertEqual(result["config"]["training_supervision"], "weak")
+                    self.assertEqual(result["config"]["benchmark"]["metric"], "Dice (including background)")
+                    self.assertTrue(all(case["score"] == case["benchmark_mean"] for case in result["cases"]))
+                    self.assertTrue(all(cell["score"] == cell["benchmark_mean"] for cell in result["cells"]
+                                        if cell["score"] is not None))
+                    public = json.loads(aggregate_report([result]))["runs"][0]
+                    self.assertEqual(public["benchmark"]["metric"], "Dice (including background)")
+                    legacy = copy.deepcopy(result)
+                    legacy["config"]["evaluator_version"] = "medcl-evaluator-0.2.0"
+                    legacy["config"]["benchmark"]["metric"] = "Foreground Dice"
+                    self.assertEqual(json.loads(aggregate_report([legacy]))["runs"][0]["benchmark"]["metric"],
+                                     "Foreground Dice")
+                    legacy["config"]["evaluator_version"] = "medcl-evaluator-0.3.0"
+                    with self.assertRaises(ValueError):
+                        aggregate_report([legacy])
                     empty = [c for c in result["cells"] if c["client_id"] == "C04"]
                     self.assertTrue(all(c["score"] is None and c["n_samples"] == 0 for c in empty))
                     self.assertTrue(all("benchmark_mean" in c for c in result["cases"]))

@@ -1,3 +1,22 @@
+# MedCL 分割 Dice 含背景口径更新 · 2026-09-06
+
+分割主指标已从病例内前景类宏平均改为病例内“背景 0 + 所有前景类”的类别宏平均，再对病例做宏平均。阶段矩阵、逻辑客户端聚合、Final average、BWT、Forgetting、报告和病例页面均使用这一主 `score`；背景单类 Dice 与逐类 Dice 仍保留在结果明细中。
+
+本次将 evaluator 从 `medcl-evaluator-0.2.0` 更新为 `medcl-evaluator-0.3.0`，新协议指标名为 `Dice (including background)`。旧 0.2 结果保持原始 `Foreground Dice` 数值和标识，可继续查看与公开聚合，但 evaluator 版本不同，因此不会与新口径结果混合比较或被静默重算。
+
+确定性算例中，背景 Dice 为 `0.6000004`、前景 Dice 为 `0.3333344`，新的病例主分数为两者宏平均 `0.4666674`。完整测试：
+
+```text
+/opt/miniconda3/bin/python -m unittest discover -s tests -v
+Ran 55 tests in 15.408s
+OK
+```
+
+测试同时锁定病例、任务单元格与公开聚合均采用含背景分数，并验证旧 evaluator 的前景 Dice 仍可导出、旧指标不能伪装成新 evaluator 结果。历史验收 JSON 和旧测试报告未改写；它们仍是当时前景 Dice 口径的证据。
+另使用当前本地协议配置和独立临时状态目录执行 Streamlit 页面 smoke test，首页正常加载且无应用异常；私有配置只在本机同步更新指标名称，没有纳入版本控制。
+
+---
+
 # MedCL 首页视觉保真修正验收 · 2026-09-06
 
 结论：已按 `medcl-homepage-fidelity-fix` 增量包原样接入首页模块、医学背景、脑形 Logo、统一图标、CSS 和测试，没有重新设计或把医学背景替换为纯渐变。开始基线为 `f5d2c23d264768f931896c6cb06ef9dcc2f86d5a`，分支为 `codex/medcl-evaluation-platform`。

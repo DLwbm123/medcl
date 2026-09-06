@@ -551,7 +551,7 @@ def result_view(job):
                             suffix = f" · Z={slice_index}" if slice_index is not None else ""
                             left.image(original, caption="原始测试切片" + suffix, width="stretch")
                             right.image(overlay, caption="预测遮罩叠加（绿色）" + suffix, width="stretch")
-                        st.metric("该病例前景 Dice", score_text(preview["score"]))
+                        st.metric("该病例 Dice（含背景）", score_text(preview["score"]))
                         st.caption("浏览器只接收原始影像与预测，不接收隐藏测试真值。")
                     else:
                         viewer_state = None

@@ -37,11 +37,11 @@ html,body,.stApp,input,button,textarea {font-family:-apple-system,BlinkMacSystem
 .stMainBlockContainer {width:92vw;max-width:1760px;padding:0 0 4rem;}
 [data-testid="stHeader"] {height:0;background:transparent;}
 [data-testid="stToolbar"],[data-testid="stDecoration"],footer {display:none!important;}
-h1 {font-size:1.85rem!important;font-weight:700!important;letter-spacing:-.025em!important;line-height:1.2!important;margin:.35rem 0 .4rem!important;color:var(--text)!important;}
-h2 {font-size:1.45rem!important;font-weight:680!important;letter-spacing:-.015em!important;color:var(--text)!important;}
-h3 {font-size:1.1rem!important;font-weight:650!important;color:var(--text)!important;}
-h4 {font-size:.9rem!important;font-weight:680!important;color:#344054!important;letter-spacing:.01em!important;margin-top:.3rem!important;}
-p,li {line-height:1.65;} label p {color:#344054!important;font-weight:520!important;}
+h1 {font-size:2.1rem!important;font-weight:750!important;letter-spacing:-.025em!important;line-height:1.2!important;margin:.35rem 0 .4rem!important;color:var(--text)!important;}
+h2 {font-size:1.7rem!important;font-weight:750!important;letter-spacing:-.015em!important;color:var(--text)!important;}
+h3 {font-size:1.3rem!important;font-weight:700!important;color:var(--text)!important;}
+h4 {font-size:1.1rem!important;font-weight:700!important;color:#344054!important;letter-spacing:.01em!important;margin-top:.3rem!important;}
+p,li {line-height:1.65;} label p {color:#344054!important;font-size:1rem!important;font-weight:650!important;}
 [data-testid="stCaptionContainer"] p {color:var(--text-secondary)!important;font-size:.875rem!important;line-height:1.55!important;}
 .st-key-topbar {background:var(--surface);border-bottom:1px solid var(--border);padding:11px 18px;margin:0 calc(50% - 50vw) 18px;}
 .st-key-topbar>div {width:92vw;max-width:1760px;margin:auto;}
@@ -71,11 +71,12 @@ p,li {line-height:1.65;} label p {color:#344054!important;font-weight:520!import
 .recent-item{border-bottom:1px solid var(--border);padding:6px 0 10px;}.recent-item:last-child{border-bottom:0;}.recent-method{font-size:14px;font-weight:650;color:var(--text);}.recent-meta{font-size:12px;color:var(--text-secondary);margin-top:2px;}
 .inline-note {border-left:3px solid var(--primary);background:var(--primary-soft);color:#344054;border-radius:0 8px 8px 0;padding:9px 12px;margin:8px 0 14px;font-size:13px;line-height:1.55;}
 [data-testid="stMetric"] {background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;min-height:98px;box-shadow:none;}
-[data-testid="stMetricLabel"] p {color:var(--text-secondary)!important;font-size:.82rem!important;font-weight:560!important;}
-[data-testid="stMetricValue"] {font-size:1.9rem!important;font-weight:680!important;letter-spacing:-.035em!important;color:var(--text)!important;}
+[data-testid="stMetricLabel"] p {color:var(--text-secondary)!important;font-size:.95rem!important;font-weight:650!important;}
+[data-testid="stMetricValue"] {font-size:2.15rem!important;font-weight:750!important;letter-spacing:-.035em!important;color:var(--text)!important;}
 .badge {display:inline-flex;align-items:center;border:1px solid var(--border);background:var(--surface-subtle);color:#475467;padding:3px 9px;font-size:12px;border-radius:999px;margin-right:6px;}
 .badge.ready {background:var(--success-soft);border-color:#C7EAD4;color:var(--success);}.badge.pending{background:var(--warning-soft);border-color:#F4E2B7;color:var(--warning);}
 .timeline {display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 24px;}.task-step {display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-radius:9px;background:var(--surface);padding:9px 13px;font-size:14px;}.task-step b {color:var(--primary);font-size:12px;}.task-step span{color:#344054;}
+.stButton button p,.stDownloadButton button p,[data-testid="stButtonGroup"] button p,[data-baseweb="tab"] p {font-size:1rem!important;font-weight:650!important;}
 .stButton button,.stDownloadButton button {border-radius:9px!important;min-height:40px!important;font-weight:600!important;border-color:var(--border-strong)!important;box-shadow:none!important;}
 .stButton button[kind="primary"],.stDownloadButton button[kind="primary"] {background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important;}
 .stButton button[kind="primary"]:hover,.stDownloadButton button[kind="primary"]:hover {background:var(--primary-hover)!important;border-color:var(--primary-hover)!important;}

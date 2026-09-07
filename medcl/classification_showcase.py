@@ -47,10 +47,10 @@ def card_html(dataset, arrays):
     .medcl-class-info .medcl-class-description {{font-size:14px;line-height:1.8;color:#64758b;margin:0 0 25px}}
     .medcl-class-category {{border-left:3px solid var(--accent);padding:3px 0 3px 16px;margin:0 0 26px}}
     .medcl-class-category small {{display:block;color:#64758b;font-size:12px;margin-bottom:7px}}
-    .medcl-class-category strong {{font-size:24px;line-height:1.4;font-weight:650;color:#203349}}
+    .medcl-class-category strong {{font-size:28px;line-height:1.4;font-weight:750;color:#203349}}
     .medcl-class-meta {{display:grid;grid-template-columns:1fr 1fr;gap:18px 30px;border-top:1px solid #e6ecf2;padding-top:23px;width:100%;margin:0}}
     .medcl-class-meta dt {{font-size:12px;color:#64758b;margin-bottom:5px}}
-    .medcl-class-meta dd {{font-size:14px;font-weight:550;margin:0;color:#304963}}
+    .medcl-class-meta dd {{font-size:16px;font-weight:650;margin:0;color:#304963}}
     .medcl-class-foot {{margin:20px 0 0;font-size:12px;color:#64758b;line-height:1.7}}
     @media(max-width:700px) {{.medcl-class-card {{grid-template-columns:1fr}} .medcl-class-info {{padding:25px}} .medcl-class-visual {{padding:20px}} .medcl-class-info h2 {{font-size:26px}}}}
     </style>

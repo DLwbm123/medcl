@@ -1,4 +1,4 @@
-"""Read four administrator-selected cases and stream a private tar to stdout.
+"""Read administrator-selected cases and stream a private tar to stdout.
 
 Run on the asset host using its existing h5py/nibabel environment. This does not
 run models, write source assets, or modify evaluation records. Redirect stdout
@@ -26,20 +26,25 @@ def normalize(array):
     return (np.clip((array.astype(np.float32) - low) / (high - low), 0, 1) * 255).astype(np.uint8)
 
 
-def segmentation(path, *, weak):
+def segmentation(path, *, weak, cardiac=False):
     with h5py.File(path, "r") as source:
         if weak:
             image, labels, scribble = (source[k][:] for k in ("image", "label", "scribble"))
         else:
-            end = int(source["patient_info_train"][0]) + 1
-            image = np.moveaxis(source["train_images"][:, :, :end], -1, 0)
-            labels = np.moveaxis(source["train_labels"][:, :, :end], -1, 0).astype(np.int64)
-        if image.shape != labels.shape or not np.isin(labels, [0, 1, 2, 3]).all():
+            split = "test" if cardiac else "train"
+            end = int(source[f"patient_info_{split}"][0]) + 1
+            image = np.moveaxis(source[f"{split}_images"][:, :, :end], -1, 0)
+            labels = np.moveaxis(source[f"{split}_labels"][:, :, :end], -1, 0)
+            if not cardiac:
+                labels = labels.astype(np.int64)
+        if image.shape != labels.shape or not np.isin(labels, range(8) if cardiac else range(4)).all():
             raise ValueError("Invalid segmentation source")
-        steps = np.maximum(1, np.ceil(np.array(image.shape) / 128).astype(int))
+        steps = np.maximum(1, np.ceil(np.array(image.shape) / (160 if cardiac else 128)).astype(int))
         slices = tuple(slice(None, None, int(step)) for step in steps)
         arrays = {"image": normalize(image[slices]), "labels": labels[slices].astype(np.uint8),
                   "spacing": steps.astype(np.float32)}
+        if cardiac and set(np.unique(arrays["labels"])) != set(range(8)):
+            raise ValueError("Cardiac preview must retain all seven foreground labels")
         if weak:
             if scribble.shape != labels.shape or not np.isin(scribble, [0, 1, 2, 3, 4]).all():
                 raise ValueError("Invalid scribble source")
@@ -49,12 +54,24 @@ def segmentation(path, *, weak):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--prostate", type=Path, required=True)
-    parser.add_argument("--weak", type=Path, required=True)
+    parser.add_argument("--prostate", type=Path)
+    parser.add_argument("--weak", type=Path)
     parser.add_argument("--weak-geometry", type=Path, help="Corresponding original NIfTI for voxel spacing")
-    parser.add_argument("--classification", type=Path, required=True, help="PathMNIST NPY directory")
-    parser.add_argument("--pair", type=Path, required=True, help="Curated OASIS pair directory")
+    parser.add_argument("--classification", type=Path, help="PathMNIST NPY directory")
+    parser.add_argument("--pair", type=Path, help="Curated OASIS pair directory")
+    parser.add_argument("--cardiac", type=Path, help="Prepare only the first complete seven-label MMWHS case")
     args = parser.parse_args()
+    if args.cardiac:
+        cases = {"segmentation-cardiac": segmentation(args.cardiac, weak=False, cardiac=True)}
+        write_archive(cases, {"source": str(args.cardiac), "case_index": 0,
+            "source_labels": "Original complete integer labels 0 through 7, no remapping",
+            "geometry": "H5 has no physical geometry. Slice axis moved first; nearest-neighbor stride in index space.",
+            "preview_shape_zyx": list(cases["segmentation-cardiac"]["image"].shape),
+            "preview_spacing_zyx": cases["segmentation-cardiac"]["spacing"].tolist(),
+            "not_model_inference": True, "not_evaluation_results": True}, "cardiac-provenance.private.json")
+        return
+    if not all((args.prostate, args.weak, args.classification, args.pair)):
+        parser.error("Provide --cardiac, or all of --prostate, --weak, --classification and --pair")
     # Deterministic first training image; no model confidence or performance selection.
     images = np.load(args.classification / "train_images.npy", mmap_mode="r", allow_pickle=False)
     labels = np.load(args.classification / "train_labels.npy", mmap_mode="r", allow_pickle=False)
@@ -91,6 +108,10 @@ def main():
                   "registration": "Real OASIS pair; registered slot is fixed-image target-state reference replay, not a computed registration",
                   "geometry": "Prostate: index-space steps. OASIS and optional original weak NIfTI: header voxel spacing. No patient orientation claim.",
                   "not_model_inference": True, "not_evaluation_results": True}
+    write_archive(cases, provenance)
+
+
+def write_archive(cases, provenance, provenance_name="provenance.private.json"):
     with tarfile.open(fileobj=sys.stdout.buffer, mode="w|") as archive:
         for name, arrays in cases.items():
             content = io.BytesIO()
@@ -100,7 +121,7 @@ def main():
             member.size, member.mode = len(payload), 0o600
             archive.addfile(member, io.BytesIO(payload))
         payload = json.dumps(provenance, ensure_ascii=False, indent=2).encode()
-        member = tarfile.TarInfo("provenance.private.json")
+        member = tarfile.TarInfo(provenance_name)
         member.size, member.mode = len(payload), 0o600
         archive.addfile(member, io.BytesIO(payload))
 

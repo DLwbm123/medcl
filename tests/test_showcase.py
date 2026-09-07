@@ -14,6 +14,26 @@ from medcl_cornerstone import unpack_envelope
 
 
 class ShowcaseTest(unittest.TestCase):
+    def test_prepare_cardiac_keeps_all_labels_and_first_case(self):
+        import h5py
+        from scripts.prepare_showcase import segmentation
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "cardiac.h5"
+            image = np.arange(10 * 12 * 16, dtype=np.float32).reshape(10, 12, 16)
+            labels = np.zeros(image.shape, dtype=np.int64)
+            labels[2:8, 3:10, :8] = np.arange(8)
+            labels[:, :, 8:] = 99  # A later case must not be read.
+            with h5py.File(path, "w") as f:
+                f["test_images"], f["test_labels"] = image, labels
+                f["patient_info_test"] = [7, 15]
+            result = segmentation(path, weak=False, cardiac=True)
+            np.testing.assert_array_equal(result["labels"], np.moveaxis(labels[:, :, :8], -1, 0))
+            np.testing.assert_array_equal(result["spacing"], [1, 1, 1])
+            with h5py.File(path, "r+") as f:
+                f["test_labels"][:, :, 7] = 0
+            with self.assertRaisesRegex(ValueError, "all seven"):
+                segmentation(path, weak=False, cardiac=True)
+
     def test_reference_gallery_navigation_and_pixels(self):
         with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {
                 "MEDCL_STATE_DIR": directory, "MEDCL_CONFIG": str(Path(directory) / "absent.json"),
@@ -31,10 +51,14 @@ class ShowcaseTest(unittest.TestCase):
                      "segmentation-full": volumes,
                      "segmentation-weak": {**volumes, "scribble": scribble},
                      "registration": {"fixed": image, "moving": image // 2, "registered": image, "spacing": np.ones(3)}}
+            cardiac = np.zeros_like(image)
+            for label in range(1, 8):
+                cardiac[:, label * 2:label * 2 + 2, 3:12] = label
+            cases["segmentation-cardiac"] = {**volumes, "labels": cardiac}
             for name, arrays in cases.items():
                 np.savez_compressed(folder / f"{name}.npz", **arrays)
             app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
-            for name in showcase.EXAMPLES:
+            for name in (key for key in showcase.EXAMPLES if key != "segmentation-cardiac"):
                 next(b for b in app.button if b.key == f"home-showcase-{name}").click().run()
                 self.assertFalse(app.exception)
                 self.assertIn("示例展示", app.title[0].value)
@@ -50,6 +74,17 @@ class ShowcaseTest(unittest.TestCase):
                     self.assertNotIn("stage", header["context"])
                     next(s for s in app.selectbox if s.label == "切面").set_value(1).run()
                     self.assertFalse(app.exception)
+                if name == "segmentation-full":
+                    next(s for s in app.selectbox if s.label == "示例病例").set_value("segmentation-cardiac").run()
+                    self.assertFalse(app.exception)
+                    self.assertIn("心脏七结构", app.title[0].value)
+                    header, packed = unpack_envelope(showcase.volume_envelope("segmentation-cardiac", showcase.load_example("segmentation-cardiac")))
+                    np.testing.assert_array_equal(packed["prediction"], cardiac)
+                    self.assertEqual(set(np.unique(packed["prediction"])), set(range(8)))
+                    pixels = showcase.overlay(image[0], cardiac[0], 1)
+                    for label in range(1, 8):
+                        np.testing.assert_array_equal(pixels[label * 2, 4], showcase.COLORS[label - 1])
+                    self.assertEqual(len(set(map(tuple, showcase.COLORS))), 7)
                 next(c for c in app.segmented_control if c.label == "主导航").set_value("首页").run()
             # Sparse unlabelled pixels remain intact; background scribbles are visible.
             pixels = showcase.overlay(image[3], scribble[3], 1, scribble=True)

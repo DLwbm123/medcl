@@ -26,6 +26,18 @@ describe("per-label prediction surfaces", () => {
     expect(labelColor(513)).toEqual(labelColor(513));
     expect(labelColor(2)).not.toEqual(labelColor(7));
   });
+  it("renders seven foregrounds with distinct stable colors and independent meshes", () => {
+    const p = block([4, 6, 30]);
+    for (let label = 1; label <= 7; label++)
+      for (let z = 1; z <= 2; z++) for (let y = 2; y <= 3; y++) p.data[(z * 6 + y) * 30 + label * 4] = label;
+    expect(presentLabels(p)).toEqual([1,2,3,4,5,6,7]);
+    expect(new Set(presentLabels(p).map(l => labelColor(l).join(","))).size).toBe(7);
+    for (const label of presentLabels(p)) {
+      const mesh = predictionSurface(p, label, [1,2,2], [0,0,0]);
+      expect(bounds(mesh.points)[0]).toEqual([label * 8 - 1, label * 8 + 1]);
+      expect(mesh.polys.length).toBeGreaterThan(12);
+    }
+  });
   it("has no image input: image changes cannot change geometry or colors", () => {
     const p=block([4,5,6]); p.data[42]=7; p.data[70]=2;
     const render = (image: Uint8Array) => ({image, meshes: presentLabels(p).map(l => ({...predictionSurface(p,l,[2,1,1],[0,0,0]),color:labelColor(l)}))});

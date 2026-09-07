@@ -9,7 +9,7 @@ from medcl_cornerstone import pack_envelope, render
 st.set_page_config(layout="wide")
 st.title("MedCL · 预测三维验收（合成数据）")
 left, middle, right = st.columns(3)
-case = left.selectbox("测试病例", ["两个对象 · 2 / 7", "uint16 · 2 / 513", "空预测", "单层薄体", "全体积前景", "配准"])
+case = left.selectbox("测试病例", ["两个对象 · 2 / 7", "七前景 · 1–7", "uint16 · 2 / 513", "空预测", "单层薄体", "全体积前景", "配准"])
 intensity = middle.selectbox("原图强度", ["原始合成体", "全零", "高对比体"])
 if right.button("重复挂载"):
     st.session_state["mount_revision"] = st.session_state.get("mount_revision", 0) + 1
@@ -19,7 +19,10 @@ image = np.clip(20 + x * 3 + y + z * 2, 0, 255).astype(np.uint8)
 if intensity == "全零": image[:] = 0
 elif intensity == "高对比体": image = np.where((x // 4 + y // 4 + z // 4) % 2, 255, 0).astype(np.uint8)
 prediction = np.zeros(shape, dtype=np.uint16)
-if case == "单层薄体":
+if case == "七前景 · 1–7":
+    for label, (cx, cy, cz) in enumerate([(10,10,9),(24,10,12),(38,10,9),(10,28,21),(24,28,18),(38,28,21),(24,19,26)], 1):
+        prediction[((x-cx)/4)**2 + ((y-cy)/5)**2 + ((z-cz)/4)**2 <= 1] = label
+elif case == "单层薄体":
     prediction[:, 8:19, 7:18] = 2
     prediction[:, 22:32, 28:40] = 7
 elif case == "全体积前景": prediction[:] = 7

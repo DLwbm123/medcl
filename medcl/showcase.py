@@ -17,6 +17,8 @@ EXAMPLES = {
                        "description": "病理图像与组织类别展示。"},
     "segmentation-full": {"kind": "segmentation", "title": "全监督分割",
                           "description": "原始影像、区域叠加与三维结构浏览。"},
+    "segmentation-cardiac": {"kind": "segmentation", "title": "心脏七结构分割",
+                             "description": "类增量最终七类的切面与三维结构展示。"},
     "segmentation-weak": {"kind": "segmentation", "title": "弱监督分割",
                           "description": "稀疏涂鸦、完整分割区域与三维结构浏览。"},
     "registration": {"kind": "registration", "title": "医学影像配准",
@@ -24,7 +26,8 @@ EXAMPLES = {
 }
 CLASS_NAMES = ("脂肪组织", "背景", "组织碎屑", "淋巴细胞", "黏液",
                "平滑肌", "正常结肠黏膜", "癌相关间质", "结直肠腺癌上皮")
-COLORS = np.array([[38, 200, 122], [255, 181, 71], [96, 165, 250]], dtype=np.uint8)
+COLORS = np.array([[38, 200, 122], [255, 181, 71], [96, 165, 250], [207, 122, 232],
+                   [255, 112, 137], [67, 217, 214], [232, 222, 85]], dtype=np.uint8)
 
 
 def load_example(example):
@@ -39,7 +42,7 @@ def load_example(example):
     return arrays
 
 
-@lru_cache(maxsize=4)
+@lru_cache(maxsize=5)
 def _load(path, mtime):
     with zipfile.ZipFile(path) as archive:
         if sum(item.file_size for item in archive.infolist()) > 32 * 1024 * 1024:
@@ -65,7 +68,7 @@ def _load(path, mtime):
                 or arrays["spacing"].shape != (3,) or not np.isfinite(arrays["spacing"]).all()
                 or np.any(arrays["spacing"] <= 0)):
             raise ValueError("Invalid showcase volume")
-        if "labels" in arrays and not np.isin(arrays["labels"], [0, 1, 2, 3]).all():
+        if "labels" in arrays and not np.isin(arrays["labels"], range(8)).all():
             raise ValueError("Invalid labels")
         if "scribble" in arrays and not np.isin(arrays["scribble"], [0, 1, 2, 3, 4]).all():
             raise ValueError("Invalid scribble")
@@ -74,7 +77,7 @@ def _load(path, mtime):
 
 def overlay(image, labels, opacity=0.5, *, scribble=False):
     result = np.repeat(image[..., None], 3, axis=-1)
-    for label, color in enumerate(COLORS, 1):
+    for label, color in enumerate(COLORS[:3] if scribble else COLORS, 1):
         mask = labels == label
         result[mask] = ((1 - opacity) * result[mask] + opacity * color).astype(np.uint8)
     if scribble:
@@ -99,6 +102,11 @@ def volume_envelope(example, arrays):
 
 
 def render(st, example):
+    if example in ("segmentation-full", "segmentation-cardiac"):
+        example = st.selectbox("示例病例", ["segmentation-full", "segmentation-cardiac"],
+                               index=int(example == "segmentation-cardiac"),
+                               format_func=lambda value: "前列腺 · 单前景" if value.endswith("full") else "心脏 · 七前景",
+                               key="showcase-full-case")
     definition = EXAMPLES[example]
     st.title(f"{definition['title']} · 示例展示")
     st.caption("预置图像与组织类别展示" if example == "classification" else "预置病例展示 · 可切换视图与浏览细节")
@@ -119,6 +127,9 @@ def render(st, example):
             st.write("组织类别")
             st.caption("原始图像为 28 × 28 像素，已放大便于浏览。")
         return
+
+    if example == "segmentation-cardiac":
+        st.caption("类增量最终七类 · 保留原始标签编号 1–7 · 0 为背景")
 
     view = st.radio("展示视图", ["切片对比", "三维浏览"], horizontal=True, key=f"showcase-view-{example}")
     if view == "三维浏览":
@@ -147,7 +158,9 @@ def render(st, example):
         if "scribble" in arrays:
             panels.append(("稀疏涂鸦", overlay(cut("image"), cut("scribble"), 1, scribble=True)))
         panels.append(("分割区域", overlay(cut("image"), cut("labels"), opacity)))
-        st.caption("绿色：分割区域" if example.endswith("full") else "绿色：右心室 · 橙色：心肌 · 蓝色：左心室 · 浅灰：背景涂鸦")
+        st.caption("绿色：分割区域" if example.endswith("full") else
+                   "绿色：标签 1 · 橙色：标签 2 · 蓝色：标签 3 · 紫色：标签 4 · 粉色：标签 5 · 青色：标签 6 · 黄色：标签 7"
+                   if example == "segmentation-cardiac" else "绿色：右心室 · 橙色：心肌 · 蓝色：左心室 · 浅灰：背景涂鸦")
     else:
         panels = [("固定影像", cut("fixed")), ("移动影像", cut("moving")), ("对齐参考", cut("registered"))]
     for column, (label, pixels) in zip(st.columns(len(panels), gap="medium"), panels):

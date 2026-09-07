@@ -126242,7 +126242,7 @@ var eWe = k.newInstance(Aee, "vtkImageMarchingCubes"), tWe = {
   extend: Aee
 };
 const nU = (t) => [...new Set(t.data)].filter((e) => e !== 0).sort((e, n) => e - n), rU = (t) => {
-  const e = [[38, 200, 122], [255, 181, 71], [96, 165, 250], [207, 122, 232], [255, 112, 137], [67, 217, 214]];
+  const e = [[38, 200, 122], [255, 181, 71], [96, 165, 250], [207, 122, 232], [255, 112, 137], [67, 217, 214], [232, 222, 85]];
   return [...e[(t - 1) % e.length], 255];
 };
 function nWe(t, e, n, r) {

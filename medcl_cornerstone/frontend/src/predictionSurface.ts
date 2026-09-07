@@ -10,7 +10,7 @@ export const presentLabels = (prediction: VolumeBlock): number[] =>
   [...new Set(prediction.data)].filter((label) => label !== 0).sort((a, b) => a - b);
 
 export const labelColor = (label: number): [number, number, number, number] => {
-  const palette = [[38, 200, 122], [255, 181, 71], [96, 165, 250], [207, 122, 232], [255, 112, 137], [67, 217, 214]];
+  const palette = [[38, 200, 122], [255, 181, 71], [96, 165, 250], [207, 122, 232], [255, 112, 137], [67, 217, 214], [232, 222, 85]];
   return [...palette[(label - 1) % palette.length]!, 255] as [number, number, number, number];
 };
 

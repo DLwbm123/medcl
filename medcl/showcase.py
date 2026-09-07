@@ -128,8 +128,8 @@ def volume_envelope(example, arrays, *, case_id=None, task_id=None):
 
 def render(st, example):
     definition = EXAMPLES[example]
-    st.title(f"{definition['title']} · 示例展示")
-    st.caption("从组织纹理到皮肤病变与内镜视野，浏览三种医学影像的分类示例。" if example == "classification" else "预置病例展示 · 可切换视图与浏览细节")
+    st.title(f"{definition['title']} · 展示")
+    st.caption("从组织纹理到皮肤病变与内镜视野，浏览三种医学影像的分类。" if example == "classification" else "预置病例展示 · 可切换视图与浏览细节")
     dataset = "pathmnist"
     if example == "classification":
         if st.session_state.get("showcase-classification-dataset") not in DATASETS:
@@ -147,16 +147,16 @@ def render(st, example):
     task_id = st.selectbox("持续学习任务", list(choices),
         format_func=lambda value: f"{value} · {choices[value]['name']}",
         key=f"showcase-task-{example}-{scenario}-{dataset}")
-    st.caption(f"共 {len(specs)} 个任务 · 每任务 1 个示例 · 当前 {task_id}：{choices[task_id]['name']}")
+    st.caption(f"共 {len(specs)} 个任务 · 每任务 1 组图像与结果 · 当前 {task_id}：{choices[task_id]['name']}")
     whole_heart = kind == "segmentation" and scenario == "class" and task_id == "T3" and st.checkbox(
-        "查看最终七类完整心脏示例", key=f"showcase-whole-heart-{example}")
+        "查看最终七类完整心脏", key=f"showcase-whole-heart-{example}")
     if whole_heart:
         example = "segmentation-cardiac"
     view_key = f"{example}-{scenario}-{dataset}-{task_id}"
     try:
         arrays = load_example(example, dataset=dataset, scenario=scenario, task_id=None if whole_heart else task_id)
     except (OSError, ValueError, KeyError, zipfile.BadZipFile):
-        st.info("此示例素材暂不可用，请联系管理员准备展示病例。")
+        st.info("此素材暂不可用，请联系管理员准备展示病例。")
         return
     if example == "classification":
         st.html(card_html(dataset, arrays))
@@ -192,7 +192,7 @@ def render(st, example):
         panels = [("原始影像", cut("image"))]
         if "scribble" in arrays:
             panels.append(("稀疏涂鸦", overlay(cut("image"), cut("scribble"), 1, scribble=True, ignore=int(arrays.get("scribble_ignore", 4)))))
-        panels.append(("示例分割结果", overlay(cut("image"), cut("labels"), opacity)))
+        panels.append(("分割结果", overlay(cut("image"), cut("labels"), opacity)))
         st.caption(" · ".join(f"{color}：标签 {label}" for label, color in enumerate(
             ("绿色", "橙色", "蓝色", "紫色", "粉色", "青色", "黄色"), 1) if label in arrays["labels"]) +
             (" · 浅灰：背景涂鸦" if "scribble" in arrays else ""))

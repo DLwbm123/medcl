@@ -277,9 +277,9 @@ def task_center():
 
     example = f"segmentation-{supervision}" if selected_kind == "segmentation" else selected_kind
     with st.container(border=True):
-        st.markdown(f"### {showcase.EXAMPLES[example]['title']} · 示例展示")
+        st.markdown(f"### {showcase.EXAMPLES[example]['title']} · 展示")
         st.caption(showcase.EXAMPLES[example]["description"])
-        st.button("打开可视化示例", key=f"center-showcase-{example}", on_click=open_showcase, args=(example, scenario))
+        st.button("打开可视化", key=f"center-showcase-{example}", on_click=open_showcase, args=(example, scenario))
 
     st.subheader("选择评测协议")
     shown = [b for b in benchmarks if b["kind"] == selected_kind and b["incremental"] == scenario]
@@ -293,7 +293,7 @@ def task_center():
         shown = [b for b in shown if benchmark_visible(b)]
     shown.sort(key=lambda b: (2 if b.get("synthetic") else 0 if readiness(b)[0] else 1, b["title"]))
     if not shown:
-        st.info("当前没有可用的评测协议：自动评分所需的测试数据与配置尚未接入。可先浏览上方任务示例。")
+        st.info("当前没有可用的评测协议：自动评分所需的测试数据与配置尚未接入。可先浏览上方任务。")
     for b in shown:
         ok, reason = readiness(b)
         tasks = " → ".join(f"{t['id']} {t['name']}" for t in b["tasks"]) or "任务和测试资产待登记"
@@ -403,7 +403,7 @@ def new_evaluation(benchmark_id, training_supervision=None):
                               accept_multiple_files=False, key=f"upload-{benchmark_id}-{mode}-{stage}", disabled=not model_ok)
         if up is not None:
             files.append({"stage": stage, "name": up.name, "data": up.getvalue()})
-    with st.expander("样本索引、文件格式与可下载示例"):
+    with st.expander("样本索引、文件格式与可下载文件"):
         st.write("使用平台生成的匿名样本 ID；预测必须覆盖该阶段协议要求的全部任务与样本。隐藏标签不包含在索引中。")
         if st.button("准备样本索引", key=f"manifest-{benchmark_id}"):
             try:
@@ -417,9 +417,9 @@ def new_evaluation(benchmark_id, training_supervision=None):
         if b.get("synthetic"):
             example = pack_predictions(baseline_predictions(b, standard), as_json=b["kind"] != "segmentation")
             suffix = "npz" if b["kind"] == "segmentation" else "json"
-            st.download_button("下载最终阶段合成预测示例", example, f"{benchmark_id}-final.{suffix}", "application/octet-stream")
+            st.download_button("下载最终阶段合成预测", example, f"{benchmark_id}-final.{suffix}", "application/octet-stream")
             st.download_button("下载未训练的结构验收权重", example_weights(b["kind"]), f"{benchmark_id}-untrained.safetensors", "application/octet-stream")
-            st.caption("示例权重仅用于工程验收，从未训练；不能作为方法结果。")
+            st.caption("权重仅用于工程验收，从未训练；不能作为方法结果。")
     st.subheader("开始评测")
     if clients > 1 and mode == "predictions":
         st.caption("预测模式由提交者声明同一阶段各客户端预测来自同一全局模型；平台不要求训练日志，也不伪称已验证模型来源。")

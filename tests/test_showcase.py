@@ -128,14 +128,14 @@ class ShowcaseTest(unittest.TestCase):
                 if name == "segmentation-full":
                     next(c for c in app.selectbox if c.label == "持续学习场景").set_value("class").run()
                     next(c for c in app.selectbox if c.label == "持续学习任务").set_value("T3").run()
-                    next(c for c in app.checkbox if c.label == "查看最终七类完整心脏示例").check().run()
+                    next(c for c in app.checkbox if c.label == "查看最终七类完整心脏").check().run()
                     self.assertFalse(app.exception)
                     self.assertTrue(any("最终七类" in c.value for c in app.caption))
                 next(c for c in app.segmented_control if c.label == "主导航").set_value("首页").run()
             self.assertEqual(visits, 47)
             next(b for b in app.button if b.label == "进入分割任务").click().run()
             next(c for c in app.segmented_control if c.label == "增量场景").set_value("类别增量").run()
-            next(b for b in app.button if b.label == "打开可视化示例").click().run()
+            next(b for b in app.button if b.label == "打开可视化").click().run()
             self.assertFalse(app.exception)
             self.assertEqual(next(c for c in app.selectbox if c.label == "持续学习场景").value, "class")
             # Ignore 255 remains unchanged even when label 4 is a real foreground.

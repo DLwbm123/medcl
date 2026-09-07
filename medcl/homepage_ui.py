@@ -207,7 +207,7 @@ def render_homepage(
                                       on_click=on_task, args=(kind,), width="stretch",
                                       help=f"{name} · {state}")
                     if on_showcase is not None:
-                        examples = (("segmentation-full", "全监督示例"), ("segmentation-weak", "弱监督示例")) if kind == "segmentation" else ((kind, f"{kinds[kind]}示例"),)
+                        examples = (("segmentation-full", "全监督"), ("segmentation-weak", "弱监督")) if kind == "segmentation" else ((kind, f"{kinds[kind]}"),)
                         for example, label in examples:
                             st.button(label, key=f"home-showcase-{example}", on_click=on_showcase,
                                       args=(example,), width="stretch")

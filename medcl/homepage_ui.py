@@ -191,13 +191,13 @@ def render_homepage(
         definitions = (
             ("segmentation", "医学影像分割", "器官与病灶分割的持续学习评测", "cube"),
             ("classification", "医学影像分类", "医学影像分类任务的持续学习评测", "list"),
-            ("registration", "医学影像配准", "影像配准与标志点 TRE 评测", "target"),
+            ("registration", "医学影像配准", "任务增量 · 影像配准持续学习", "target"),
         )
         for col, (kind, name, description, glyph) in zip(cols, definitions):
             with col:
                 with st.container(border=True, key=f"medcl-home-task-{kind}"):
                     description_col, button_col = st.columns([7, 1], gap="small", vertical_alignment="center")
-                    state = f"{available[kind]} 个可用真实协议" if available[kind] else "暂无可用真实协议"
+                    state = f"{available[kind]} 个可用真实协议" if available[kind] else "自动评分数据待接入"
                     with description_col:
                         st.html(f'<div class="medcl-task-heading"><span class="medcl-task-symbol {kind}">'
                                 + icon(glyph, "#FFFFFF", 26) + '</span><div>'

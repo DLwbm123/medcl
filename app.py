@@ -292,7 +292,7 @@ def task_center():
         shown = [b for b in shown if benchmark_visible(b)]
     shown.sort(key=lambda b: (2 if b.get("synthetic") else 0 if readiness(b)[0] else 1, b["title"]))
     if not shown:
-        st.info("当前没有可用的评测协议。")
+        st.info("当前没有可用的评测协议：自动评分所需的测试数据与配置尚未接入。可先浏览上方任务示例。")
     for b in shown:
         ok, reason = readiness(b)
         tasks = " → ".join(f"{t['id']} {t['name']}" for t in b["tasks"]) or "任务和测试资产待登记"

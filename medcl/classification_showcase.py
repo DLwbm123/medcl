@@ -63,7 +63,7 @@ def card_html(dataset, arrays):
       <div class="medcl-class-info">
         <span class="medcl-class-badge">{modality}</span>
         <h2>{name}</h2><p class="medcl-class-description">{escape(info['description'])}</p>
-        <div class="medcl-class-category"><small>图像类别</small><strong>{category}</strong></div>
+        <div class="medcl-class-category"><small>示例分类结果</small><strong>{category}</strong></div>
         <dl class="medcl-class-meta"><div><dt>图像分辨率</dt><dd>{width} × {height}</dd></div>
           <div><dt>类别编号</dt><dd>{label:02d}</dd></div><div><dt>数据集类别</dt><dd>{info['classes']} 类</dd></div><div><dt>图像通道</dt><dd>RGB · 彩色</dd></div></dl>
         <p class="medcl-class-foot">{'沿用素材中的类别编号。' if dataset == 'skin' else '切换上方数据集，浏览不同类型的医学影像。'}</p>

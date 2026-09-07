@@ -125,9 +125,11 @@ def select_task(kind):
     st.session_state.pop("selected_showcase", None)
 
 
-def open_showcase(example):
+def open_showcase(example, scenario=None):
     select_task(showcase.EXAMPLES[example]["kind"])
     st.session_state.selected_showcase = example
+    if scenario is not None and showcase.EXAMPLES[example]["kind"] == "segmentation":
+        st.session_state[f"showcase-scenario-{example}"] = scenario
 
 
 def open_job(job_id):
@@ -276,7 +278,7 @@ def task_center():
     with st.container(border=True):
         st.markdown(f"### {showcase.EXAMPLES[example]['title']} · 示例展示")
         st.caption(showcase.EXAMPLES[example]["description"])
-        st.button("打开可视化示例", key=f"center-showcase-{example}", on_click=open_showcase, args=(example,))
+        st.button("打开可视化示例", key=f"center-showcase-{example}", on_click=open_showcase, args=(example, scenario))
 
     st.subheader("选择评测协议")
     shown = [b for b in benchmarks if b["kind"] == selected_kind and b["incremental"] == scenario]

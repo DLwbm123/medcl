@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 import sys
 import tarfile
+import zipfile
 
 import h5py
 import nibabel as nib
@@ -64,6 +65,91 @@ def classification(path, *, size=128, classes=9, skin=False):
     return {"image": image, "class_id": np.asarray(label)}
 
 
+def sparse_prefix(path, end, expected_shape):
+    # Read only the selected case from the existing compressed annotation array.
+    with zipfile.ZipFile(path) as archive, archive.open("annotations.npy") as source:
+        version = np.lib.format.read_magic(source)
+        if version == (1, 0):
+            shape, fortran, dtype = np.lib.format.read_array_header_1_0(source)
+        elif version == (2, 0):
+            shape, fortran, dtype = np.lib.format.read_array_header_2_0(source)
+        else:
+            raise ValueError("Unsupported sparse NPY version")
+        if shape != expected_shape or fortran or dtype.kind not in "iu" or not 0 < end <= shape[0]:
+            raise ValueError("Sparse annotation geometry/dtype mismatch")
+        count = end * shape[1] * shape[2]
+        payload = source.read(count * dtype.itemsize)
+        if len(payload) != count * dtype.itemsize:
+            raise ValueError("Truncated sparse annotation")
+        return np.frombuffer(payload, dtype=dtype).reshape(end, *shape[1:])
+
+
+def task_gallery(args):
+    from medcl.showcase_tasks import task_specs
+    cases, records = {}, []
+    for dataset, folder, image_file, label_file, size in (
+        ("pathmnist", args.classification, "train_images.npy", "train_labels.npy", 128),
+        ("skin", args.skin, "train_data_128_new.npy", "train_label_128_new.npy", 128),
+        ("hyperkvasir", args.hyperkvasir, "train_images.npy", "train_labels.npy", 224)):
+        images = np.load(folder / image_file, mmap_mode="r", allow_pickle=False)
+        labels = np.load(folder / label_file, mmap_mode="r", allow_pickle=False).reshape(-1)
+        if images.shape != (len(labels), size, size, 3) or images.dtype != np.uint8 or labels.dtype.kind not in "iu":
+            raise ValueError("Invalid task classification source")
+        for spec in task_specs("classification", dataset=dataset):
+            matches = np.flatnonzero(np.isin(labels, spec["classes"]))
+            if not len(matches): raise ValueError("Task has no classification example")
+            index = int(matches[0])
+            cases[spec["file"]] = {"image": images[index], "class_id": np.asarray(labels[index])}
+            records.append({"file": spec["file"], "source": str(folder), "index": index, "classes": spec["classes"]})
+    for scenario in ("domain", "class", "task"):
+        for index, spec in enumerate(task_specs("segmentation", scenario=scenario)):
+            path = args.segmentation_root / spec["source"]
+            with h5py.File(path, "r") as source:
+                end = int(source["patient_info_train"][0]) + 1
+                image = np.moveaxis(source["train_images"][:, :, :end], -1, 0)
+                labels = np.moveaxis(source["train_labels"][:, :, :end], -1, 0).astype(np.int64)
+                full_shape = (source["train_images"].shape[2], *source["train_images"].shape[:2])
+            if image.shape != labels.shape or not np.isin(labels, range(4)).all():
+                raise ValueError("Invalid task segmentation source")
+            # Follow the existing protocol's foreground label_shift, never edit source files.
+            labels[labels > 0] += spec["shift"]
+            steps = np.maximum(1, np.ceil(np.array(image.shape) / 128).astype(int))
+            slices = tuple(slice(None, None, int(step)) for step in steps)
+            arrays = {"image": normalize(image[slices]), "labels": labels[slices].astype(np.uint8), "spacing": steps.astype(np.float32)}
+            cases[spec["file"]] = arrays
+            sparse_scenario = "organ" if scenario == "task" else scenario
+            sparse_task = chr(65 + index) if scenario == "domain" else spec["id"]
+            sparse_path = args.sparse_root / sparse_scenario / f"{sparse_task}_v2_s2_seed42.npz"
+            sparse = sparse_prefix(sparse_path, end, full_shape)
+            if not np.isin(sparse, [-100, 0, *np.unique(labels)]).all():
+                raise ValueError(f"Sparse annotation label mismatch: {spec['source']}")
+            valid = sparse >= 0
+            if not np.array_equal(sparse[valid], labels[valid]):
+                raise ValueError(f"Sparse annotations do not match the selected dense case: {spec['source']}")
+            # Existing annotations already carry global class IDs; do not shift them twice.
+            sparse = sparse[slices].copy()
+            # Preserve unknown/background distinction in the uint8 display envelope.
+            sparse[sparse == -100] = 255
+            cases[spec["file"].replace("segmentation-", "segmentation-weak-", 1)] = {
+                **arrays, "scribble": sparse.astype(np.uint8), "scribble_ignore": np.asarray(255, dtype=np.uint8)}
+            records.append({"file": spec["file"], "source": str(path), "sparse_source": str(sparse_path),
+                            "case_index": 0, "foreground_label_shift": spec["shift"], "spacing_zyx": steps.tolist(),
+                            "label_decode": "Existing H5 protocol integer truncation; display-grid nearest-neighbor stride"})
+    for spec in task_specs("registration"):
+        pair = args.assets / "registration/examples/task_pairs" / spec["source"] / "pair_001"
+        fixed, moving = [nib.load(pair / f"{name}_image.nii.gz") for name in ("fixed", "moving")]
+        if fixed.shape != moving.shape or not np.allclose(fixed.affine, moving.affine):
+            raise ValueError("Registration pair does not share a display grid")
+        steps = np.maximum(1, np.ceil(np.array(fixed.shape[::-1]) / 128).astype(int))
+        slices = tuple(slice(None, None, int(step)) for step in steps)
+        a, b = [normalize(np.asarray(v.dataobj).transpose(2, 1, 0)[slices]) for v in (fixed, moving)]
+        cases[spec["file"]] = {"fixed": a, "moving": b, "registered": a.copy(),
+            "spacing": np.asarray(fixed.header.get_zooms()[::-1], dtype=np.float32) * steps,
+            "spacing_source": np.asarray("protocol")}
+        records.append({"file": spec["file"], "source": str(pair), "result": "Fixed-image target-state reference, not inferred warp"})
+    write_archive(cases, {"records": records, "not_model_inference": True, "not_evaluation_results": True}, "tasks-provenance.private.json")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prostate", type=Path)
@@ -75,7 +161,16 @@ def main():
     parser.add_argument("--classification-gallery", action="store_true", help="Prepare only the three classification examples")
     parser.add_argument("--skin", type=Path, help="Skin six-class 128x128 NPY directory")
     parser.add_argument("--hyperkvasir", type=Path, help="HyperKvasir20 224x224 NPY directory")
+    parser.add_argument("--task-gallery", action="store_true", help="Prepare one reference per continual task")
+    parser.add_argument("--assets", type=Path)
+    parser.add_argument("--segmentation-root", type=Path)
+    parser.add_argument("--sparse-root", type=Path)
     args = parser.parse_args()
+    if args.task_gallery:
+        if not all((args.classification, args.skin, args.hyperkvasir, args.assets, args.segmentation_root, args.sparse_root)):
+            parser.error("Task gallery requires classification, skin, hyperkvasir, assets, segmentation-root and sparse-root")
+        task_gallery(args)
+        return
     if args.classification_gallery:
         if not all((args.classification, args.skin, args.hyperkvasir)):
             parser.error("Classification gallery requires --classification, --skin and --hyperkvasir")

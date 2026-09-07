@@ -5,6 +5,7 @@ import os
 
 # MedCL homepage fidelity pass v1 (presentation only).
 from medcl import homepage_ui as _home_ui
+from medcl import showcase
 
 import altair as alt
 import numpy as np
@@ -114,12 +115,19 @@ def reset_task_center():
     st.session_state.nav = "任务中心"
     st.session_state.pop("selected_kind", None)
     st.session_state.pop("selected_benchmark", None)
+    st.session_state.pop("selected_showcase", None)
 
 
 def select_task(kind):
     st.session_state.nav = "任务中心"
     st.session_state.selected_kind = kind
     st.session_state.pop("selected_benchmark", None)
+    st.session_state.pop("selected_showcase", None)
+
+
+def open_showcase(example):
+    select_task(showcase.EXAMPLES[example]["kind"])
+    st.session_state.selected_showcase = example
 
 
 def open_job(job_id):
@@ -194,7 +202,7 @@ def homepage():
         st, benchmarks=benchmarks, jobs=visible_jobs(), readiness=readiness,
         kinds=KINDS, statuses=STATUS, on_start=reset_task_center,
         on_records=lambda: navigate("评测记录"), on_task=select_task,
-        on_job=open_job, show_demos=SHOW_DEMOS,
+        on_job=open_job, on_showcase=open_showcase, show_demos=SHOW_DEMOS,
     )
 
 
@@ -222,6 +230,11 @@ def heatmap(matrix, columns, rows, direction="higher", title_text=""):
 
 
 def task_center():
+    example = st.session_state.get("selected_showcase")
+    if example in showcase.EXAMPLES:
+        st.button("← 返回任务", on_click=select_task, args=(showcase.EXAMPLES[example]["kind"],))
+        showcase.render(st, example)
+        return
     chosen = st.session_state.get("selected_benchmark")
     if chosen in lookup and benchmark_visible(lookup[chosen]):
         if st.button("← 返回具体任务"):
@@ -258,6 +271,12 @@ def task_center():
             supervision_label = required_segmented_control("分割监督方式", ["全监督", "弱监督"], "segmentation-supervision")
             supervision = {"全监督": "full", "弱监督": "weak"}[supervision_label]
             st.caption("监督方式由提交者声明；两者使用同一冻结测试集计算 Dice。")
+
+    example = f"segmentation-{supervision}" if selected_kind == "segmentation" else selected_kind
+    with st.container(border=True):
+        st.markdown(f"### {showcase.EXAMPLES[example]['title']} · 示例展示")
+        st.caption(showcase.EXAMPLES[example]["description"])
+        st.button("打开可视化示例", key=f"center-showcase-{example}", on_click=open_showcase, args=(example,))
 
     st.subheader("选择评测协议")
     shown = [b for b in benchmarks if b["kind"] == selected_kind and b["incremental"] == scenario]

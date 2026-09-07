@@ -162,7 +162,8 @@ def render_homepage(
     st: Any, *, benchmarks: Sequence[Mapping[str, Any]], jobs: Sequence[Mapping[str, Any]],
     readiness: Callable[..., tuple[bool, str]], kinds: Mapping[str, str], statuses: Mapping[str, str],
     on_start: Callable[[], None], on_records: Callable[[], None],
-    on_task: Callable[[str], None], on_job: Callable[[str], None], show_demos: bool = False,
+    on_task: Callable[[str], None], on_job: Callable[[str], None],
+    on_showcase: Callable[[str], None] | None = None, show_demos: bool = False,
 ) -> None:
     """Render using existing read-only catalog and visible-jobs snapshots."""
     available = Counter()
@@ -205,6 +206,11 @@ def render_homepage(
                     button_col.button(f"进入{kinds[kind]}任务", key=f"home-enter-{kind}",
                                       on_click=on_task, args=(kind,), width="stretch",
                                       help=f"{name} · {state}")
+                    if on_showcase is not None:
+                        examples = (("segmentation-full", "全监督示例"), ("segmentation-weak", "弱监督示例")) if kind == "segmentation" else ((kind, f"{kinds[kind]}示例"),)
+                        for example, label in examples:
+                            st.button(label, key=f"home-showcase-{example}", on_click=on_showcase,
+                                      args=(example,), width="stretch")
 
     with st.container(key="medcl-home-lower"):
         recent, overview = st.columns([1.2, 1], gap="medium")

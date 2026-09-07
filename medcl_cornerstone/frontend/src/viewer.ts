@@ -5,6 +5,8 @@ import {
   cache,
   init as initCore,
   volumeLoader,
+  geometryLoader,
+  metaData,
 } from "@cornerstonejs/core";
 import {
   CrosshairsTool,
@@ -21,6 +23,12 @@ import {
   synchronizers,
 } from "@cornerstonejs/tools";
 import type { FrontendRendererArgs } from "@streamlit/component-v2-lib";
+import surfaceDisplay from "@cornerstonejs/tools/tools/displayTools/Surface/surfaceDisplay";
+import labelmapDisplay from "@cornerstonejs/tools/tools/displayTools/Labelmap/labelmapDisplay";
+import { getSurfaceActorEntry } from "@cornerstonejs/tools/segmentation/helpers/getSegmentationActor";
+import { registerSegmentationRepresentationDisplay } from "@cornerstonejs/tools/segmentation/SegmentationRepresentationDisplayRegistry";
+import type vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
+import { presentLabels, predictionSurface, labelColor } from "./predictionSurface";
 import { CleanupBag } from "./lifecycle";
 import viewerStyles from "./styles.css?inline";
 import { mprBindingPlan, MprPrimaryTool, MprTool, MouseBinding } from "./interaction";
@@ -73,11 +81,19 @@ const mouseBindings: Record<MouseBinding, ToolEnums.MouseBindings> = {
   Wheel: ToolEnums.MouseBindings.Wheel,
 };
 
+const immutableSurfaceViewports = new Set<string>();
+
 const initialize = (): Promise<void> => {
   if (!initialized) {
     initialized = Promise.resolve().then(() => {
       initCore();
       initTools();
+      // 5.8.2's default Surface update callback assumes PolySeg is installed.
+      // These preview meshes are immutable and rebuilt on each envelope mount.
+      registerSegmentationRepresentationDisplay(ToolEnums.SegmentationRepresentations.Surface, {
+        ...surfaceDisplay,
+        getUpdateFunction: (viewport) => immutableSurfaceViewports.has(viewport.id) ? undefined : surfaceDisplay.getUpdateFunction(viewport),
+      });
       for (const tool of toolClasses) addTool(tool);
     });
   }
@@ -126,13 +142,16 @@ const metadata = (
 const createVolume = (block: VolumeBlock, id: string, envelope: ParsedEnvelope, frame: string): string[] => {
   const dimensions = xyzDimensions(block.shapeZYX);
   const spacing = xyzSpacing(envelope.spacingZYX);
+  // Exact numeric display copy: all uint16 labels are representable in float32.
+  // vtk.js's normalized unsigned-short texture path loses categorical overlays.
+  const floatLabels = envelope.viewerMode === "segmentation" && block.role === "labelmap" && block.dtype === "uint16";
   const options = {
-    metadata: metadata(dimensions, spacing, frame, block.dtype),
+    metadata: metadata(dimensions, spacing, frame, floatLabels ? "float32" : block.dtype),
     dimensions,
     spacing,
     origin: envelope.originXYZ,
     direction: envelope.directionXYZ,
-    scalarData: block.data as Types.PixelDataTypedArray,
+    scalarData: floatLabels ? Float32Array.from(block.data) : block.data as Types.PixelDataTypedArray,
   };
   const volume = block.role === "labelmap"
     ? volumeLoader.createLocalLabelmapVolume(options, id)
@@ -211,7 +230,7 @@ function makeShell(parent: HTMLElement | ShadowRoot, envelope: ParsedEnvelope): 
   const grid = element("div", "medcl-grid");
   const panes = new Map<string, HTMLDivElement>();
   const sliceLabels = new Map<string, HTMLSpanElement>();
-  for (const [id, label] of [...viewportSpecs.map(([id, label]) => [id, label] as const), ["volume3d", "3D volume"] as const]) {
+  for (const [id, label] of [...viewportSpecs.map(([id, label]) => [id, label] as const), ["volume3d", envelope.viewerMode === "segmentation" ? "预测分割 · 3D" : "3D volume"] as const]) {
     const card = element("div", "medcl-card");
     const title = element("div", "medcl-card-title");
     title.append(element("span", "", label));
@@ -233,7 +252,7 @@ function makeShell(parent: HTMLElement | ShadowRoot, envelope: ParsedEnvelope): 
   return { toolbar, grid, status, panes, sliceLabels };
 }
 
-const addToolButtons = (toolbar: HTMLDivElement, mprGroupId: string, engine: RenderingEngine): void => {
+const addToolButtons = (toolbar: HTMLDivElement, mprGroupId: string, engine: RenderingEngine, onReset?: () => void): void => {
   const actions: Array<[string, string, MprPrimaryTool]> = [
     ["W/L", "Window / level", "windowLevel"],
     ["Pan", "Pan all MPR views", "pan"],
@@ -262,6 +281,7 @@ const addToolButtons = (toolbar: HTMLDivElement, mprGroupId: string, engine: Ren
   }
   const reset = button("Reset", "Reset cameras and display properties");
   reset.addEventListener("click", () => {
+    if (onReset) { onReset(); return; }
     for (const viewport of engine.getViewports()) {
       const volume = viewport as VolumeViewport;
       volume.resetProperties?.();
@@ -278,12 +298,14 @@ const addOverlayControls = (
   segmentationId: string,
   segments: number[],
   args: Args,
+  onSelect3D?: (selected: number | null) => void,
 ): void => {
+  let selectedLabel: number | null = null;
   const visibleLabel = element("label", "medcl-control");
   const visible = element("input") as HTMLInputElement;
   visible.type = "checkbox";
   visible.checked = true;
-  visibleLabel.append(visible, document.createTextNode(" overlay"));
+  visibleLabel.append(visible, document.createTextNode(onSelect3D ? " 切面叠加" : " overlay"));
   visible.addEventListener("change", () => {
     for (const viewportId of viewportIds) {
       segmentation.config.visibility.setSegmentationRepresentationVisibility(
@@ -291,9 +313,14 @@ const addOverlayControls = (
         { segmentationId, type: ToolEnums.SegmentationRepresentations.Labelmap },
         visible.checked,
       );
+      if (onSelect3D) for (const segment of segments) {
+        segmentation.config.visibility.setSegmentIndexVisibility(viewportId,
+          { segmentationId, type: ToolEnums.SegmentationRepresentations.Labelmap }, segment,
+          visible.checked && (selectedLabel === null || selectedLabel === segment));
+      }
     }
   });
-  const opacityLabel = element("label", "medcl-control", "Opacity ");
+  const opacityLabel = element("label", "medcl-control", onSelect3D ? "切面透明度 " : "Opacity ");
   const opacity = element("input") as HTMLInputElement;
   opacity.type = "range";
   opacity.min = "0";
@@ -303,16 +330,16 @@ const addOverlayControls = (
   opacity.addEventListener("input", () => {
     segmentation.config.style.setStyle(
       { segmentationId, type: ToolEnums.SegmentationRepresentations.Labelmap },
-      { fillAlpha: Number(opacity.value), fillAlphaInactive: Number(opacity.value), renderOutline: true },
+      { fillAlpha: Number(opacity.value), fillAlphaInactive: Number(opacity.value), renderOutline: !onSelect3D, renderOutlineInactive: !onSelect3D },
       true,
     );
   });
   opacityLabel.append(opacity);
   toolbar.append(visibleLabel, opacityLabel);
   if (segments.length) {
-    const segmentLabel = element("label", "medcl-control", "Segment ");
+    const segmentLabel = element("label", "medcl-control", onSelect3D ? "标签 " : "Segment ");
     const select = element("select") as HTMLSelectElement;
-    const all = element("option", "", "All");
+    const all = element("option", "", onSelect3D ? "全部标签" : "All");
     all.value = "all";
     select.append(all);
     for (const segment of segments) {
@@ -321,17 +348,18 @@ const addOverlayControls = (
       select.append(option);
     }
     select.addEventListener("change", () => {
-      const selected = select.value === "all" ? null : Number(select.value);
+      const selected = selectedLabel = select.value === "all" ? null : Number(select.value);
       for (const viewportId of viewportIds) {
         for (const segment of segments) {
           segmentation.config.visibility.setSegmentIndexVisibility(
             viewportId,
             { segmentationId, type: ToolEnums.SegmentationRepresentations.Labelmap },
             segment,
-            selected === null || selected === segment,
+            (!onSelect3D || visible.checked) && (selected === null || selected === segment),
           );
         }
       }
+      onSelect3D?.(selected);
       args.setStateValue("selected_segment", selected);
     });
     segmentLabel.append(select);
@@ -427,11 +455,6 @@ export async function mountViewer(args: Args, envelope: ParsedEnvelope, bag: Cle
   const frame = `${unique}-frame`;
   const ids = new Map<VolumeName, string>();
   const imageIds = new Map<string, string[]>();
-  for (const block of envelope.volumes) {
-    const volumeId = `${unique}-${block.name}`;
-    ids.set(block.name, volumeId);
-    imageIds.set(volumeId, createVolume(block, volumeId, envelope, frame));
-  }
   bag.add(() => {
     for (const [volumeId, slices] of imageIds) {
       try { cache.removeVolumeLoadObject(volumeId); } catch { /* already evicted */ }
@@ -440,6 +463,25 @@ export async function mountViewer(args: Args, envelope: ParsedEnvelope, bag: Cle
       }
     }
   });
+  for (const block of envelope.volumes) {
+    const volumeId = `${unique}-${block.name}`;
+    ids.set(block.name, volumeId);
+    imageIds.set(volumeId, createVolume(block, volumeId, envelope, frame));
+  }
+  if (envelope.viewerMode === "segmentation") {
+    // createLocalVolume in 5.8.2 gives every slice the same position.
+    // Supply the real preview slice positions for MPR image/labelmap matching.
+    const planes = new Map<string, object>();
+    for (const slices of imageIds.values()) slices.forEach((imageId, z) => {
+      planes.set(imageId, { ...metaData.get("imagePlaneModule", imageId),
+        frameOfReferenceUID: frame,
+        imagePositionPatient: envelope.originXYZ.map((v, axis) => v + z * envelope.spacingZYX[0] * envelope.directionXYZ[axis + 6]!),
+      });
+    });
+    const provider = (type: string, imageId: unknown) => type === "imagePlaneModule" && typeof imageId === "string" ? planes.get(imageId) : undefined;
+    metaData.addProvider(provider, 1000);
+    bag.add(() => { metaData.removeProvider(provider); planes.clear(); });
+  }
   const engine = new RenderingEngine(engineId);
   bag.add(() => engine.destroy());
   const mprIds = viewportSpecs.map(([id]) => `${unique}-${id}`);
@@ -460,7 +502,17 @@ export async function mountViewer(args: Args, envelope: ParsedEnvelope, bag: Cle
   ]);
   const groupIds = configureToolGroups(engineId, mprIds, volume3dId, unique);
   bag.add(() => { for (const groupId of groupIds) ToolGroupManager.destroyToolGroup(groupId); });
-  addToolButtons(shell.toolbar, groupIds[0]!, engine);
+  let resetSegmentation3D: (() => void) | undefined;
+  addToolButtons(shell.toolbar, groupIds[0]!, engine, envelope.viewerMode === "segmentation" ? () => {
+    for (const viewportId of mprIds) {
+      const viewport = engine.getViewport<VolumeViewport>(viewportId);
+      viewport.resetProperties();
+      viewport.setProperties({ voiRange: normalizedVoi }, ids.get("image")!);
+      viewport.resetCamera();
+    }
+    resetSegmentation3D?.();
+    engine.render();
+  } : undefined);
 
   const syncs = [
     synchronizers.createZoomPanSynchronizer(`${unique}-zoom-pan`),
@@ -470,54 +522,156 @@ export async function mountViewer(args: Args, envelope: ParsedEnvelope, bag: Cle
   for (const sync of syncs) for (const viewportId of mprIds) sync.add({ renderingEngineId: engineId, viewportId });
 
   let segmentationId: string | undefined;
+  let surfaceError: string | undefined;
   if (envelope.viewerMode === "segmentation") {
     const scalarId = ids.get("image")!;
-    for (const viewportId of [...mprIds, volume3dId]) {
+    const prediction = envelope.volumes.find((block) => block.name === "prediction")!;
+    const labels = presentLabels(prediction);
+    const viewport3D = engine.getViewport<VolumeViewport>(volume3dId);
+    immutableSurfaceViewports.add(volume3dId);
+    bag.add(() => immutableSurfaceViewports.delete(volume3dId));
+    // Only these three viewports can ever receive the source scalar image.
+    for (const viewportId of mprIds) {
       const viewport = engine.getViewport<VolumeViewport>(viewportId);
       await viewport.setVolumes([{ volumeId: scalarId, actorUID: scalarId }], false);
+      if (cancelled()) return;
       viewport.setProperties({ voiRange: normalizedVoi }, scalarId);
       viewport.resetCamera();
     }
-    engine.getViewport<VolumeViewport>(volume3dId).setProperties({ preset: "MR-Default" }, scalarId);
     const imageLabel = element("label", "medcl-control");
     const imageVisible = element("input") as HTMLInputElement;
     imageVisible.type = "checkbox";
     imageVisible.checked = true;
-    imageLabel.append(imageVisible, document.createTextNode(" image"));
+    imageLabel.append(imageVisible, document.createTextNode(" 切面原图"));
     imageVisible.addEventListener("change", () => {
-      for (const viewportId of [...mprIds, volume3dId]) {
+      for (const viewportId of mprIds) {
         engine.getViewport<VolumeViewport>(viewportId).getActor(scalarId)?.actor.setVisibility(imageVisible.checked);
       }
       engine.render();
     });
     shell.toolbar.append(imageLabel);
-    segmentationId = `${unique}-prediction-segmentation`;
-    segmentation.addSegmentations([{
-      segmentationId,
-      representation: {
-        type: ToolEnums.SegmentationRepresentations.Labelmap,
-        data: { volumeId: ids.get("prediction")! },
-      },
-    }]);
-    for (const viewportId of [...mprIds, volume3dId]) {
-      segmentation.addSegmentationRepresentations(viewportId, [{
-        segmentationId,
-        type: ToolEnums.SegmentationRepresentations.Labelmap,
-      }]);
-    }
-    segmentation.config.style.setStyle(
-      { segmentationId, type: ToolEnums.SegmentationRepresentations.Labelmap },
-      { fillAlpha: 0.45, fillAlphaInactive: 0.45, renderOutline: true, outlineWidth: 1 },
-      true,
-    );
-    const id = segmentationId;
+    const id = segmentationId = `${unique}-prediction-segmentation`;
+    const geometryIds = new Map<number, string>();
+    const lut: Types.ColorLUT = Array.from({ length: Math.max(0, ...labels) + 1 }, (_, i) =>
+      i === 0 ? [0, 0, 0, 0] : labelColor(i));
+    const lutIndex = segmentation.state.addColorLUT(lut);
+    const clearSurfaces = () => {
+      const actors = labels.map((label) => getSurfaceActorEntry(volume3dId, id, label)?.actor as vtkActor | undefined).filter(Boolean);
+      try { segmentation.removeSegmentationRepresentations(volume3dId, { segmentationId: id }, true); } catch { /* already gone */ }
+      for (const actor of actors) {
+        const mapper = actor!.getMapper();
+        mapper?.getInputData()?.delete(); mapper?.delete(); actor!.delete();
+      }
+      for (const geometryId of geometryIds.values()) cache.removeGeometryLoadObject(geometryId);
+      geometryIds.clear();
+    };
     bag.add(() => {
-      for (const viewportId of [...mprIds, volume3dId]) {
+      clearSurfaces();
+      for (const viewportId of mprIds) {
         try { segmentation.removeSegmentationRepresentations(viewportId, { segmentationId: id }, true); } catch { /* already gone */ }
       }
       try { segmentation.removeSegmentation(id); } catch { /* already gone */ }
+      segmentation.state.removeColorLUT(lutIndex);
     });
-    addOverlayControls(shell.toolbar, [...mprIds, volume3dId], segmentationId, envelope.segments, args);
+    segmentation.addSegmentations([{
+      segmentationId: id,
+      representation: { type: ToolEnums.SegmentationRepresentations.Labelmap, data: { volumeId: ids.get("prediction")! } },
+      config: { segments: Object.fromEntries(labels.map((label) => [label, { segmentIndex: label }])) },
+    }]);
+    for (const viewportId of mprIds) {
+      segmentation.addSegmentationRepresentations(viewportId, [{ segmentationId: id,
+        type: ToolEnums.SegmentationRepresentations.Labelmap, config: { colorLUTOrIndex: lutIndex } }]);
+    }
+    segmentation.config.style.setStyle(
+      { segmentationId: id, type: ToolEnums.SegmentationRepresentations.Labelmap },
+      // 5.8.2's slice outline shader still draws hidden labels with width zero.
+      // Filled overlays respect per-label alpha and visibility, including uint16.
+      { fillAlpha: 0.45, fillAlphaInactive: 0.45, renderOutline: false, renderOutlineInactive: false }, true,
+    );
+    // Await the actual display operation rather than treating registration as Ready.
+    for (const viewportId of mprIds) {
+      await labelmapDisplay.render(engine.getViewport(viewportId),
+        segmentation.state.getSegmentationRepresentation(viewportId, { segmentationId: id, type: ToolEnums.SegmentationRepresentations.Labelmap })! as Parameters<typeof labelmapDisplay.render>[1]);
+      if (cancelled()) return;
+    }
+    try {
+      for (const label of labels) {
+        // Yield between labels so unmount/case changes can cancel before registration.
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        if (cancelled()) return;
+        const mesh = predictionSurface(prediction, label, envelope.spacingZYX, envelope.originXYZ);
+        const geometryId = `${unique}-surface-${label}`;
+        geometryLoader.createAndCacheGeometry(geometryId, { type: CoreEnums.GeometryType.SURFACE,
+          geometryData: { id: geometryId, ...mesh, segmentIndex: label, frameOfReferenceUID: frame } });
+        geometryIds.set(label, geometryId);
+      }
+      if (labels.length) {
+        segmentation.addRepresentationData({ segmentationId: id, type: ToolEnums.SegmentationRepresentations.Surface, data: { geometryIds } });
+        segmentation.addSurfaceRepresentationToViewport(volume3dId, [{ segmentationId: id, config: { colorLUTOrIndex: lutIndex } }]);
+        await surfaceDisplay.render(viewport3D, segmentation.state.getSegmentationRepresentation(volume3dId,
+          { segmentationId: id, type: ToolEnums.SegmentationRepresentations.Surface })!);
+        if (cancelled()) return;
+        if (viewport3D.getActors().length !== labels.length || labels.some((label) => !getSurfaceActorEntry(volume3dId, id, label))) {
+          throw new Error("prediction_surface_render_failed");
+        }
+      } else {
+        const empty = element("div", "medcl-empty-prediction", "当前预览没有可显示的预测前景");
+        empty.setAttribute("role", "status");
+        shell.panes.get("volume3d")!.append(empty);
+      }
+    } catch (error) {
+      if (cancelled()) return;
+      clearSurfaces();
+      surfaceError = "PREDICTION_SURFACE_FAILED";
+      console.error("Prediction Surface rendering failed", error);
+      const notice = element("div", "medcl-empty-prediction", "预测三维显示失败；仍可使用二维切面。");
+      notice.setAttribute("role", "alert");
+      shell.panes.get("volume3d")!.append(notice);
+    }
+    let selectedLabel: number | null = null;
+    const opacity = element("input") as HTMLInputElement;
+    opacity.type = "range"; opacity.min = "0"; opacity.max = "1"; opacity.step = "0.05"; opacity.value = "1";
+    const applyMaterials = (): void => {
+      for (const label of labels) {
+        const actor = getSurfaceActorEntry(volume3dId, id, label)?.actor as vtkActor | undefined;
+        if (!actor) continue;
+        actor.setVisibility(selectedLabel === null || selectedLabel === label);
+        const color = labelColor(label);
+        actor.getProperty().setColor(color[0] / 255, color[1] / 255, color[2] / 255);
+        actor.getProperty().setOpacity(Number(opacity.value));
+        actor.getProperty().setAmbient(0.25);
+        actor.getProperty().setDiffuse(0.75);
+        actor.getProperty().setSpecular(0.15);
+      }
+      viewport3D.render();
+    };
+    resetSegmentation3D = () => {
+      opacity.value = "1";
+      applyMaterials();
+      if (labels.length && !surfaceError) {
+        viewport3D.setCamera({ viewPlaneNormal: [0, 0, 1], viewUp: [0, -1, 0] });
+        viewport3D.resetCamera(); // only visible prediction surfaces contribute bounds
+        const camera = viewport3D.getCamera();
+        if (camera.parallelScale) {
+          const bounds = labels.filter((label) => selectedLabel === null || label === selectedLabel)
+            .map((label) => (getSurfaceActorEntry(volume3dId, id, label)!.actor as vtkActor).getBounds());
+          const extent = [0, 1, 2].map((axis) => Math.max(...bounds.map((b) => b[axis * 2 + 1]!)) - Math.min(...bounds.map((b) => b[axis * 2]!)));
+          viewport3D.setCamera({ parallelScale: Math.max(camera.parallelScale, Math.hypot(...extent) * 0.55) });
+        }
+      }
+    };
+    resetSegmentation3D();
+    addOverlayControls(shell.toolbar, mprIds, id, labels, args, (selected) => {
+      selectedLabel = selected;
+      for (const label of labels) segmentation.config.visibility.setSegmentIndexVisibility(volume3dId,
+        { segmentationId: id, type: ToolEnums.SegmentationRepresentations.Surface }, label, selected === null || label === selected);
+      applyMaterials();
+    });
+    const opacityLabel = element("label", "medcl-control", "3D 不透明度 ");
+    opacityLabel.append(opacity); opacity.disabled = labels.length === 0 || !!surfaceError;
+    opacity.addEventListener("input", applyMaterials);
+    shell.toolbar.append(opacityLabel);
+    args.setStateValue("selected_segment", null);
   } else {
     const applyMode = (mode: LayerMode, opacity: number) =>
       setRegistrationVolumes(mode, opacity, engine, mprIds, volume3dId, ids);
@@ -565,7 +719,7 @@ export async function mountViewer(args: Args, envelope: ParsedEnvelope, bag: Cle
   }
   const refresh = (): void => {
     if (cancelled()) return;
-    engine.resize(true, true);
+    engine.resize(true, envelope.viewerMode === "registration");
     engine.render();
   };
   const observer = new ResizeObserver(refresh);
@@ -580,12 +734,12 @@ export async function mountViewer(args: Args, envelope: ParsedEnvelope, bag: Cle
   bag.add(() => cancelAnimationFrame(resizeFrame));
   refresh();
   sliceHandler();
-  shell.status.textContent = envelope.viewerMode === "registration" && !ids.has("registered")
+  shell.status.textContent = surfaceError ? "预测三维显示失败；二维切面可继续使用。" : envelope.viewerMode === "registration" && !ids.has("registered")
     ? "No registered volume was submitted; showing Fixed + Moving. TRE still uses predicted landmarks."
-    : envelope.viewerMode === "segmentation" && envelope.segments.length === 0
-      ? "Prediction is empty; the image is available but no foreground overlay or 3D labelmap exists."
+    : envelope.viewerMode === "segmentation" && !presentLabels(envelope.volumes.find((block) => block.name === "prediction")!).length
+      ? "当前预览没有可显示的预测前景；切面原图仍可浏览。"
       : "Ready · wheel scrolls MPR slices · right drag zooms · middle drag pans";
-  args.setStateValue("viewer_error_code", null);
-  args.setStateValue("viewer_ready", true);
+  args.setStateValue("viewer_error_code", surfaceError ?? null);
+  args.setStateValue("viewer_ready", !surfaceError);
 
 }

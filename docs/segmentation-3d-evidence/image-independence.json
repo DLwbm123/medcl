@@ -1,0 +1,14 @@
+{
+  "zero": {
+    "3d_pixels": 591744,
+    "3d_differing_pixels": 0,
+    "max_3d_channel_delta": 0,
+    "mpr_differing_pixels": 219696
+  },
+  "contrast": {
+    "3d_pixels": 591744,
+    "3d_differing_pixels": 0,
+    "max_3d_channel_delta": 0,
+    "mpr_differing_pixels": 219317
+  }
+}

@@ -119,6 +119,17 @@
   height: 100% !important;
 }
 
+.medcl-empty-prediction {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  color: #b4c6df;
+  text-align: center;
+  pointer-events: none;
+}
+
 .medcl-error {
   box-sizing: border-box;
   min-height: 96px;

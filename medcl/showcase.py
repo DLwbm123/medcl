@@ -10,11 +10,12 @@ import zipfile
 import numpy as np
 
 from medcl.benchmarks import state_path
+from medcl.classification_showcase import DATASETS, card_html
 from medcl_cornerstone import pack_envelope, render as render_volume
 
 EXAMPLES = {
     "classification": {"kind": "classification", "title": "医学影像分类",
-                       "description": "病理图像与组织类别展示。"},
+                       "description": "病理、皮肤与消化道内镜图像的分类展示。"},
     "segmentation-full": {"kind": "segmentation", "title": "全监督分割",
                           "description": "原始影像、区域叠加与三维结构浏览。"},
     "segmentation-cardiac": {"kind": "segmentation", "title": "心脏七结构分割",
@@ -24,25 +25,30 @@ EXAMPLES = {
     "registration": {"kind": "registration", "title": "医学影像配准",
                      "description": "固定影像、移动影像、对齐参考与融合对比。"},
 }
-CLASS_NAMES = ("脂肪组织", "背景", "组织碎屑", "淋巴细胞", "黏液",
-               "平滑肌", "正常结肠黏膜", "癌相关间质", "结直肠腺癌上皮")
 COLORS = np.array([[38, 200, 122], [255, 181, 71], [96, 165, 250], [207, 122, 232],
                    [255, 112, 137], [67, 217, 214], [232, 222, 85]], dtype=np.uint8)
 
 
-def load_example(example):
+def load_example(example, *, dataset="pathmnist"):
     if example not in EXAMPLES:
         raise ValueError("Unknown showcase")
-    path = state_path() / "showcase" / f"{example}.npz"
+    if dataset not in DATASETS:
+        raise ValueError("Unknown classification dataset")
+    filename = DATASETS[dataset]["file"] if example == "classification" else example
+    path = state_path() / "showcase" / f"{filename}.npz"
     arrays = _load(str(path), path.stat().st_mtime_ns)
     if ("class_id" in arrays) != (example == "classification") or (
             "fixed" in arrays) != (example == "registration") or (
             "scribble" in arrays) != (example == "segmentation-weak"):
         raise ValueError("Showcase task mismatch")
+    if example == "classification":
+        info = DATASETS[dataset]
+        if arrays["image"].shape != (info["size"], info["size"], 3) or not 0 <= int(arrays["class_id"]) < info["classes"]:
+            raise ValueError("Classification dataset mismatch")
     return arrays
 
 
-@lru_cache(maxsize=5)
+@lru_cache(maxsize=7)
 def _load(path, mtime):
     with zipfile.ZipFile(path) as archive:
         if sum(item.file_size for item in archive.infolist()) > 32 * 1024 * 1024:
@@ -50,9 +56,9 @@ def _load(path, mtime):
     with np.load(path, allow_pickle=False) as archive:
         arrays = {key: archive[key] for key in archive.files}
     if "class_id" in arrays:
-        if (set(arrays) != {"image", "class_id"} or arrays["image"].shape != (28, 28, 3)
+        if (set(arrays) != {"image", "class_id"} or arrays["image"].shape not in ((128, 128, 3), (224, 224, 3))
                 or arrays["image"].dtype != np.uint8 or arrays["class_id"].shape != ()
-                or arrays["class_id"].dtype.kind not in "iu" or not 0 <= int(arrays["class_id"]) < len(CLASS_NAMES)):
+                or arrays["class_id"].dtype.kind not in "iu" or not 0 <= int(arrays["class_id"]) < 20):
             raise ValueError("Invalid classification example")
     else:
         keys = set(arrays) - {"spacing_source"}
@@ -109,23 +115,23 @@ def render(st, example):
                                key="showcase-full-case")
     definition = EXAMPLES[example]
     st.title(f"{definition['title']} · 示例展示")
-    st.caption("预置图像与组织类别展示" if example == "classification" else "预置病例展示 · 可切换视图与浏览细节")
+    st.caption("从组织纹理到皮肤病变与内镜视野，浏览三种医学影像的分类示例。" if example == "classification" else "预置病例展示 · 可切换视图与浏览细节")
+    dataset = "pathmnist"
+    if example == "classification":
+        if st.session_state.get("showcase-classification-dataset") not in DATASETS:
+            st.session_state["showcase-classification-dataset"] = "pathmnist"
+        dataset = st.segmented_control("影像类型", list(DATASETS),
+            format_func=lambda key: f"{DATASETS[key]['name']} · {DATASETS[key]['modality']}",
+            key="showcase-classification-dataset")
     if example == "registration":
         st.caption("使用固定与移动脑 MRI 展示对齐关系，参考视图呈现目标对齐状态。")
     try:
-        arrays = load_example(example)
+        arrays = load_example(example, dataset=dataset)
     except (OSError, ValueError, KeyError, zipfile.BadZipFile):
         st.info("此示例素材暂不可用，请联系管理员准备展示病例。")
         return
     if example == "classification":
-        left, right = st.columns([1, 1.5], gap="large", vertical_alignment="center")
-        from PIL import Image
-        left.image(Image.fromarray(arrays["image"]).resize((336, 336), Image.Resampling.NEAREST),
-                   caption="PathMNIST · 病理图像", width=336)
-        with right:
-            st.subheader(CLASS_NAMES[int(arrays["class_id"])])
-            st.write("组织类别")
-            st.caption("原始图像为 28 × 28 像素，已放大便于浏览。")
+        st.html(card_html(dataset, arrays))
         return
 
     if example == "segmentation-cardiac":

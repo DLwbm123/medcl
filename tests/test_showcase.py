@@ -14,6 +14,20 @@ from medcl_cornerstone import unpack_envelope
 
 
 class ShowcaseTest(unittest.TestCase):
+    def test_classification_preparation_requires_native_resolution(self):
+        from scripts.prepare_showcase import classification
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            image = np.arange(128 * 128 * 3, dtype=np.uint8).reshape(128, 128, 3)
+            np.save(folder / "train_images.npy", image[None])
+            np.save(folder / "train_labels.npy", np.array([[2]], dtype=np.uint8))
+            result = classification(folder)
+            np.testing.assert_array_equal(result["image"], image)
+            self.assertEqual(result["class_id"], 2)
+            np.save(folder / "train_images.npy", np.zeros((1, 28, 28, 3), dtype=np.uint8))
+            with self.assertRaisesRegex(ValueError, "resolution"):
+                classification(folder)
+
     def test_prepare_cardiac_keeps_all_labels_and_first_case(self):
         import h5py
         from scripts.prepare_showcase import segmentation
@@ -47,7 +61,7 @@ class ShowcaseTest(unittest.TestCase):
             scribble[3, 6, 6:9] = 1
             scribble[3, 2, 2:5] = 0
             volumes = {"image": image, "labels": labels, "spacing": np.ones(3)}
-            cases = {"classification": {"image": np.full((28, 28, 3), 100, dtype=np.uint8), "class_id": np.asarray(8)},
+            cases = {"classification": {"image": np.full((128, 128, 3), 100, dtype=np.uint8), "class_id": np.asarray(8)},
                      "segmentation-full": volumes,
                      "segmentation-weak": {**volumes, "scribble": scribble},
                      "registration": {"fixed": image, "moving": image // 2, "registered": image, "spacing": np.ones(3)}}
@@ -55,6 +69,8 @@ class ShowcaseTest(unittest.TestCase):
             for label in range(1, 8):
                 cardiac[:, label * 2:label * 2 + 2, 3:12] = label
             cases["segmentation-cardiac"] = {**volumes, "labels": cardiac}
+            cases["classification-skin"] = {"image": np.full((128, 128, 3), 130, dtype=np.uint8), "class_id": np.asarray(1)}
+            cases["classification-hyperkvasir"] = {"image": np.full((224, 224, 3), 170, dtype=np.uint8), "class_id": np.asarray(7)}
             for name, arrays in cases.items():
                 np.savez_compressed(folder / f"{name}.npz", **arrays)
             app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
@@ -68,6 +84,23 @@ class ShowcaseTest(unittest.TestCase):
                 self.assertNotIn("GT", text)
                 self.assertNotIn("ground truth", text.lower())
                 self.assertNotIn("预测", text)
+                if name == "classification":
+                    from medcl.classification_showcase import DATASETS, card_html
+                    for dataset, info in DATASETS.items():
+                        next(c for c in app.segmented_control if c.label == "影像类型").set_value(dataset).run()
+                        self.assertFalse(app.exception)
+                        source = showcase.load_example(name, dataset=dataset)
+                        html = card_html(dataset, source)
+                        self.assertIn(info["name"], html)
+                        self.assertIn(info["labels"][int(source["class_id"])], html)
+                        import base64, io
+                        from PIL import Image
+                        pixels = np.asarray(Image.open(io.BytesIO(base64.b64decode(html.split("data:image/png;base64,")[1].split('"')[0]))))
+                        np.testing.assert_array_equal(pixels, source["image"])
+                        self.assertEqual(list_jobs(), [])
+                    next(c for c in app.segmented_control if c.label == "影像类型").set_value(None).run()
+                    self.assertFalse(app.exception)
+                    self.assertIn(next(c for c in app.segmented_control if c.label == "影像类型").value, DATASETS)
                 if name != "classification":
                     header, arrays = unpack_envelope(showcase.volume_envelope(name, showcase.load_example(name)))
                     self.assertNotIn("score", header["context"])
@@ -94,7 +127,13 @@ class ShowcaseTest(unittest.TestCase):
             np.testing.assert_array_equal(showcase.checkerboard(image[0], image[0] // 2)[0, [0, 12]], [80, 40])
             with self.assertRaises(ValueError):
                 showcase.load_example("../private")
-            np.savez_compressed(folder / "classification.npz", image=np.zeros((28, 28, 3)), class_id=100)
+            for filename, shape, label in [("classification", (28, 28, 3), 0), ("classification-skin", (128, 128, 3), 6),
+                                            ("classification-hyperkvasir", (128, 128, 3), 7)]:
+                np.savez_compressed(folder / f"{filename}.npz", image=np.zeros(shape, dtype=np.uint8), class_id=label)
+                dataset = {"classification": "pathmnist", "classification-skin": "skin", "classification-hyperkvasir": "hyperkvasir"}[filename]
+                with self.assertRaises(ValueError):
+                    showcase.load_example("classification", dataset=dataset)
+            np.savez_compressed(folder / "classification.npz", image=np.zeros((128, 128, 3)), class_id=100)
             with self.assertRaises(ValueError):
                 showcase.load_example("classification")
 

@@ -52,15 +52,41 @@ def segmentation(path, *, weak, cardiac=False):
         return arrays
 
 
+def classification(path, *, size=128, classes=9, skin=False):
+    image_file, label_file = ("train_data_128_new.npy", "train_label_128_new.npy") if skin else ("train_images.npy", "train_labels.npy")
+    images = np.load(path / image_file, mmap_mode="r", allow_pickle=False)
+    labels = np.load(path / label_file, mmap_mode="r", allow_pickle=False)
+    if len(images) != len(labels) or len(images) == 0 or labels.dtype.kind not in "iu":
+        raise ValueError("Invalid classification source labels")
+    image, label = np.asarray(images[0]), int(np.asarray(labels[0]).item())
+    if image.shape != (size, size, 3) or image.dtype != np.uint8 or not 0 <= label < classes:
+        raise ValueError("Invalid classification source resolution or class")
+    return {"image": image, "class_id": np.asarray(label)}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prostate", type=Path)
     parser.add_argument("--weak", type=Path)
     parser.add_argument("--weak-geometry", type=Path, help="Corresponding original NIfTI for voxel spacing")
-    parser.add_argument("--classification", type=Path, help="PathMNIST NPY directory")
+    parser.add_argument("--classification", type=Path, help="Native PathMNIST 128x128 NPY directory")
     parser.add_argument("--pair", type=Path, help="Curated OASIS pair directory")
     parser.add_argument("--cardiac", type=Path, help="Prepare only the first complete seven-label MMWHS case")
+    parser.add_argument("--classification-gallery", action="store_true", help="Prepare only the three classification examples")
+    parser.add_argument("--skin", type=Path, help="Skin six-class 128x128 NPY directory")
+    parser.add_argument("--hyperkvasir", type=Path, help="HyperKvasir20 224x224 NPY directory")
     args = parser.parse_args()
+    if args.classification_gallery:
+        if not all((args.classification, args.skin, args.hyperkvasir)):
+            parser.error("Classification gallery requires --classification, --skin and --hyperkvasir")
+        cases = {"classification": classification(args.classification),
+                 "classification-skin": classification(args.skin, classes=6, skin=True),
+                 "classification-hyperkvasir": classification(args.hyperkvasir, size=224, classes=20)}
+        write_archive(cases, {"sources": {key: str(getattr(args, key)) for key in ("classification", "skin", "hyperkvasir")},
+            "selection": "First training image in each prepared dataset, original pixels and numeric class",
+            "resizing": "None: native prepared grids 128, 128 and 224",
+            "not_model_inference": True, "not_evaluation_results": True}, "classification-provenance.private.json")
+        return
     if args.cardiac:
         cases = {"segmentation-cardiac": segmentation(args.cardiac, weak=False, cardiac=True)}
         write_archive(cases, {"source": str(args.cardiac), "case_index": 0,
@@ -72,13 +98,7 @@ def main():
         return
     if not all((args.prostate, args.weak, args.classification, args.pair)):
         parser.error("Provide --cardiac, or all of --prostate, --weak, --classification and --pair")
-    # Deterministic first training image; no model confidence or performance selection.
-    images = np.load(args.classification / "train_images.npy", mmap_mode="r", allow_pickle=False)
-    labels = np.load(args.classification / "train_labels.npy", mmap_mode="r", allow_pickle=False)
-    image, label = np.asarray(images[0]), int(np.asarray(labels[0]).item())
-    if image.shape != (28, 28, 3) or image.dtype != np.uint8 or not 0 <= label < 9:
-        raise ValueError("Invalid classification source")
-    cases = {"classification": {"image": image, "class_id": np.asarray(label)},
+    cases = {"classification": classification(args.classification),
              "segmentation-full": segmentation(args.prostate, weak=False),
              "segmentation-weak": segmentation(args.weak, weak=True)}
     if args.weak_geometry:

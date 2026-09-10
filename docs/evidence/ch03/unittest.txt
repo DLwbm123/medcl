@@ -1,0 +1,91 @@
+test_home_ctas_use_real_navigation (test_app.BrowserAppCheck.test_home_ctas_use_real_navigation) ... 2026-09-10 13:19:50.979 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_required_task_segments_recover_after_deselection (test_app.BrowserAppCheck.test_required_task_segments_recover_after_deselection) ... 2026-09-10 13:19:51.619 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-09-10 13:19:51.893 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-09-10 13:19:51.893 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-09-10 13:19:51.893 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_thesis_visual_system_is_centralized_and_wide (test_app.BrowserAppCheck.test_thesis_visual_system_is_centralized_and_wide) ... ok
+test_unseen_state_resets_when_output_head_changes (test_app.BrowserAppCheck.test_unseen_state_resets_when_output_head_changes) ... 2026-09-10 13:19:51.924 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_upload_result_navigation_and_invalid_file (test_app.BrowserAppCheck.test_upload_result_navigation_and_invalid_file) ... 2026-09-10 13:19:52.327 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+MedCL worker ready (one worker, local evaluation only)
+2026-09-10 13:19:55.074 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_all_chart_forms_render_and_offline_exports_are_real (test_benchmark_charts.BenchmarkCharts.test_all_chart_forms_render_and_offline_exports_are_real) ... ok
+test_specs_encode_reported_values_domains_and_missing (test_benchmark_charts.BenchmarkCharts.test_specs_encode_reported_values_domains_and_missing) ... ok
+test_empty_jobs_all_views_scenarios_filters_reset_exports (test_benchmark_ui.BenchmarkUI.test_empty_jobs_all_views_scenarios_filters_reset_exports) ... 2026-09-10 13:19:59.847 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_one_and_two_real_completed_test_jobs_preserve_platform_comparison (test_benchmark_ui.BenchmarkUI.test_one_and_two_real_completed_test_jobs_preserve_platform_comparison) ... 2026-09-10 13:20:02.488 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+MedCL worker ready (one worker, local evaluation only)
+MedCL worker ready (one worker, local evaluation only)
+MedCL worker ready (one worker, local evaluation only)
+ok
+test_all_icons_are_local_images (test_homepage_ui.HomepageUITests.test_all_icons_are_local_images) ... ok
+test_asset_allowlist (test_homepage_ui.HomepageUITests.test_asset_allowlist) ... ok
+test_assets_are_bundled_webp (test_homepage_ui.HomepageUITests.test_assets_are_bundled_webp) ... ok
+test_callbacks_are_wired_to_existing_actions (test_homepage_ui.HomepageUITests.test_callbacks_are_wired_to_existing_actions) ... ok
+test_development_records_disclosed (test_homepage_ui.HomepageUITests.test_development_records_disclosed) ... ok
+test_empty_homepage_does_not_invent_records (test_homepage_ui.HomepageUITests.test_empty_homepage_does_not_invent_records) ... ok
+test_header_preserves_required_selection_guard (test_homepage_ui.HomepageUITests.test_header_preserves_required_selection_guard) ... ok
+test_icon_input_validation (test_homepage_ui.HomepageUITests.test_icon_input_validation) ... ok
+test_invalid_overview_values_rejected (test_homepage_ui.HomepageUITests.test_invalid_overview_values_rejected) ... ok
+test_latest_three_records_are_selected (test_homepage_ui.HomepageUITests.test_latest_three_records_are_selected) ... ok
+test_only_ready_real_protocols_are_counted (test_homepage_ui.HomepageUITests.test_only_ready_real_protocols_are_counted) ... ok
+test_recent_selection_keeps_exact_job_id (test_homepage_ui.HomepageUITests.test_recent_selection_keeps_exact_job_id) ... ok
+test_rendering_does_not_mutate_input_data (test_homepage_ui.HomepageUITests.test_rendering_does_not_mutate_input_data) ... ok
+test_showcase_is_explicit_illustration (test_homepage_ui.HomepageUITests.test_showcase_is_explicit_illustration) ... ok
+test_stylesheet_resolves_all_tokens (test_homepage_ui.HomepageUITests.test_stylesheet_resolves_all_tokens) ... ok
+test_untrusted_titles_are_escaped (test_homepage_ui.HomepageUITests.test_untrusted_titles_are_escaped) ... ok
+test_classification_cases_and_client_weighting (test_metrics.KernelChecks.test_classification_cases_and_client_weighting) ... ok
+test_custom_task_order_is_explicit_matrix_reordering (test_metrics.KernelChecks.test_custom_task_order_is_explicit_matrix_reordering) ... ok
+test_dice_empty_and_case_voxel_aggregation (test_metrics.KernelChecks.test_dice_empty_and_case_voxel_aggregation) ... ok
+test_gates_and_no_data (test_metrics.KernelChecks.test_gates_and_no_data) ... ok
+test_invalid_inputs (test_metrics.KernelChecks.test_invalid_inputs) ... ok
+test_missing_stages_are_not_compacted_or_imputed (test_metrics.KernelChecks.test_missing_stages_are_not_compacted_or_imputed) ... ok
+test_tre_spacing_and_lower_is_better (test_metrics.KernelChecks.test_tre_spacing_and_lower_is_better) ... ok
+test_custom_order_and_missing_stage (test_platform.PlatformChecks.test_custom_order_and_missing_stage) ... ok
+test_final_predictions_worker_reports_no_training_logs (test_platform.PlatformChecks.test_final_predictions_worker_reports_no_training_logs) ... MedCL worker ready (one worker, local evaluation only)
+ok
+test_html_csv_escaping_and_no_partial_claiming (test_platform.PlatformChecks.test_html_csv_escaping_and_no_partial_claiming) ... ok
+test_illegal_payloads_rejected_before_queue (test_platform.PlatformChecks.test_illegal_payloads_rejected_before_queue) ... ok
+test_immutable_config_and_comparison_gates (test_platform.PlatformChecks.test_immutable_config_and_comparison_gates) ... ok
+test_json_resource_limits_and_public_allowlist (test_platform.PlatformChecks.test_json_resource_limits_and_public_allowlist) ... ok
+test_larger_linear_head_and_finite_outputs (test_platform.PlatformChecks.test_larger_linear_head_and_finite_outputs) ... ok
+test_mapping_checks_and_failed_job_visibility (test_platform.PlatformChecks.test_mapping_checks_and_failed_job_visibility) ... MedCL worker ready (one worker, local evaluation only)
+ok
+test_model_gate_and_weights_format (test_platform.PlatformChecks.test_model_gate_and_weights_format) ... ok
+test_owner_only_modes_and_legacy_classification_migration (test_platform.PlatformChecks.test_owner_only_modes_and_legacy_classification_migration) ... MedCL worker ready (one worker, local evaluation only)
+ok
+test_preview_corruption_and_legacy_result_degrade_safely (test_platform.PlatformChecks.test_preview_corruption_and_legacy_result_degrade_safely) ... ok
+test_protocol_schema_and_strict_hdf5_ranges (test_platform.PlatformChecks.test_protocol_schema_and_strict_hdf5_ranges) ... ok
+test_segmentation_and_registration_e2e (test_platform.PlatformChecks.test_segmentation_and_registration_e2e) ... ok
+test_supported_final_model_sandbox_without_logs (test_platform.PlatformChecks.test_supported_final_model_sandbox_without_logs) ... ok
+test_all_46_rows_262_cells_against_source_text (test_reference_results.ReferenceResults.test_all_46_rows_262_cells_against_source_text) ... ok
+test_all_sam_annotations_orientation_and_derived_values (test_reference_results.ReferenceResults.test_all_sam_annotations_orientation_and_derived_values) ... ok
+test_composition_missing_zero_and_reference_boundaries (test_reference_results.ReferenceResults.test_composition_missing_zero_and_reference_boundaries) ... ok
+test_order_sd_independent_from_main_sd_and_no_capacity_points (test_reference_results.ReferenceResults.test_order_sd_independent_from_main_sd_and_no_capacity_points) ... ok
+test_schema_rejects_nonfinite_duplicate_and_mixed_sources (test_reference_results.ReferenceResults.test_schema_rejects_nonfinite_duplicate_and_mixed_sources) ... ok
+test_classification_preparation_requires_native_resolution (test_showcase.ShowcaseTest.test_classification_preparation_requires_native_resolution) ... ok
+test_prepare_cardiac_keeps_all_labels_and_first_case (test_showcase.ShowcaseTest.test_prepare_cardiac_keeps_all_labels_and_first_case) ... ok
+test_reference_gallery_navigation_and_pixels (test_showcase.ShowcaseTest.test_reference_gallery_navigation_and_pixels) ... 2026-09-10 13:20:20.613 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_sparse_prefix_checks_geometry_and_preserves_global_ids (test_showcase.ShowcaseTest.test_sparse_prefix_checks_geometry_and_preserves_global_ids) ... ok
+test_only_identity_direction_is_supported (test_volume_platform.EnvelopeChecks.test_only_identity_direction_is_supported) ... ok
+test_roundtrip_preserves_asymmetric_zyx_and_dtype (test_volume_platform.EnvelopeChecks.test_roundtrip_preserves_asymmetric_zyx_and_dtype) ... ok
+test_truncated_header_payload_and_trailing_bytes_rejected (test_volume_platform.EnvelopeChecks.test_truncated_header_payload_and_trailing_bytes_rejected) ... ok
+test_wrong_dtype_shape_length_and_overlap_rejected (test_volume_platform.EnvelopeChecks.test_wrong_dtype_shape_length_and_overlap_rejected) ... ok
+test_domain_class_and_task_label_space_rules (test_volume_platform.VolumePlatformChecks.test_domain_class_and_task_label_space_rules) ... ok
+test_generated_registration_volume_is_explicitly_synthetic (test_volume_platform.VolumePlatformChecks.test_generated_registration_volume_is_explicitly_synthetic) ... ok
+test_label_shift_cannot_hide_a_real_foreground_class (test_volume_platform.VolumePlatformChecks.test_label_shift_cannot_hide_a_real_foreground_class) ... ok
+test_legacy_two_dimensional_previews_remain_readable (test_volume_platform.VolumePlatformChecks.test_legacy_two_dimensional_previews_remain_readable) ... ok
+test_registration_volume_asset_and_optional_preview (test_volume_platform.VolumePlatformChecks.test_registration_volume_asset_and_optional_preview) ... ok
+test_registration_volume_shape_and_submission_arrays_are_strict (test_volume_platform.VolumePlatformChecks.test_registration_volume_shape_and_submission_arrays_are_strict) ... ok
+test_segmentation_downsample_is_bounded_and_nearest_neighbor (test_volume_platform.VolumePlatformChecks.test_segmentation_downsample_is_bounded_and_nearest_neighbor) ... ok
+test_spacing_validation_and_missing_default (test_volume_platform.VolumePlatformChecks.test_spacing_validation_and_missing_default) ... ok
+test_submit_enforces_allowed_output_heads (test_volume_platform.VolumePlatformChecks.test_submit_enforces_allowed_output_heads) ... ok
+
+----------------------------------------------------------------------
+Ran 68 tests in 31.899s
+
+OK

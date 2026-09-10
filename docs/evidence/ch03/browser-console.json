@@ -1,0 +1,936 @@
+{
+  "browser": "Codex in-app Chromium",
+  "url": "http://127.0.0.1:8501/",
+  "errors": [],
+  "warnings": [
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:05:38.609Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:05:38.609Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:05:38.609Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:05:38.609Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:05:38.609Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:05:38.609Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:07:14.865Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:07:14.917Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:07:14.940Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:07:14.949Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:07:14.957Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.959Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.959Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.959Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.959Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.959Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.959Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"adice\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.959Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:07:14.962Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.964Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.964Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.964Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.964Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"adice\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:07:14.964Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Dropping sort property {\"field\":\"order_sd\",\"op\":\"sum\",\"order\":\"descending\"} as unioned domains only support boolean or op \"count\", \"min\", and \"max\".",
+      "timestamp": "2026-09-10T05:08:12.876Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Domains that should be unioned has conflicting sort properties. Sort will be set to true.",
+      "timestamp": "2026-09-10T05:08:12.876Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:08:12.878Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:08:12.879Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:08:12.879Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Dropping sort property {\"field\":\"order_sd\",\"op\":\"sum\",\"order\":\"descending\"} as unioned domains only support boolean or op \"count\", \"min\", and \"max\".",
+      "timestamp": "2026-09-10T05:08:12.881Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Domains that should be unioned has conflicting sort properties. Sort will be set to true.",
+      "timestamp": "2026-09-10T05:08:12.882Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:08:12.884Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:08:12.884Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:08:12.884Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:27.738Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:27.738Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:27.738Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:27.738Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:27.740Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:27.741Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:42.765Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:42.766Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:42.766Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:42.766Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:42.766Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:42.766Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:43.052Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:43.053Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:43.053Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:43.053Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:43.053Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:10:43.053Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:11:55.693Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:11:55.697Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:11:55.733Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:11:55.750Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.752Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.752Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.752Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.753Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.753Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.753Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"adice\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.753Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:11:55.755Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.756Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.756Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.756Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.757Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"adice\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:11:55.757Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.127Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.127Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.127Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.127Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.127Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.127Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.371Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.371Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.371Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.371Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.371Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:09.371Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:28.120Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:28.120Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:28.120Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:28.120Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:28.120Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:28.120Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:12:46.086Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:12:46.096Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:12:46.124Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"adice\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Conflicting legend property \"disable\" (false and true). Using false.",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"x\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"y\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"adice\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:12:46.217Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Dropping sort property {\"field\":\"order_sd\",\"op\":\"sum\",\"order\":\"descending\"} as unioned domains only support boolean or op \"count\", \"min\", and \"max\".",
+      "timestamp": "2026-09-10T05:13:06.539Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Domains that should be unioned has conflicting sort properties. Sort will be set to true.",
+      "timestamp": "2026-09-10T05:13:06.540Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:06.542Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:06.542Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:06.542Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Dropping sort property {\"field\":\"order_sd\",\"op\":\"sum\",\"order\":\"descending\"} as unioned domains only support boolean or op \"count\", \"min\", and \"max\".",
+      "timestamp": "2026-09-10T05:13:06.544Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Domains that should be unioned has conflicting sort properties. Sort will be set to true.",
+      "timestamp": "2026-09-10T05:13:06.544Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:06.548Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:06.548Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"order_sd\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:06.548Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:46.797Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:46.797Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:46.797Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:46.797Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:46.797Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:13:46.797Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.134Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.134Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.134Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.134Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.134Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.134Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.443Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.443Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.444Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.444Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.444Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:17:28.444Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:18:40.662Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:18:40.662Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:18:40.662Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:18:40.662Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:18:40.662Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    },
+    {
+      "level": "warn",
+      "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+      "timestamp": "2026-09-10T05:18:40.681Z",
+      "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+    }
+  ],
+  "download_svg_event": true,
+  "checked_viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      1920,
+      1080
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "max_page_width_matched_viewport": true,
+  "offline_file_browser_open": "blocked by URL policy; not verified",
+  "final_review": {
+    "errors": [],
+    "recent_warnings": [
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:25.324Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:25.325Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:25.325Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:25.325Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:25.328Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:25.328Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"mean_start\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:54.966Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"mean_end\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:54.966Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"low\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:54.966Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:54.966Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"high\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:54.966Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      },
+      {
+        "level": "warn",
+        "message": "WARN Infinite extent for field \"mean\": [Infinity, -Infinity]",
+        "timestamp": "2026-09-10T05:28:54.966Z",
+        "url": "http://127.0.0.1:8501/static/js/styled-components.CEexHQqE.js"
+      }
+    ],
+    "note": "Final review after explicit order sorting and unified category legends. Remaining warnings are transient empty extents during Streamlit data insertion; rendered charts contain reported values."
+  }
+}

@@ -1,0 +1,5963 @@
+{
+  "schema": "medcl.ch03.reference.v1",
+  "source_type": "thesis_reference",
+  "platform_recomputed": false,
+  "source_zip_sha256": "45159469254a5a1e5920aa0b6f9a65f997e39aa86917b45f59aefda8e167c702",
+  "source_hashes": {
+    "chapters/ch03_medcl_benchmark.tex": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f",
+    "figures/ch03/SAM_confusion_matrix.pdf": "4f93ca3ce4b6f78b6106066c2d403c5922d59ff74f30188f849afbbdf62453b9",
+    "figures/ch03/task_robustness_adice.pdf": "9491c6ea60b0c3765ca0aeac14c7529dcd47b285dfefe57c0eb718876b86feb3",
+    "figures/ch03/task_robustness_bwt_from_bottom.pdf": "bba6aa855a7ad724dfec73e481fc6b9c3f375d35762e5be3f6b63197517880fe",
+    "figures/ch03/domain_memory_size_adice.pdf": "aade5a55a456e56aa9c21b946082aa31a23630ccf21eff5158aa13d5afef7f94"
+  },
+  "main_results": [
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Regu-EWC",
+      "family": "regularization",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 669,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.672,
+          "sd": 0.021,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.672\\pm.021$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.242,
+          "sd": 0.039,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.242\\pm.039$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.086,
+          "sd": 0.014,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{1.086\\pm.014}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.255,
+          "sd": 0.152,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.255\\pm.152$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Regu-SI",
+      "family": "regularization",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 670,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.676,
+          "sd": 0.024,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.676\\pm.024$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.236,
+          "sd": 0.042,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.236\\pm.042$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.084,
+          "sd": 0.008,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.084\\pm.008$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.259,
+          "sd": 0.151,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.259\\pm.151$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Regu-LwF",
+      "family": "regularization",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 671,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.663,
+          "sd": 0.029,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.663\\pm.029$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.09,
+          "sd": 0.027,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.090\\pm.027$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.894,
+          "sd": 0.021,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.894\\pm.021$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.224,
+          "sd": 0.153,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.224\\pm.153$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Repl-ER",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 674,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.75,
+          "sd": 0.021,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.750\\pm.021$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.1,
+          "sd": 0.027,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.100\\pm.027$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.054,
+          "sd": 0.014,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.054\\pm.014$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.256,
+          "sd": 0.15,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.256\\pm.150$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.027,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.027^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Repl-GSS",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 675,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.726,
+          "sd": 0.026,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.726\\pm.026$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.14,
+          "sd": 0.04,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.140\\pm.040$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.059,
+          "sd": 0.01,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.059\\pm.010$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.255,
+          "sd": 0.15,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.255\\pm.150$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.036,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.036^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Repl-GEM",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 676,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.718,
+          "sd": 0.018,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.718\\pm.018$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.095,
+          "sd": 0.022,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.095\\pm.022$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.994,
+          "sd": 0.024,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.994\\pm.024$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.251,
+          "sd": 0.154,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.251\\pm.154$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.042,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.042^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Repl-GPM",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 677,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.661,
+          "sd": 0.01,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.661\\pm.010$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.188,
+          "sd": 0.01,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.188\\pm.010$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.013,
+          "sd": 0.022,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.013\\pm.022$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.212,
+          "sd": 0.08,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.212\\pm.080$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.113,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.113$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "historical_subspace",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Repl-AGEM",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 678,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.74,
+          "sd": 0.015,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.740\\pm.015$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.093,
+          "sd": 0.023,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.093\\pm.023$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.023,
+          "sd": 0.027,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.023\\pm.027$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.253,
+          "sd": 0.155,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.253\\pm.155$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.042,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.042^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Repl-DER",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 679,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.715,
+          "sd": 0.011,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.715\\pm.011$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.126,
+          "sd": 0.015,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.126\\pm.015$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.018,
+          "sd": 0.016,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.018\\pm.016$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.249,
+          "sd": 0.148,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.249\\pm.148$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.027,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.027^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Repl-DER++",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 680,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.725,
+          "sd": 0.013,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.725\\pm.013$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.105,
+          "sd": 0.018,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.105\\pm.018$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.012,
+          "sd": 0.013,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.012\\pm.013$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.251,
+          "sd": 0.149,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.251\\pm.149$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.027,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.027^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Repl-FDR",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 681,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.728,
+          "sd": 0.015,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.728\\pm.015$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.111,
+          "sd": 0.028,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.111\\pm.028$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.025,
+          "sd": 0.033,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.025\\pm.033$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.252,
+          "sd": 0.136,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.252\\pm.136$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.042,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.042^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "ParIso-PNN",
+      "family": "parameter_isolation",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 684,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.789,
+          "sd": 0.002,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{.789\\pm.002}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": 0.0,
+          "sd": 0.0,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{0\\pm0}$",
+          "source_precision": {
+            "mean": 0,
+            "sd": 0
+          }
+        },
+        "RMA": {
+          "mean": 1.003,
+          "sd": 0.014,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.003\\pm.014$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.235,
+          "sd": 0.148,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.235\\pm.148$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 1.112,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$1.112$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "ParIso-DAN",
+      "family": "parameter_isolation",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 685,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.786,
+          "sd": 0.008,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.786\\pm.008$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": 0.0,
+          "sd": 0.0,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{0\\pm0}$",
+          "source_precision": {
+            "mean": 0,
+            "sd": 0
+          }
+        },
+        "RMA": {
+          "mean": 1.016,
+          "sd": 0.021,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.016\\pm.021$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.312,
+          "sd": 0.21,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{.312\\pm.210}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.111,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.111$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "Non-CL",
+      "family": "reference",
+      "role": "reference",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 688,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.676,
+          "sd": 0.021,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.676\\pm.021$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.237,
+          "sd": 0.038,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.237\\pm.038$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.086,
+          "sd": 0.008,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.086\\pm.008$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "E-FWT": {
+          "mean": 0.26,
+          "sd": 0.151,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.260\\pm.151$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Domain-CL",
+      "study_id": "ch03-main-domain",
+      "method_id": "JointTrain",
+      "family": "reference",
+      "role": "reference",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-domain-results",
+      "source_line": 689,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.83,
+          "sd": 0.04,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.830\\pm.040$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": null,
+          "sd": null,
+          "status": "not_applicable_or_not_reported",
+          "missing_reason": "原表 --：不适用或未报告，未进一步区分。",
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "--",
+          "source_precision": {
+            "mean": null,
+            "sd": null
+          }
+        },
+        "RMA": {
+          "mean": null,
+          "sd": null,
+          "status": "not_applicable_or_not_reported",
+          "missing_reason": "原表 --：不适用或未报告，未进一步区分。",
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "--",
+          "source_precision": {
+            "mean": null,
+            "sd": null
+          }
+        },
+        "E-FWT": {
+          "mean": null,
+          "sd": null,
+          "status": "not_applicable_or_not_reported",
+          "missing_reason": "原表 --：不适用或未报告，未进一步区分。",
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "--",
+          "source_precision": {
+            "mean": null,
+            "sd": null
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": null,
+      "data_access": "joint_full_history",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Regu-EWC",
+      "family": "regularization",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 719,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.487,
+          "sd": 0.02,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.487\\pm.020$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.552,
+          "sd": 0.042,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.552\\pm.042$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.999,
+          "sd": 0.022,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.999\\pm.022$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.513,
+          "sd": 0.022,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.513\\pm.022$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Regu-SI",
+      "family": "regularization",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 720,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.469,
+          "sd": 0.007,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.469\\pm.007$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.602,
+          "sd": 0.016,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.602\\pm.016$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.018,
+          "sd": 0.028,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.018\\pm.028$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.57,
+          "sd": 0.02,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.570\\pm.020$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Regu-LwF",
+      "family": "regularization",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 721,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.384,
+          "sd": 0.022,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.384\\pm.022$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.575,
+          "sd": 0.013,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.575\\pm.013$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.782,
+          "sd": 0.046,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.782\\pm.046$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.602,
+          "sd": 0.002,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.602\\pm.002$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Repl-ER",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 724,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.654,
+          "sd": 0.034,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.654\\pm.034$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.243,
+          "sd": 0.068,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.243\\pm.068$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.015,
+          "sd": 0.029,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.015\\pm.029$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.596,
+          "sd": 0.019,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.596\\pm.019$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.011,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.011^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Repl-GSS",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 725,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.456,
+          "sd": 0.003,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.456\\pm.003$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.611,
+          "sd": 0.016,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.611\\pm.016$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.991,
+          "sd": 0.038,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.991\\pm.038$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.6,
+          "sd": 0.006,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.600\\pm.006$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.018,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.018^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Repl-GEM",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 726,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.684,
+          "sd": 0.036,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.684\\pm.036$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.304,
+          "sd": 0.038,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.304\\pm.038$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.014,
+          "sd": 0.031,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.014\\pm.031$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.622,
+          "sd": 0.031,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.622\\pm.031$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.01,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.010^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Repl-GPM",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 727,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.575,
+          "sd": 0.023,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.575\\pm.023$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.219,
+          "sd": 0.033,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.219\\pm.033$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.892,
+          "sd": 0.014,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.892\\pm.014$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.513,
+          "sd": 0.014,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.513\\pm.014$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.068,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.068$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "historical_subspace",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Repl-AGEM",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 728,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.595,
+          "sd": 0.017,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.595\\pm.017$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.37,
+          "sd": 0.032,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.370\\pm.032$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.02,
+          "sd": 0.019,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{1.020\\pm.019}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.562,
+          "sd": 0.026,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.562\\pm.026$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.01,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.010^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Repl-DER",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 729,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.628,
+          "sd": 0.027,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.628\\pm.027$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.219,
+          "sd": 0.07,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.219\\pm.070$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.913,
+          "sd": 0.029,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.913\\pm.029$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.622,
+          "sd": 0.029,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.622\\pm.029$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.011,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.011^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Repl-DER++",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 730,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.638,
+          "sd": 0.036,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.638\\pm.036$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.208,
+          "sd": 0.056,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.208\\pm.056$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.932,
+          "sd": 0.034,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.932\\pm.034$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.633,
+          "sd": 0.043,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.633\\pm.043$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.011,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.011^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Repl-FDR",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 731,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.666,
+          "sd": 0.012,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.666\\pm.012$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.146,
+          "sd": 0.046,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.146\\pm.046$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.917,
+          "sd": 0.035,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.917\\pm.035$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.627,
+          "sd": 0.015,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.627\\pm.015$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.01,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.010^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "ParIso-PNN",
+      "family": "parameter_isolation",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 734,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.77,
+          "sd": 0.012,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{.770\\pm.012}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": 0.0,
+          "sd": 0.0,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{0\\pm0}$",
+          "source_precision": {
+            "mean": 0,
+            "sd": 0
+          }
+        },
+        "RMA": {
+          "mean": 0.976,
+          "sd": 0.021,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.976\\pm.021$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.62,
+          "sd": 0.02,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.620\\pm.020$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 1.056,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$1.056$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "ParIso-DAN",
+      "family": "parameter_isolation",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 735,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.729,
+          "sd": 0.009,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.729\\pm.009$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": 0.0,
+          "sd": 0.0,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{0\\pm0}$",
+          "source_precision": {
+            "mean": 0,
+            "sd": 0
+          }
+        },
+        "RMA": {
+          "mean": 0.897,
+          "sd": 0.022,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.897\\pm.022$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.543,
+          "sd": 0.127,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.543\\pm.127$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.111,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.111$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "ClassCL-PLOP",
+      "family": "class_specific",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 738,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.708,
+          "sd": 0.025,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.708\\pm.025$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.104,
+          "sd": 0.026,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.104\\pm.026$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.986,
+          "sd": 0.038,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.986\\pm.038$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.707,
+          "sd": 0.009,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{.707\\pm.009}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "ClassCL-MiB",
+      "family": "class_specific",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 739,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.751,
+          "sd": 0.008,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.751\\pm.008$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.039,
+          "sd": 0.003,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.039\\pm.003$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.004,
+          "sd": 0.018,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.004\\pm.018$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.697,
+          "sd": 0.008,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.697\\pm.008$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "Non-CL",
+      "family": "reference",
+      "role": "reference",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 742,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.471,
+          "sd": 0.012,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.471\\pm.012$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.598,
+          "sd": 0.015,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.598\\pm.015$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.014,
+          "sd": 0.028,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.014\\pm.028$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "WCD": {
+          "mean": 0.572,
+          "sd": 0.023,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.572\\pm.023$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Class-CL",
+      "study_id": "ch03-main-class",
+      "method_id": "JointTrain",
+      "family": "reference",
+      "role": "reference",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-class-results",
+      "source_line": 743,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.81,
+          "sd": 0.023,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.810\\pm.023$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": null,
+          "sd": null,
+          "status": "not_applicable_or_not_reported",
+          "missing_reason": "原表 --：不适用或未报告，未进一步区分。",
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "--",
+          "source_precision": {
+            "mean": null,
+            "sd": null
+          }
+        },
+        "RMA": {
+          "mean": null,
+          "sd": null,
+          "status": "not_applicable_or_not_reported",
+          "missing_reason": "原表 --：不适用或未报告，未进一步区分。",
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "--",
+          "source_precision": {
+            "mean": null,
+            "sd": null
+          }
+        },
+        "WCD": {
+          "mean": null,
+          "sd": null,
+          "status": "not_applicable_or_not_reported",
+          "missing_reason": "原表 --：不适用或未报告，未进一步区分。",
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "--",
+          "source_precision": {
+            "mean": null,
+            "sd": null
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": null,
+      "data_access": "joint_full_history",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Regu-EWC",
+      "family": "regularization",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 773,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.601,
+          "sd": 0.008,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.601\\pm.008$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.371,
+          "sd": 0.014,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.371\\pm.014$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.004,
+          "sd": 0.012,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{1.004\\pm.012}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Regu-SI",
+      "family": "regularization",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 774,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.621,
+          "sd": 0.024,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.621\\pm.024$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.343,
+          "sd": 0.025,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.343\\pm.025$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.003,
+          "sd": 0.009,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.003\\pm.009$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Regu-LwF",
+      "family": "regularization",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 775,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.594,
+          "sd": 0.018,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.594\\pm.018$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.308,
+          "sd": 0.044,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.308\\pm.044$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.916,
+          "sd": 0.004,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.916\\pm.004$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Repl-ER",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 778,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.729,
+          "sd": 0.009,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.729\\pm.009$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.178,
+          "sd": 0.021,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.178\\pm.021$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.996,
+          "sd": 0.011,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.996\\pm.011$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.012,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.012^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Repl-GSS",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 779,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.717,
+          "sd": 0.005,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.717\\pm.005$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.276,
+          "sd": 0.055,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.276\\pm.055$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.995,
+          "sd": 0.009,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.995\\pm.009$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.023,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.023^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Repl-GEM",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 780,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.599,
+          "sd": 0.007,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.599\\pm.007$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.182,
+          "sd": 0.068,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.182\\pm.068$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.806,
+          "sd": 0.059,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.806\\pm.059$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.023,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.023^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Repl-GPM",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 781,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.605,
+          "sd": 0.009,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.605\\pm.009$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.329,
+          "sd": 0.034,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.329\\pm.034$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.96,
+          "sd": 0.027,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.960\\pm.027$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.068,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.068$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "historical_subspace",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Repl-AGEM",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 782,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.635,
+          "sd": 0.013,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.635\\pm.013$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.193,
+          "sd": 0.069,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.193\\pm.069$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.873,
+          "sd": 0.052,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.873\\pm.052$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.023,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.023^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Repl-DER",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 783,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.717,
+          "sd": 0.005,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.717\\pm.005$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.157,
+          "sd": 0.022,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.157\\pm.022$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.953,
+          "sd": 0.013,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.953\\pm.013$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.012,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.012^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Repl-FDR",
+      "family": "replay",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 784,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.631,
+          "sd": 0.008,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.631\\pm.008$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.217,
+          "sd": 0.008,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.217\\pm.008$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 0.885,
+          "sd": 0.013,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.885\\pm.013$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.023,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.023^{*}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": true,
+      "raw_image_replay": true,
+      "data_access": "raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "ParIso-PNN",
+      "family": "parameter_isolation",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 787,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.839,
+          "sd": 0.004,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{.839\\pm.004}$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": 0.0,
+          "sd": 0.0,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{0\\pm0}$",
+          "source_precision": {
+            "mean": 0,
+            "sd": 0
+          }
+        },
+        "RMA": {
+          "mean": 1.001,
+          "sd": 0.006,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.001\\pm.006$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 1.074,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$1.074$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "ParIso-DAN",
+      "family": "parameter_isolation",
+      "role": "continual_method",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 788,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.824,
+          "sd": 0.005,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.824\\pm.005$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": 0.0,
+          "sd": 0.0,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$\\best{0\\pm0}$",
+          "source_precision": {
+            "mean": 0,
+            "sd": 0
+          }
+        },
+        "RMA": {
+          "mean": 0.972,
+          "sd": 0.016,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.972\\pm.016$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.166,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$.166$",
+          "source_precision": {
+            "mean": 3,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "Non-CL",
+      "family": "reference",
+      "role": "reference",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 791,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.603,
+          "sd": 0.008,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.603\\pm.008$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": -0.369,
+          "sd": 0.005,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$-.369\\pm.005$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "RMA": {
+          "mean": 1.006,
+          "sd": 0.008,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$1.006\\pm.008$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": false,
+      "data_access": "no_raw_image_replay",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    },
+    {
+      "scenario": "Organ-CL",
+      "study_id": "ch03-main-organ",
+      "method_id": "JointTrain",
+      "family": "reference",
+      "role": "reference",
+      "source_type": "thesis_reference",
+      "platform_recomputed": false,
+      "source_file": "chapters/ch03_medcl_benchmark.tex",
+      "source_label": "tab:benchmark-organ-results",
+      "source_line": 792,
+      "source_page": null,
+      "metrics": {
+        "A-Dice": {
+          "mean": 0.881,
+          "sd": 0.01,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "Dice",
+          "direction": "maximize",
+          "uncertainty_kind": "reported_sd",
+          "uncertainty_scope": "not_specified_in_main_table",
+          "n_repeats": null,
+          "source_raw": "$.881\\pm.010$",
+          "source_precision": {
+            "mean": 3,
+            "sd": 3
+          }
+        },
+        "BWTR": {
+          "mean": null,
+          "sd": null,
+          "status": "not_applicable_or_not_reported",
+          "missing_reason": "原表 --：不适用或未报告，未进一步区分。",
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "--",
+          "source_precision": {
+            "mean": null,
+            "sd": null
+          }
+        },
+        "RMA": {
+          "mean": null,
+          "sd": null,
+          "status": "not_applicable_or_not_reported",
+          "missing_reason": "原表 --：不适用或未报告，未进一步区分。",
+          "unit": "ratio",
+          "direction": "maximize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "--",
+          "source_precision": {
+            "mean": null,
+            "sd": null
+          }
+        },
+        "MPE": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        },
+        "DRR": {
+          "mean": 0.0,
+          "sd": null,
+          "status": "reported",
+          "missing_reason": null,
+          "unit": "ratio",
+          "direction": "minimize",
+          "uncertainty_kind": null,
+          "uncertainty_scope": null,
+          "n_repeats": null,
+          "source_raw": "$0$",
+          "source_precision": {
+            "mean": 0,
+            "sd": null
+          }
+        }
+      },
+      "drr_star": false,
+      "raw_image_replay": null,
+      "data_access": "joint_full_history",
+      "source_sha256": "670c93a39c643f0fa0f3a63f755eea853db7e5775c55745387b748fe5772406f"
+    }
+  ],
+  "sam_matrices": {
+    "source_file": "figures/ch03/SAM_confusion_matrix.pdf",
+    "source_label": "fig:benchmark-sam-lora",
+    "source_page": 1,
+    "value_precision": 3,
+    "extraction": "PDF embedded text; visually verified row-major order against rendered PDF",
+    "matrix_orientation": {
+      "rows": "model_after_training_stage",
+      "columns": "test_task"
+    },
+    "scenario": "Domain-CL",
+    "backbone_group": "SAM_supplement_not_main_ResUNet32",
+    "task_ids": [
+      "T1",
+      "T2",
+      "T3",
+      "T4",
+      "T5",
+      "T6"
+    ],
+    "SAM": [
+      [
+        0.888,
+        0.811,
+        0.79,
+        0.728,
+        0.776,
+        0.58
+      ],
+      [
+        0.784,
+        0.898,
+        0.752,
+        0.663,
+        0.706,
+        0.542
+      ],
+      [
+        0.714,
+        0.61,
+        0.907,
+        0.887,
+        0.781,
+        0.793
+      ],
+      [
+        0.733,
+        0.783,
+        0.859,
+        0.875,
+        0.695,
+        0.709
+      ],
+      [
+        0.886,
+        0.842,
+        0.817,
+        0.826,
+        0.855,
+        0.666
+      ],
+      [
+        0.496,
+        0.496,
+        0.697,
+        0.632,
+        0.518,
+        0.887
+      ]
+    ],
+    "SAM-LoRA": [
+      [
+        0.877,
+        0.841,
+        0.839,
+        0.82,
+        0.844,
+        0.702
+      ],
+      [
+        0.915,
+        0.913,
+        0.863,
+        0.856,
+        0.869,
+        0.708
+      ],
+      [
+        0.886,
+        0.886,
+        0.916,
+        0.877,
+        0.845,
+        0.799
+      ],
+      [
+        0.914,
+        0.9,
+        0.917,
+        0.915,
+        0.829,
+        0.818
+      ],
+      [
+        0.861,
+        0.753,
+        0.835,
+        0.829,
+        0.867,
+        0.721
+      ],
+      [
+        0.76,
+        0.534,
+        0.718,
+        0.67,
+        0.627,
+        0.894
+      ]
+    ],
+    "source_type": "thesis_reference",
+    "platform_recomputed": false,
+    "random_initialization_reference_available": false,
+    "independent_training_reference_available": false,
+    "study_id": "ch03-sam",
+    "source_sha256": "4f93ca3ce4b6f78b6106066c2d403c5922d59ff74f30188f849afbbdf62453b9"
+  },
+  "order_robustness": [
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Regu-EWC",
+      "metric": "A-Dice",
+      "order_sd": 0.028,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_adice.pdf",
+      "source_label": "fig:benchmark-order-adice",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.028,
+      "family": "regularization",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "Dice",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "9491c6ea60b0c3765ca0aeac14c7529dcd47b285dfefe57c0eb718876b86feb3"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Regu-LwF",
+      "metric": "A-Dice",
+      "order_sd": 0.0328,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_adice.pdf",
+      "source_label": "fig:benchmark-order-adice",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0328,
+      "family": "regularization",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "Dice",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "9491c6ea60b0c3765ca0aeac14c7529dcd47b285dfefe57c0eb718876b86feb3"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-ER",
+      "metric": "A-Dice",
+      "order_sd": 0.0204,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_adice.pdf",
+      "source_label": "fig:benchmark-order-adice",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0204,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "Dice",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "9491c6ea60b0c3765ca0aeac14c7529dcd47b285dfefe57c0eb718876b86feb3"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-GSS",
+      "metric": "A-Dice",
+      "order_sd": 0.0134,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_adice.pdf",
+      "source_label": "fig:benchmark-order-adice",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0134,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "Dice",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "9491c6ea60b0c3765ca0aeac14c7529dcd47b285dfefe57c0eb718876b86feb3"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-GEM",
+      "metric": "A-Dice",
+      "order_sd": 0.0238,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_adice.pdf",
+      "source_label": "fig:benchmark-order-adice",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0238,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "Dice",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "9491c6ea60b0c3765ca0aeac14c7529dcd47b285dfefe57c0eb718876b86feb3"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-AGEM",
+      "metric": "A-Dice",
+      "order_sd": 0.0239,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_adice.pdf",
+      "source_label": "fig:benchmark-order-adice",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0239,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "Dice",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "9491c6ea60b0c3765ca0aeac14c7529dcd47b285dfefe57c0eb718876b86feb3"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-DER",
+      "metric": "A-Dice",
+      "order_sd": 0.0141,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_adice.pdf",
+      "source_label": "fig:benchmark-order-adice",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0141,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "Dice",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "9491c6ea60b0c3765ca0aeac14c7529dcd47b285dfefe57c0eb718876b86feb3"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-FDR",
+      "metric": "A-Dice",
+      "order_sd": 0.0206,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_adice.pdf",
+      "source_label": "fig:benchmark-order-adice",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0206,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "Dice",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "9491c6ea60b0c3765ca0aeac14c7529dcd47b285dfefe57c0eb718876b86feb3"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Regu-EWC",
+      "metric": "BWTR",
+      "order_sd": 0.0274,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_bwt_from_bottom.pdf",
+      "source_label": "fig:benchmark-order-bwtr",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0274,
+      "family": "regularization",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "ratio",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "bba6aa855a7ad724dfec73e481fc6b9c3f375d35762e5be3f6b63197517880fe"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Regu-LwF",
+      "metric": "BWTR",
+      "order_sd": 0.0226,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_bwt_from_bottom.pdf",
+      "source_label": "fig:benchmark-order-bwtr",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0226,
+      "family": "regularization",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "ratio",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "bba6aa855a7ad724dfec73e481fc6b9c3f375d35762e5be3f6b63197517880fe"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-ER",
+      "metric": "BWTR",
+      "order_sd": 0.0145,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_bwt_from_bottom.pdf",
+      "source_label": "fig:benchmark-order-bwtr",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0145,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "ratio",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "bba6aa855a7ad724dfec73e481fc6b9c3f375d35762e5be3f6b63197517880fe"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-GSS",
+      "metric": "BWTR",
+      "order_sd": 0.0123,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_bwt_from_bottom.pdf",
+      "source_label": "fig:benchmark-order-bwtr",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0123,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "ratio",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "bba6aa855a7ad724dfec73e481fc6b9c3f375d35762e5be3f6b63197517880fe"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-GEM",
+      "metric": "BWTR",
+      "order_sd": 0.0189,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_bwt_from_bottom.pdf",
+      "source_label": "fig:benchmark-order-bwtr",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0189,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "ratio",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "bba6aa855a7ad724dfec73e481fc6b9c3f375d35762e5be3f6b63197517880fe"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-AGEM",
+      "metric": "BWTR",
+      "order_sd": 0.0145,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_bwt_from_bottom.pdf",
+      "source_label": "fig:benchmark-order-bwtr",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0145,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "ratio",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "bba6aa855a7ad724dfec73e481fc6b9c3f375d35762e5be3f6b63197517880fe"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-DER",
+      "metric": "BWTR",
+      "order_sd": 0.019,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_bwt_from_bottom.pdf",
+      "source_label": "fig:benchmark-order-bwtr",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.019,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "ratio",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "bba6aa855a7ad724dfec73e481fc6b9c3f375d35762e5be3f6b63197517880fe"
+    },
+    {
+      "scenario": "Domain-CL",
+      "method_id": "Repl-FDR",
+      "metric": "BWTR",
+      "order_sd": 0.0136,
+      "n_orders": 10,
+      "source_file": "figures/ch03/task_robustness_bwt_from_bottom.pdf",
+      "source_label": "fig:benchmark-order-bwtr",
+      "source_page": 1,
+      "precision": 4,
+      "extraction": "Explicit printed SD label; visually verified left-to-right order",
+      "order_values_available": false,
+      "mean_across_orders": null,
+      "source_type": "thesis_reference",
+      "study_id": "ch03-order",
+      "mean": null,
+      "sd": 0.0136,
+      "family": "replay",
+      "role": "supplementary_study",
+      "source_line": null,
+      "source_precision": 4,
+      "status": "reported",
+      "unit": "ratio",
+      "direction": "minimize",
+      "missing_reason": "十种顺序的逐次精确观测未提供；仅导入原图标注 SD。",
+      "uncertainty_kind": "sd_across_task_orders",
+      "platform_recomputed": false,
+      "source_sha256": "bba6aa855a7ad724dfec73e481fc6b9c3f375d35762e5be3f6b63197517880fe"
+    }
+  ],
+  "memory_capacity_study": {
+    "source_file": "figures/ch03/domain_memory_size_adice.pdf",
+    "source_label": "fig:benchmark-memory",
+    "exact_numeric_series_available_in_zip": false,
+    "display_mode": "original_figure_only_until_verified_raw_values_are_available",
+    "study_id": "ch03-memory",
+    "source_type": "thesis_reference",
+    "platform_recomputed": false,
+    "source_page": 1,
+    "source_sha256": "aade5a55a456e56aa9c21b946082aa31a23630ccf21eff5158aa13d5afef7f94"
+  },
+  "source_table_mapping": [
+    {
+      "scenario": "Domain-CL",
+      "source_line": 669,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Regu-EWC & $.672\\pm.021$ & $-.242\\pm.039$ & $\\best{1.086\\pm.014}$ & $.255\\pm.152$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 670,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Regu-SI & $.676\\pm.024$ & $-.236\\pm.042$ & $1.084\\pm.008$ & $.259\\pm.151$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 671,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Regu-LwF & $.663\\pm.029$ & $-.090\\pm.027$ & $.894\\pm.021$ & $.224\\pm.153$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 674,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Repl-ER & $.750\\pm.021$ & $-.100\\pm.027$ & $1.054\\pm.014$ & $.256\\pm.150$ & $0$ & $.027^{*}$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 675,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Repl-GSS & $.726\\pm.026$ & $-.140\\pm.040$ & $1.059\\pm.010$ & $.255\\pm.150$ & $0$ & $.036^{*}$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 676,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Repl-GEM & $.718\\pm.018$ & $-.095\\pm.022$ & $.994\\pm.024$ & $.251\\pm.154$ & $0$ & $.042^{*}$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 677,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Repl-GPM & $.661\\pm.010$ & $-.188\\pm.010$ & $1.013\\pm.022$ & $.212\\pm.080$ & $0$ & $.113$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 678,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Repl-AGEM & $.740\\pm.015$ & $-.093\\pm.023$ & $1.023\\pm.027$ & $.253\\pm.155$ & $0$ & $.042^{*}$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 679,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Repl-DER & $.715\\pm.011$ & $-.126\\pm.015$ & $1.018\\pm.016$ & $.249\\pm.148$ & $0$ & $.027^{*}$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 680,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Repl-DER++ & $.725\\pm.013$ & $-.105\\pm.018$ & $1.012\\pm.013$ & $.251\\pm.149$ & $0$ & $.027^{*}$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 681,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Repl-FDR & $.728\\pm.015$ & $-.111\\pm.028$ & $1.025\\pm.033$ & $.252\\pm.136$ & $0$ & $.042^{*}$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 684,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "ParIso-PNN & $\\best{.789\\pm.002}$ & $\\best{0\\pm0}$ & $1.003\\pm.014$ & $.235\\pm.148$ & $1.112$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 685,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "ParIso-DAN & $.786\\pm.008$ & $\\best{0\\pm0}$ & $1.016\\pm.021$ & $\\best{.312\\pm.210}$ & $.111$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 688,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "Non-CL & $.676\\pm.021$ & $-.237\\pm.038$ & $1.086\\pm.008$ & $.260\\pm.151$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Domain-CL",
+      "source_line": 689,
+      "source_label": "tab:benchmark-domain-results",
+      "source_text": "JointTrain & $.830\\pm.040$ & -- & -- & -- & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 719,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Regu-EWC & $.487\\pm.020$ & $-.552\\pm.042$ & $.999\\pm.022$ & $.513\\pm.022$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 720,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Regu-SI & $.469\\pm.007$ & $-.602\\pm.016$ & $1.018\\pm.028$ & $.570\\pm.020$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 721,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Regu-LwF & $.384\\pm.022$ & $-.575\\pm.013$ & $.782\\pm.046$ & $.602\\pm.002$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 724,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Repl-ER & $.654\\pm.034$ & $-.243\\pm.068$ & $1.015\\pm.029$ & $.596\\pm.019$ & $0$ & $.011^{*}$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 725,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Repl-GSS & $.456\\pm.003$ & $-.611\\pm.016$ & $.991\\pm.038$ & $.600\\pm.006$ & $0$ & $.018^{*}$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 726,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Repl-GEM & $.684\\pm.036$ & $-.304\\pm.038$ & $1.014\\pm.031$ & $.622\\pm.031$ & $0$ & $.010^{*}$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 727,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Repl-GPM & $.575\\pm.023$ & $-.219\\pm.033$ & $.892\\pm.014$ & $.513\\pm.014$ & $0$ & $.068$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 728,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Repl-AGEM & $.595\\pm.017$ & $-.370\\pm.032$ & $\\best{1.020\\pm.019}$ & $.562\\pm.026$ & $0$ & $.010^{*}$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 729,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Repl-DER & $.628\\pm.027$ & $-.219\\pm.070$ & $.913\\pm.029$ & $.622\\pm.029$ & $0$ & $.011^{*}$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 730,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Repl-DER++ & $.638\\pm.036$ & $-.208\\pm.056$ & $.932\\pm.034$ & $.633\\pm.043$ & $0$ & $.011^{*}$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 731,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Repl-FDR & $.666\\pm.012$ & $-.146\\pm.046$ & $.917\\pm.035$ & $.627\\pm.015$ & $0$ & $.010^{*}$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 734,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "ParIso-PNN & $\\best{.770\\pm.012}$ & $\\best{0\\pm0}$ & $.976\\pm.021$ & $.620\\pm.020$ & $1.056$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 735,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "ParIso-DAN & $.729\\pm.009$ & $\\best{0\\pm0}$ & $.897\\pm.022$ & $.543\\pm.127$ & $.111$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 738,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "ClassCL-PLOP & $.708\\pm.025$ & $-.104\\pm.026$ & $.986\\pm.038$ & $\\best{.707\\pm.009}$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 739,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "ClassCL-MiB & $.751\\pm.008$ & $-.039\\pm.003$ & $1.004\\pm.018$ & $.697\\pm.008$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 742,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "Non-CL & $.471\\pm.012$ & $-.598\\pm.015$ & $1.014\\pm.028$ & $.572\\pm.023$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Class-CL",
+      "source_line": 743,
+      "source_label": "tab:benchmark-class-results",
+      "source_text": "JointTrain & $.810\\pm.023$ & -- & -- & -- & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 773,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Regu-EWC & $.601\\pm.008$ & $-.371\\pm.014$ & $\\best{1.004\\pm.012}$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 774,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Regu-SI & $.621\\pm.024$ & $-.343\\pm.025$ & $1.003\\pm.009$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 775,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Regu-LwF & $.594\\pm.018$ & $-.308\\pm.044$ & $.916\\pm.004$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 778,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Repl-ER & $.729\\pm.009$ & $-.178\\pm.021$ & $.996\\pm.011$ & $0$ & $.012^{*}$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 779,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Repl-GSS & $.717\\pm.005$ & $-.276\\pm.055$ & $.995\\pm.009$ & $0$ & $.023^{*}$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 780,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Repl-GEM & $.599\\pm.007$ & $-.182\\pm.068$ & $.806\\pm.059$ & $0$ & $.023^{*}$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 781,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Repl-GPM & $.605\\pm.009$ & $-.329\\pm.034$ & $.960\\pm.027$ & $0$ & $.068$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 782,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Repl-AGEM & $.635\\pm.013$ & $-.193\\pm.069$ & $.873\\pm.052$ & $0$ & $.023^{*}$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 783,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Repl-DER & $.717\\pm.005$ & $-.157\\pm.022$ & $.953\\pm.013$ & $0$ & $.012^{*}$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 784,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Repl-FDR & $.631\\pm.008$ & $-.217\\pm.008$ & $.885\\pm.013$ & $0$ & $.023^{*}$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 787,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "ParIso-PNN & $\\best{.839\\pm.004}$ & $\\best{0\\pm0}$ & $1.001\\pm.006$ & $1.074$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 788,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "ParIso-DAN & $.824\\pm.005$ & $\\best{0\\pm0}$ & $.972\\pm.016$ & $.166$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 791,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "Non-CL & $.603\\pm.008$ & $-.369\\pm.005$ & $1.006\\pm.008$ & $0$ & $0$ \\\\"
+    },
+    {
+      "scenario": "Organ-CL",
+      "source_line": 792,
+      "source_label": "tab:benchmark-organ-results",
+      "source_text": "JointTrain & $.881\\pm.010$ & -- & -- & $0$ & $0$ \\\\"
+    }
+  ]
+}

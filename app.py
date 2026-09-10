@@ -678,6 +678,12 @@ def records():
 
 def compare():
     title("方法比较", "仅比较评测条件一致的结果；不同任务类型不合成总分。")
+    source = st.segmented_control("结果来源", ["第三章基准结果", "平台评测结果"],
+                                  default="第三章基准结果", key="compare-source", label_visibility="collapsed") or "第三章基准结果"
+    if source == "第三章基准结果":
+        from medcl.benchmark_compare_ui import render
+        render()
+        return
     jobs = [job for job in visible_jobs() if job["status"] == "completed"]
     if len(jobs) < 2:
         st.info("至少需要两条已完成且协议相容的评测。不会使用示意分数填充对比。")

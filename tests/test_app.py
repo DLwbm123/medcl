@@ -81,6 +81,7 @@ class BrowserAppCheck(unittest.TestCase):
                 self.assertNotIn("—", [metric.value for metric in app.metric])
                 self.assertIn("仅有最终阶段", self.visible_text(app))
                 next(control for control in app.segmented_control if control.label == "主导航").set_value("方法比较").run()
+                next(control for control in app.segmented_control if control.label == "结果来源").set_value("平台评测结果").run()
                 self.assertTrue(any("至少需要两条" in notice.value for notice in app.info))
                 next(control for control in app.segmented_control if control.label == "主导航").set_value("任务中心").run()
                 app.text_input[0].set_value("invalid upload check").run()

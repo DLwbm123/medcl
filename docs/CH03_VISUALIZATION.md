@@ -61,7 +61,7 @@ python3 scripts/import_ch03_reference.py \
 
 ## 导出与依赖
 
-新增固定 `altair==6.2.2` 和 `vl-convert-python==1.9.0.post1`（本地 Vega-Lite 6.4 渲染器，[官方项目](https://github.com/vega/vl-convert)）。不通过 CDN 获取渲染器、数据或字体。PNG 使用本机 CJK 字体并检查基本中文字形；找不到字体时明确报错，不输出缺字图。本轮验证字体为系统 Arial Unicode，不随仓库分发。SVG 保留矢量文字，接收机需要可用 CJK 字体；离线 HTML 内嵌 PNG，因此图中文字不依赖接收机安装同一字体。
+新增固定 `altair==6.2.2` 和 `vl-convert-python==1.9.0.post1`（本地 Vega-Lite 6.4 渲染器，[官方项目](https://github.com/vega/vl-convert)）。不通过 CDN 获取渲染器、数据或字体。PNG 使用本机 CJK 字体并检查基本中文字形；找不到字体时明确报错，不输出缺字图。本轮验证字体为系统 Arial Unicode，不随仓库分发。Linux 容器可设置 `MEDCL_EXPORT_FONT=/path/to/local-cjk-font.otf` 指定已安装的中文字体；显式配置无效时会报错，不静默替换。SVG 保留矢量文字，接收机需要可用 CJK 字体；离线 HTML 内嵌 PNG，因此图中文字不依赖接收机安装同一字体。
 
 每次“生成当前视图导出”提供 CSV、JSON、带当前图表的 HTML，以及每张图的 SVG/PNG。JSON 禁止 NaN；CSV 独立 mean/sd，缺失为空且带状态/原因。CSV 对文本公式前缀转义，真实负数保持数值。离线 HTML 内嵌真实图表及来源，无外部资源或脚本。
 

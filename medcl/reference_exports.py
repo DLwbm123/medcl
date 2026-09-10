@@ -4,6 +4,7 @@ import csv
 from html import escape
 import io
 import json
+import os
 from functools import lru_cache
 from pathlib import Path
 import shutil
@@ -18,7 +19,10 @@ def local_export_font():
     from PIL import ImageFont
     candidates = [Path("/System/Library/Fonts/Supplemental/Arial Unicode.ttf"),
                   Path("/System/Library/Fonts/Hiragino Sans GB.ttc"), Path("C:/Windows/Fonts/msyh.ttc")]
-    if shutil.which("fc-match"):
+    configured = os.environ.get("MEDCL_EXPORT_FONT")
+    if configured:
+        candidates = [Path(configured).expanduser()]
+    if not configured and shutil.which("fc-match"):
         match = subprocess.run(["fc-match", "-f", "%{file}", "sans-serif:lang=zh-cn"], capture_output=True, text=True, timeout=5)
         if match.returncode == 0 and match.stdout:
             candidates.append(Path(match.stdout))

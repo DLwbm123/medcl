@@ -1,12 +1,14 @@
 import io
 import json
+import os
 import unittest
+from unittest.mock import patch
 import xml.etree.ElementTree as ET
 from PIL import Image, ImageStat
 
 from medcl import benchmark_charts as c
 from medcl.reference_results import *
-from medcl.reference_exports import csv_bytes, export_view, json_bytes, render_chart
+from medcl.reference_exports import csv_bytes, export_view, json_bytes, render_chart, local_export_font
 
 
 def values(node):
@@ -24,6 +26,19 @@ class BenchmarkCharts(unittest.TestCase):
     def setUpClass(cls):
         cls.registry = load_reference()
         cls.rows = select_rows(cls.registry["main_results"], "Domain-CL")
+
+    def test_explicit_export_font_uses_validated_file_without_silent_fallback(self):
+        path, family = local_export_font()
+        try:
+            with patch.dict(os.environ, {"MEDCL_EXPORT_FONT": str(path)}):
+                local_export_font.cache_clear()
+                self.assertEqual(local_export_font(), (path, family))
+            with patch.dict(os.environ, {"MEDCL_EXPORT_FONT": "/missing/medcl-font.otf"}):
+                local_export_font.cache_clear()
+                with self.assertRaisesRegex(RuntimeError, "中文字体"):
+                    local_export_font()
+        finally:
+            local_export_font.cache_clear()
 
     def test_specs_encode_reported_values_domains_and_missing(self):
         rows = c.metric_rows(self.rows, "A-Dice")

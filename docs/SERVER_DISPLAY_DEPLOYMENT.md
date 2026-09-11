@@ -41,3 +41,13 @@ ssh -N -L 127.0.0.1:18501:127.0.0.1:8501 <SSH_HOST_ALIAS>
 - 本次公网 health 请求直连及经现有代理均返回 `200 ok`。Chrome 实际打开公网首页，并完成 Domain-CL 从 T1 到 T2 的任务切换；原图、分割叠加、三个 MPR 和独立绿色预测三维对象均已显示。四视口截图保存在本机忽略目录 `.local/tunnel/public-four-viewports.png`，不公开医学图像截图。
 - 内置浏览器导航接口超时后改用 Chrome 验收；原生坐标拖动接口不可用，未完成本轮三维旋转操作。未覆盖独立手机蜂窝网络、全部访问者网络、长期稳定性或容器重启恢复；未改应用代码，因此未重复运行应用单元测试。
 - 关闭本机浏览器、SSH 或本机电脑不影响服务器上的隧道；服务器容器和 Supervisor 必须持续运行。Quick Tunnel 没有可用性保证，也不是固定域名。长期展示应另行绑定正式隧道与域名，参见 [Cloudflare 官方说明](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/trycloudflare/)。
+
+## 免费固定 HTTPS 入口（2026-09-11）
+
+- 经用户完成设备授权与 Funnel/HTTPS 授权，新增 Tailscale 1.102.4 官方静态客户端，以 userspace networking 模式运行；管理页面实际显示 Free 套餐，没有开通付费服务。Funnel 无需给访问者安装 Tailscale。固定地址在服务器网页运行目录的 `FIXED_PUBLIC_URL` 中，格式为 `https://web-display.<tailnet>.ts.net/`。该入口仅反向代理 `http://127.0.0.1:8501`，没有开放文件目录、SSH 或评分 worker。
+- 复用 Supervisor，仅新增 `web-link` 进程组，自动恢复并轮转日志。二进制、身份状态、证书与日志保存在现有持久目录的 `fixed/` 下；目录权限 0700、身份状态文件权限 0600，不提交账号、认证链接、密钥或运行状态到 Git。完整启动命令使用 `/tmp/web-display-runtime/fixed/` 中性路径；不修改系统 DNS、路由、宿主机防火墙或现有训练环境。
+- 已实际重启一次 `web-link`：设备身份、DNS 名称、后台 Funnel 转发配置保持一致，状态恢复 Running，health 无告警。原网页和临时公网隧道的 PID 保持不变，网页本地 health 返回 `ok`。此测试覆盖新隧道进程重启，不覆盖服务器或容器重启。
+- 长期运行仍依赖容器与 Supervisor 持续运行。容器重启后的启动入口及 `/tmp` 路径恢复尚未配置；设备密钥当前到期日为 2027-03-10，需要到期前重新认证或由账号所有者另行调整密钥到期策略。本轮没有关闭密钥到期。
+- Funnel 首次开通可能有最多约 10 分钟的公网 DNS 传播延迟；仍处于 beta 且有带宽限制，不能视为可用性保证。配置和限制见 [Tailscale 官方文档](https://tailscale.com/docs/features/tailscale-funnel)。原 Quick Tunnel 保留作为备用入口。
+- 本轮公网验收尚未通过：首次启用超过 10 分钟后，权威 DNS 查询仍为 `NOERROR`、`ANSWER: 0`，公网解析器也未返回地址；直连 health 无法解析，代理 health TLS 连接超时，Chrome 显示 `ERR_TIMED_OUT`。TLS 证书已成功签发，设备在线且无 health 告警。已重新发布一次同地址的 Funnel 配置，不据此宣称恢复；固定入口保留运行，实际公网可用性待复核。
+- 原临时入口本轮 health 再次返回 `200 ok`，继续用于展示。本轮只修改部署配置和本文件，没有改应用代码；未运行应用单元测试、未完成固定入口页面截图验收或独立蜂窝网络验证。此前临时入口截图不能替代固定入口验收。

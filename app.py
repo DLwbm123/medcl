@@ -446,7 +446,7 @@ def preview_arrays(job_id, reference):
     return load_preview(job_dir(job_id), reference)
 
 
-def segmentation_fallback(image, prediction):
+def segmentation_fallback(image, prediction, spacing_zyx=(1, 1, 1)):
     """Build one prediction-only static slice when WebGL is unavailable."""
     counts = np.count_nonzero(prediction, axis=(1, 2))
     index = int(np.argmax(counts)) if np.any(counts) else prediction.shape[0] // 2
@@ -454,7 +454,8 @@ def segmentation_fallback(image, prediction):
     overlay = np.repeat(original[..., None], 3, axis=2)
     foreground = prediction[index] > 0
     overlay[foreground] = (0.35 * overlay[foreground] + 0.65 * np.array([38, 200, 122])).astype(np.uint8)
-    return original, overlay, index
+    return (showcase.physical_slice(original, spacing_zyx, 0),
+            showcase.physical_slice(overlay, spacing_zyx, 0), index)
 
 
 def viewer_fallback_open(state):
@@ -565,7 +566,8 @@ def result_view(job):
                                 viewer_state = render_volume(envelope_from_preview(preview, arrays), key=f"volume-{job['id']}-{stage}-{task_id}-{preview['case_id']}")
                             except (OSError, RuntimeError, TypeError, ValueError):
                                 st.warning("三维组件未能挂载；下方仍保留不含真值的静态切片。")
-                            original, overlay, slice_index = segmentation_fallback(arrays["image_volume"], arrays["prediction_volume"])
+                            original, overlay, slice_index = segmentation_fallback(
+                                arrays["image_volume"], arrays["prediction_volume"], arrays["spacing_zyx"])
                         else:
                             original, overlay, slice_index = arrays["original"], arrays["overlay"], None
                         with st.expander("二维预览", expanded=preview["kind"] != "segmentation-volume" or viewer_fallback_open(viewer_state)):
@@ -589,7 +591,8 @@ def result_view(job):
                             with st.expander("二维预览", expanded=viewer_fallback_open(viewer_state)):
                                 columns = st.columns(len(names))
                                 for column, (name, volume) in zip(columns, names):
-                                    column.image(volume[center], caption=f"{name} · Z={center}", width="stretch")
+                                    column.image(showcase.physical_slice(volume[center], arrays["spacing_zyx"], 0),
+                                                 caption=f"{name} · Z={center}", width="stretch")
                             moving, prediction = arrays["moving_points"], arrays["predicted_points"]
                             if "registered_volume" not in arrays:
                                 st.info("未提交配准后影像；三维查看器默认对比固定影像和移动影像。")

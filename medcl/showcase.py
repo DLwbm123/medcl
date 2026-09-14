@@ -8,6 +8,7 @@ from functools import lru_cache
 import zipfile
 
 import numpy as np
+from PIL import Image
 
 from medcl.benchmarks import state_path
 from medcl.classification_showcase import DATASETS, card_html
@@ -114,6 +115,19 @@ def checkerboard(fixed, other, tile=12):
     return np.where((y // tile + x // tile) % 2 == 0, fixed, other)
 
 
+def physical_slice(pixels, spacing_zyx, axis):
+    """Correct screen aspect after compositing; never resample stored volumes."""
+    spacing = np.asarray(spacing_zyx, dtype=float)
+    if axis not in (0, 1, 2) or spacing.shape != (3,) or not np.isfinite(spacing).all() or np.any(spacing <= 0):
+        raise ValueError("Invalid slice geometry")
+    plane_spacing = np.delete(spacing, axis)
+    if plane_spacing[0] == plane_spacing[1]:
+        return pixels
+    extent = np.asarray(pixels.shape[:2]) * (plane_spacing / plane_spacing.max())
+    height, width = np.maximum(1, np.rint(extent / extent.max() * max(pixels.shape[:2]))).astype(int)
+    return np.asarray(Image.fromarray(pixels).resize((int(width), int(height)), Image.Resampling.NEAREST))
+
+
 def volume_envelope(example, arrays, *, case_id=None, task_id=None):
     segmentation = EXAMPLES[example]["kind"] == "segmentation"
     volumes = [("image", "scalar", arrays["image"]), ("prediction", "labelmap", arrays["labels"])] if segmentation else [
@@ -166,23 +180,23 @@ def render(st, example):
         st.caption("类增量最终七类 · 保留原始标签编号 1–7 · 0 为背景")
 
     view = st.radio("展示视图", ["切片对比", "三维浏览"], horizontal=True, key=f"showcase-view-{view_key}")
+    source = str(arrays.get("spacing_source", "index-space-default"))
+    with st.expander("体素间距与 Z 轴比例"):
+        st.caption("填写当前预览网格的 Z/Y/X 间距（mm），二维切片、三视图和三维表面会同步更新。Z 应使用相邻切片中心的距离；存在层间隙时不能只填层厚。原图经 resize 或下采样后，间距也需相应换算。")
+        calibrated = st.checkbox("手动校准间距", key=f"showcase-spacing-enabled-{view_key}")
+        if calibrated:
+            spacing = [column.number_input(label, min_value=0.001, value=float(value), step=0.1,
+                       format="%.4f", key=f"showcase-spacing-{view_key}-{axis}")
+                       for axis, (column, label, value) in enumerate(zip(st.columns(3),
+                           ("Z 层间距（mm）", "Y 像素间距（mm）", "X 像素间距（mm）"), arrays["spacing"]))]
+            arrays = {**arrays, "spacing": np.asarray(spacing), "spacing_source": np.asarray("manual")}
+            st.caption("当前为手动校准值，未经原始影像验证；仅影响本次显示。取消勾选可恢复素材间距。")
+        else:
+            st.caption("当前 Z/Y/X：" + " / ".join(f"{v:g}" for v in arrays["spacing"]) +
+                       (" mm（素材记录）" if source == "protocol" else "（索引间距，无毫米标定）"))
+    if source == "index-space-default" and not calibrated:
+        st.warning("此病例缺少真实体素间距，当前按索引比例显示，Z 轴可能被压扁。请根据对应病例的影像信息校准。")
     if view == "三维浏览":
-        source = str(arrays.get("spacing_source", "index-space-default"))
-        with st.expander("体素间距与 Z 轴比例"):
-            st.caption("填写当前预览网格的 Z/Y/X 间距（mm），三视图和三维表面会同步更新。Z 应使用相邻切片中心的距离；存在层间隙时不能只填层厚。原图经 resize 或下采样后，间距也需相应换算。")
-            calibrated = st.checkbox("手动校准间距", key=f"showcase-spacing-enabled-{view_key}")
-            if calibrated:
-                spacing = [column.number_input(label, min_value=0.001, value=float(value), step=0.1,
-                           format="%.4f", key=f"showcase-spacing-{view_key}-{axis}")
-                           for axis, (column, label, value) in enumerate(zip(st.columns(3),
-                               ("Z 层间距（mm）", "Y 像素间距（mm）", "X 像素间距（mm）"), arrays["spacing"]))]
-                arrays = {**arrays, "spacing": np.asarray(spacing), "spacing_source": np.asarray("manual")}
-                st.caption("当前为手动校准值，未经原始影像验证；仅影响本次显示。取消勾选可恢复素材间距。")
-            else:
-                st.caption("当前 Z/Y/X：" + " / ".join(f"{v:g}" for v in arrays["spacing"]) +
-                           (" mm（素材记录）" if source == "protocol" else "（索引间距，无毫米标定）"))
-        if source == "index-space-default" and not calibrated:
-            st.warning("此病例缺少真实体素间距，当前按索引比例显示，Z 轴可能被压扁。请根据对应病例的影像信息校准。")
         try:
             state = render_volume(volume_envelope(example, arrays, case_id=f"example-{view_key}", task_id=task_id),
                                   key=f"showcase-volume-{view_key}")
@@ -215,11 +229,11 @@ def render(st, example):
     else:
         panels = [("固定影像", cut("fixed")), ("移动影像", cut("moving")), ("对齐参考", cut("registered"))]
     for column, (label, pixels) in zip(st.columns(len(panels), gap="medium"), panels):
-        column.image(pixels, caption=label, width="stretch")
+        column.image(physical_slice(pixels, arrays["spacing"], axis), caption=label, width="stretch")
     if not segmentation:
         st.subheader("对齐细节")
         mode = st.radio("对比方式", ["棋盘格", "彩色融合"], horizontal=True)
         for column, name, label in zip(st.columns(2), ("moving", "registered"), ("原始图像对", "参考对齐状态")):
             pixels = checkerboard(cut("fixed"), cut(name)) if mode == "棋盘格" else np.stack(
                 [cut("fixed"), cut(name), cut(name)], axis=-1)
-            column.image(pixels, caption=label, width="stretch")
+            column.image(physical_slice(pixels, arrays["spacing"], axis), caption=label, width="stretch")

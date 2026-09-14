@@ -41,3 +41,7 @@ The server checked shape and three-slice image moments/foreground counts against
 - Public HTTPS health returned `ok`. Full online 3D browser acceptance was not completed: the in-app public navigation timed out, and native Chrome interaction became unavailable. Server metadata validation and local visual acceptance are reported separately.
 
 No smoothing or interpolation was added. Correcting spacing restores physical proportions; it does not create additional acquired slices or improve acquisition resolution.
+
+## Follow-up
+
+The subsequent [cross-dataset spacing audit](VISUALIZATION_SPACING_AUDIT.md) deployed the calibration UI and corrected static slice aspect ratios. Its deployment and validation record supersedes the earlier application-code deployment limitation above.

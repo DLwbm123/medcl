@@ -182,6 +182,8 @@ def main():
     parser.add_argument("--classification", type=Path, help="Native PathMNIST 128x128 NPY directory")
     parser.add_argument("--pair", type=Path, help="Curated OASIS pair directory")
     parser.add_argument("--cardiac", type=Path, help="Prepare only the first complete seven-label MMWHS case")
+    parser.add_argument("--cardiac-spacing", type=float, nargs=3, metavar=("Z", "Y", "X"),
+                        help="First complete cardiac case HDF5 grid spacing in mm before preview sampling")
     parser.add_argument("--classification-gallery", action="store_true", help="Prepare only the three classification examples")
     parser.add_argument("--skin", type=Path, help="Skin six-class 128x128 NPY directory")
     parser.add_argument("--hyperkvasir", type=Path, help="HyperKvasir20 224x224 NPY directory")
@@ -209,10 +211,12 @@ def main():
             "not_model_inference": True, "not_evaluation_results": True}, "classification-provenance.private.json")
         return
     if args.cardiac:
-        cases = {"segmentation-cardiac": segmentation(args.cardiac, weak=False, cardiac=True)}
+        cases = {"segmentation-cardiac": segmentation(args.cardiac, weak=False, cardiac=True,
+                                                     voxel_spacing=args.cardiac_spacing)}
         write_archive(cases, {"source": str(args.cardiac), "case_index": 0,
             "source_labels": "Original complete integer labels 0 through 7, no remapping",
-            "geometry": "H5 has no physical geometry. Slice axis moved first; nearest-neighbor stride in index space.",
+            "geometry": "Explicit HDF5 grid spacing times preview stride when supplied; otherwise index space. No patient orientation claim.",
+            "spacing_source": str(cases["segmentation-cardiac"]["spacing_source"]),
             "preview_shape_zyx": list(cases["segmentation-cardiac"]["image"].shape),
             "preview_spacing_zyx": cases["segmentation-cardiac"]["spacing"].tolist(),
             "not_model_inference": True, "not_evaluation_results": True}, "cardiac-provenance.private.json")

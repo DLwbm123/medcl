@@ -14,6 +14,20 @@ from medcl_cornerstone import unpack_envelope
 
 
 class ShowcaseTest(unittest.TestCase):
+    def test_static_slices_respect_each_plane_spacing_without_editing_pixels(self):
+        volume = np.arange(4 * 6 * 8, dtype=np.uint8).reshape(4, 6, 8)
+        before = volume.copy()
+        # Physical lengths are Z=12, Y=12, X=8, so orthogonal planes differ.
+        for axis, shape in enumerate(((8, 5), (8, 5), (6, 6))):
+            pixels = np.take(volume, 1, axis=axis)
+            self.assertEqual(showcase.physical_slice(pixels, [3, 2, 1], axis).shape, shape)
+            rgb = np.repeat(pixels[..., None], 3, axis=-1)
+            self.assertEqual(showcase.physical_slice(rgb, [3, 2, 1], axis).shape, (*shape, 3))
+        np.testing.assert_array_equal(volume, before)
+        pixels = volume[0]
+        self.assertIs(showcase.physical_slice(pixels, [3, 1, 1], 0), pixels)
+        with self.assertRaises(ValueError): showcase.physical_slice(pixels, [0, 1, 1], 0)
+
     def test_hdf5_spacing_survives_sampling_and_envelope(self):
         import h5py
         from scripts.prepare_showcase import segmentation, display_spacing
@@ -53,7 +67,12 @@ class ShowcaseTest(unittest.TestCase):
             np.testing.assert_array_equal(volumes["image"], arrays["image"])
             np.testing.assert_array_equal(volumes["prediction"], arrays["labels"])
             np.testing.assert_array_equal(showcase.load_example("segmentation-full", task_id="T1")["spacing"], [1, 2, 2])
+            next(c for c in app.radio if c.label == "展示视图").set_value("切片对比").run()
+            self.assertFalse(app.warning)
+            self.assertEqual(app.number_input[0].value, 5.5)
             next(c for c in app.checkbox if c.label == "手动校准间距").uncheck().run()
+            self.assertTrue(app.warning)
+            next(c for c in app.radio if c.label == "展示视图").set_value("三维浏览").run()
             header, _ = unpack_envelope(render.call_args.args[0])
             self.assertEqual(header["spacing_zyx"], [1., 2., 2.])
             self.assertEqual(header["spacing_source"], "index-space-default")
@@ -87,6 +106,9 @@ class ShowcaseTest(unittest.TestCase):
             result = segmentation(path, weak=False, cardiac=True)
             np.testing.assert_array_equal(result["labels"], np.moveaxis(labels[:, :, :8], -1, 0))
             np.testing.assert_array_equal(result["spacing"], [1, 1, 1])
+            calibrated = segmentation(path, weak=False, cardiac=True, voxel_spacing=[4, .7, .8])
+            np.testing.assert_allclose(calibrated["spacing"], [4, .7, .8])
+            self.assertEqual(str(calibrated["spacing_source"]), "protocol")
             with h5py.File(path, "r+") as f:
                 f["test_labels"][:, :, 7] = 0
             with self.assertRaisesRegex(ValueError, "all seven"):

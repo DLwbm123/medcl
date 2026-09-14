@@ -27,7 +27,20 @@ def normalize(array):
     return (np.clip((array.astype(np.float32) - low) / (high - low), 0, 1) * 255).astype(np.uint8)
 
 
-def segmentation(path, *, weak, cardiac=False):
+def display_spacing(steps, voxel_spacing=None):
+    """Spacing of the HDF5 grid in ZYX order, then the preview stride.
+
+    Original NIfTI spacing must first be adjusted for any HDF5 resizing.
+    """
+    spacing = np.asarray([1, 1, 1] if voxel_spacing is None else voxel_spacing)
+    if (spacing.shape != (3,) or spacing.dtype.kind not in "fiu"
+            or not np.isfinite(spacing).all() or np.any(spacing <= 0)):
+        raise ValueError("Expected three finite positive HDF5 voxel spacings in ZYX order")
+    return {"spacing": spacing.astype(np.float32) * steps,
+            "spacing_source": np.asarray("index-space-default" if voxel_spacing is None else "protocol")}
+
+
+def segmentation(path, *, weak, cardiac=False, voxel_spacing=None):
     with h5py.File(path, "r") as source:
         if weak:
             image, labels, scribble = (source[k][:] for k in ("image", "label", "scribble"))
@@ -43,7 +56,7 @@ def segmentation(path, *, weak, cardiac=False):
         steps = np.maximum(1, np.ceil(np.array(image.shape) / (160 if cardiac else 128)).astype(int))
         slices = tuple(slice(None, None, int(step)) for step in steps)
         arrays = {"image": normalize(image[slices]), "labels": labels[slices].astype(np.uint8),
-                  "spacing": steps.astype(np.float32)}
+                  **display_spacing(steps, voxel_spacing)}
         if cardiac and set(np.unique(arrays["labels"])) != set(range(8)):
             raise ValueError("Cardiac preview must retain all seven foreground labels")
         if weak:
@@ -86,6 +99,13 @@ def sparse_prefix(path, end, expected_shape):
 
 def task_gallery(args):
     from medcl.showcase_tasks import task_specs
+    spacing_map = json.loads(args.segmentation_spacing.read_text()) if args.segmentation_spacing else {}
+    allowed_sources = {spec["source"] for scenario in ("domain", "class", "task")
+                       for spec in task_specs("segmentation", scenario=scenario)}
+    if not isinstance(spacing_map, dict) or not set(spacing_map) <= allowed_sources:
+        raise ValueError("Spacing map keys must be exact segmentation source paths")
+    for spacing in spacing_map.values():
+        display_spacing(np.ones(3), spacing)
     cases, records = {}, []
     for dataset, folder, image_file, label_file, size in (
         ("pathmnist", args.classification, "train_images.npy", "train_labels.npy", 128),
@@ -115,7 +135,8 @@ def task_gallery(args):
             labels[labels > 0] += spec["shift"]
             steps = np.maximum(1, np.ceil(np.array(image.shape) / 128).astype(int))
             slices = tuple(slice(None, None, int(step)) for step in steps)
-            arrays = {"image": normalize(image[slices]), "labels": labels[slices].astype(np.uint8), "spacing": steps.astype(np.float32)}
+            arrays = {"image": normalize(image[slices]), "labels": labels[slices].astype(np.uint8),
+                      **display_spacing(steps, spacing_map.get(spec["source"]))}
             cases[spec["file"]] = arrays
             sparse_scenario = "organ" if scenario == "task" else scenario
             sparse_task = chr(65 + index) if scenario == "domain" else spec["id"]
@@ -133,7 +154,8 @@ def task_gallery(args):
             cases[spec["file"].replace("segmentation-", "segmentation-weak-", 1)] = {
                 **arrays, "scribble": sparse.astype(np.uint8), "scribble_ignore": np.asarray(255, dtype=np.uint8)}
             records.append({"file": spec["file"], "source": str(path), "sparse_source": str(sparse_path),
-                            "case_index": 0, "foreground_label_shift": spec["shift"], "spacing_zyx": steps.tolist(),
+                            "case_index": 0, "foreground_label_shift": spec["shift"],
+                            "spacing_zyx": arrays["spacing"].tolist(), "spacing_source": str(arrays["spacing_source"]),
                             "label_decode": "Existing H5 protocol integer truncation; display-grid nearest-neighbor stride"})
     for spec in task_specs("registration"):
         pair = args.assets / "registration/examples/task_pairs" / spec["source"] / "pair_001"
@@ -153,6 +175,8 @@ def task_gallery(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prostate", type=Path)
+    parser.add_argument("--prostate-spacing", type=float, nargs=3, metavar=("Z", "Y", "X"),
+                        help="First case HDF5 grid spacing in mm, AFTER preprocessing and BEFORE preview sampling")
     parser.add_argument("--weak", type=Path)
     parser.add_argument("--weak-geometry", type=Path, help="Corresponding original NIfTI for voxel spacing")
     parser.add_argument("--classification", type=Path, help="Native PathMNIST 128x128 NPY directory")
@@ -164,6 +188,8 @@ def main():
     parser.add_argument("--task-gallery", action="store_true", help="Prepare one reference per continual task")
     parser.add_argument("--assets", type=Path)
     parser.add_argument("--segmentation-root", type=Path)
+    parser.add_argument("--segmentation-spacing", type=Path,
+                        help="Private JSON: exact relative H5 source path -> first training case HDF5 spacing [Z,Y,X] in mm")
     parser.add_argument("--sparse-root", type=Path)
     args = parser.parse_args()
     if args.task_gallery:
@@ -194,7 +220,7 @@ def main():
     if not all((args.prostate, args.weak, args.classification, args.pair)):
         parser.error("Provide --cardiac, or all of --prostate, --weak, --classification and --pair")
     cases = {"classification": classification(args.classification),
-             "segmentation-full": segmentation(args.prostate, weak=False),
+             "segmentation-full": segmentation(args.prostate, weak=False, voxel_spacing=args.prostate_spacing),
              "segmentation-weak": segmentation(args.weak, weak=True)}
     if args.weak_geometry:
         geometry = nib.load(args.weak_geometry)
@@ -221,7 +247,7 @@ def main():
                   "segmentation-full": "First training case with complete source labels; integer truncation",
                   "segmentation-weak": "Original complete labels and original sparse scribble; 4 is unlabelled",
                   "registration": "Real OASIS pair; registered slot is fixed-image target-state reference replay, not a computed registration",
-                  "geometry": "Prostate: index-space steps. OASIS and optional original weak NIfTI: header voxel spacing. No patient orientation claim.",
+                  "geometry": "Prostate: explicit HDF5 spacing times preview stride when supplied, otherwise index-space steps. OASIS and optional original weak NIfTI: header voxel spacing. No patient orientation claim.",
                   "not_model_inference": True, "not_evaluation_results": True}
     write_archive(cases, provenance)
 

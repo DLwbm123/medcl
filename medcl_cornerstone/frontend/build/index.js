@@ -73,7 +73,7 @@ function Zee(t) {
   if (a.schema !== qee || !["segmentation", "registration"].includes(String(a.viewer_mode)))
     throw new Error("unsupported_schema_or_mode");
   const o = a.viewer_mode;
-  if (!["index-space", "fixed-display-grid"].includes(String(a.coordinate_mode)) || !["protocol", "index-space-default"].includes(String(a.spacing_source)))
+  if (!["index-space", "fixed-display-grid"].includes(String(a.coordinate_mode)) || !["protocol", "index-space-default", "manual"].includes(String(a.spacing_source)))
     throw new Error("invalid_coordinate_metadata");
   const s = U1(a.spacing_zyx, 3, !0), c = U1(a.origin_xyz, 3), l = U1(a.direction_xyz, 9), u = [1, 0, 0, 0, 1, 0, 0, 0, 1];
   if (l.some((m, S) => Math.abs(m - u[S]) > 1e-6))
@@ -126363,7 +126363,7 @@ function dWe(t, e) {
     a.case_id === void 0 ? void 0 : `case ${a.case_id}`,
     o,
     `ZYX ${i.join("×")}`,
-    `spacing ${e.spacingZYX.map((g) => Number(g.toPrecision(6))).join("/")} (${e.spacingSource === "protocol" ? "protocol" : "index-space default"})`,
+    `spacing Z/Y/X ${e.spacingZYX.map((g) => Number(g.toPrecision(6))).join("/")} (${e.spacingSource === "manual" ? "mm; manual, unverified" : e.spacingSource === "protocol" ? "mm; protocol" : "index-space default"})`,
     e.coordinateMode === "index-space" ? "array index space; patient orientation unverified" : "fixed display grid; patient orientation unverified",
     a.downsampled ? "downsampled preview" : "native preview grid"
   ].filter((g) => g !== void 0);

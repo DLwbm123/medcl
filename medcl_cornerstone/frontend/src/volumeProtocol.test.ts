@@ -33,6 +33,10 @@ describe("volume envelope", () => {
     expect(Array.from(parsed.volumes[1]!.data)).toEqual([1, 0, 1, 0]);
     expect(xyzDimensions(parsed.volumes[0]!.shapeZYX)).toEqual([2, 2, 1]);
     expect(xyzSpacing(parsed.spacingZYX)).toEqual([1, 2, 3]);
+    const manual = parseEnvelope(encode({ ...header(volumes), spacing_source: "manual", spacing_zyx: [5, 2, 1] },
+      new Uint8Array([0, 1, 2, 3, 1, 0, 0, 0, 1, 0, 0, 0])));
+    expect(manual.spacingSource).toBe("manual");
+    expect(xyzSpacing(manual.spacingZYX)).toEqual([1, 2, 5]);
   });
 
   it("accepts only identity direction within a tiny tolerance", () => {

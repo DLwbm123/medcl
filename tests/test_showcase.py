@@ -14,6 +14,50 @@ from medcl_cornerstone import unpack_envelope
 
 
 class ShowcaseTest(unittest.TestCase):
+    def test_hdf5_spacing_survives_sampling_and_envelope(self):
+        import h5py
+        from scripts.prepare_showcase import segmentation, display_spacing
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "source.h5"
+            image = np.arange(258 * 130 * 4, dtype=np.float32).reshape(258, 130, 4)
+            with h5py.File(path, "w") as f:
+                f["train_images"], f["train_labels"] = image, np.ones_like(image)
+                f["patient_info_train"] = [3]
+            arrays = segmentation(path, weak=False, voxel_spacing=[3.6, .5, .8])
+            # HWN -> ZYX, then strides [1,3,2], not isotropic voxel indices.
+            np.testing.assert_allclose(arrays["spacing"], [3.6, 1.5, 1.6])
+            header, _ = unpack_envelope(showcase.volume_envelope("segmentation-full", arrays))
+            np.testing.assert_allclose(header["spacing_zyx"], [3.6, 1.5, 1.6])
+            self.assertEqual(header["spacing_source"], "protocol")
+            self.assertEqual(str(segmentation(path, weak=False)["spacing_source"]), "index-space-default")
+            for invalid in ([0, 1, 1], [-1, 1, 1], [float("nan"), 1, 1], [float("inf"), 1, 1], [1, 2], [True] * 3):
+                with self.assertRaises(ValueError): display_spacing(np.ones(3), invalid)
+
+    def test_manual_spacing_updates_all_volumes_without_mutating_cached_case(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"MEDCL_STATE_DIR": directory}), \
+                patch.object(showcase, "render_volume", return_value={}) as render:
+            folder = Path(directory) / "showcase"
+            folder.mkdir()
+            arrays = {"image": np.zeros((6, 8, 10), dtype=np.uint8),
+                      "labels": np.ones((6, 8, 10), dtype=np.uint8), "spacing": np.array([1., 2., 2.])}
+            np.savez_compressed(folder / "segmentation-domain-T1.npz", **arrays)
+            app = AppTest.from_string("import streamlit as st\nfrom medcl.showcase import render\nrender(st, 'segmentation-full')").run()
+            next(c for c in app.radio if c.label == "展示视图").set_value("三维浏览").run()
+            self.assertTrue(app.warning)
+            next(c for c in app.checkbox if c.label == "手动校准间距").check().run()
+            app.number_input[0].set_value(5.5).run()
+            self.assertFalse(app.exception)
+            header, volumes = unpack_envelope(render.call_args.args[0])
+            self.assertEqual(header["spacing_zyx"], [5.5, 2., 2.])
+            self.assertEqual(header["spacing_source"], "manual")
+            np.testing.assert_array_equal(volumes["image"], arrays["image"])
+            np.testing.assert_array_equal(volumes["prediction"], arrays["labels"])
+            np.testing.assert_array_equal(showcase.load_example("segmentation-full", task_id="T1")["spacing"], [1, 2, 2])
+            next(c for c in app.checkbox if c.label == "手动校准间距").uncheck().run()
+            header, _ = unpack_envelope(render.call_args.args[0])
+            self.assertEqual(header["spacing_zyx"], [1., 2., 2.])
+            self.assertEqual(header["spacing_source"], "index-space-default")
+
     def test_classification_preparation_requires_native_resolution(self):
         from scripts.prepare_showcase import classification
         with tempfile.TemporaryDirectory() as directory:

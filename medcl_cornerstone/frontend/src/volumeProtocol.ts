@@ -28,7 +28,7 @@ export interface VolumeBlock {
 export interface ParsedEnvelope {
   viewerMode: ViewerMode;
   coordinateMode: "index-space" | "fixed-display-grid";
-  spacingSource: "protocol" | "index-space-default";
+  spacingSource: "protocol" | "index-space-default" | "manual";
   spacingZYX: [number, number, number];
   originXYZ: [number, number, number];
   directionXYZ: [number, number, number, number, number, number, number, number, number];
@@ -123,7 +123,7 @@ export function parseEnvelope(input: Uint8Array | ArrayBuffer): ParsedEnvelope {
   }
   const viewerMode = header.viewer_mode as ViewerMode;
   if (!["index-space", "fixed-display-grid"].includes(String(header.coordinate_mode)) ||
-      !["protocol", "index-space-default"].includes(String(header.spacing_source))) {
+      !["protocol", "index-space-default", "manual"].includes(String(header.spacing_source))) {
     throw new Error("invalid_coordinate_metadata");
   }
   const spacingZYX = tuple(header.spacing_zyx, 3, true) as ParsedEnvelope["spacingZYX"];

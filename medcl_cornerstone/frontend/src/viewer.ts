@@ -218,7 +218,7 @@ function makeShell(parent: HTMLElement | ShadowRoot, envelope: ParsedEnvelope): 
     context.case_id === undefined ? undefined : `case ${context.case_id}`,
     score,
     `ZYX ${shape.join("×")}`,
-    `spacing ${envelope.spacingZYX.map((value) => Number(value.toPrecision(6))).join("/")} (${envelope.spacingSource === "protocol" ? "protocol" : "index-space default"})`,
+    `spacing Z/Y/X ${envelope.spacingZYX.map((value) => Number(value.toPrecision(6))).join("/")} (${envelope.spacingSource === "manual" ? "mm; manual, unverified" : envelope.spacingSource === "protocol" ? "mm; protocol" : "index-space default"})`,
     envelope.coordinateMode === "index-space"
       ? "array index space; patient orientation unverified"
       : "fixed display grid; patient orientation unverified",

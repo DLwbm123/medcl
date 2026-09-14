@@ -71,7 +71,7 @@ def pack_envelope(*, viewer_mode: str, volumes: Iterable[tuple[str, str, np.ndar
     """Pack C-order Z/Y/X arrays behind one strict JSON header."""
     if viewer_mode not in _MODE_NAMES or coordinate_mode not in ("index-space", "fixed-display-grid"):
         raise ValueError("viewer mode 无效")
-    if spacing_source not in ("protocol", "index-space-default"):
+    if spacing_source not in ("protocol", "index-space-default", "manual"):
         raise ValueError("spacing source 无效")
     spacing = _numbers(spacing_zyx, 3, "spacing", positive=True)
     origin = _numbers(origin_xyz, 3, "origin")

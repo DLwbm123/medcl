@@ -68,13 +68,13 @@ class BrowserAppCheck(unittest.TestCase):
                 app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
                 next(button for button in app.button if button.label == "进入分类任务").click().run()
                 next(button for button in app.button if button.key == "configure-demo-classification").click().run()
-                mode = next(control for control in app.radio if control.label == "提交类型")
+                mode = next(control for control in app.radio if control.label == "评测方式")
                 self.assertEqual(mode.options, ["提交预测", "提交模型"])
                 mode.set_value("提交模型").run()
                 self.assertFalse(app.exception)
-                self.assertTrue(any(button.label == "下载模型结构模板" for button in app.download_button))
-                next(control for control in app.selectbox if control.label == "模型结构").set_value("linear-classifier-v1").run()
-                app.text_input[0].set_value("model upload acceptance").run()
+                self.assertFalse(app.selectbox)
+                self.assertFalse(app.text_input)
+                self.assertFalse(app.download_button)
                 buffer = io.BytesIO()
                 torch.save({key: torch.from_numpy(value.copy()) for key, value in load(example_weights("classification")).items()}, buffer)
                 app.file_uploader[0].set_value(("final.pth", buffer.getvalue(), "application/octet-stream")).run()
@@ -106,7 +106,6 @@ class BrowserAppCheck(unittest.TestCase):
                 self.assertFalse(app.exception)
                 next(button for button in app.button if button.label == "进入分类任务").click().run()
                 next(button for button in app.button if button.key == "configure-demo-classification").click().run()
-                app.text_input[0].set_value("UI synthetic acceptance").run()
                 data = pack_predictions(baseline_predictions(demo_protocol("classification"), ["T1", "T2", "T3"]), True)
                 app.file_uploader[0].set_value(("final.json", data, "application/json")).run()
                 heartbeat(root)
@@ -127,7 +126,6 @@ class BrowserAppCheck(unittest.TestCase):
                 next(control for control in app.segmented_control if control.label == "结果来源").set_value("平台评测结果").run()
                 self.assertTrue(any("至少需要两条" in notice.value for notice in app.info))
                 next(control for control in app.segmented_control if control.label == "主导航").set_value("任务中心").run()
-                app.text_input[0].set_value("invalid upload check").run()
                 app.file_uploader[0].set_value(("bad.json", b"not-json", "application/json")).run()
                 heartbeat(root)
                 next(button for button in app.button if button.label == "提交并开始评测").click().run()
@@ -148,34 +146,52 @@ class BrowserAppCheck(unittest.TestCase):
                     next(control for control in normal.segmented_control if control.label == "主导航").set_value("评测记录").run()
                     self.assertTrue(any("还没有评测记录" in notice.value for notice in normal.info))
 
-    def test_unseen_state_resets_when_output_head_changes(self):
-        with tempfile.TemporaryDirectory(prefix="medcl-ui-state-") as directory:
+    def test_prediction_prefix_and_final_model_cover_six_task_protocol(self):
+        import copy
+        from medcl.examples import example_weights
+        from medcl.storage import get_job
+        benchmark = demo_protocol("segmentation")
+        benchmark["tasks"] = [dict(copy.deepcopy(benchmark["tasks"][0]), id=f"T{i}", name=f"任务 {i}") for i in range(1, 7)]
+        order = [task["id"] for task in benchmark["tasks"]]
+        with tempfile.TemporaryDirectory(prefix="evaluation-simple-") as directory:
             root = initialize(Path(directory))
-            with patch.dict(os.environ, {"MEDCL_STATE_DIR": str(root), "MEDCL_CONFIG": str(root / "no-assets.json"),
-                                             "MEDCL_SHOW_DEMOS": "1"}):
+            with patch.dict(os.environ, {"MEDCL_STATE_DIR": str(root), "MEDCL_SHOW_DEMOS": "1"}), patch("medcl.benchmarks.catalog", return_value=[benchmark]):
                 heartbeat(root)
                 app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
                 next(button for button in app.button if button.label == "进入分割任务").click().run()
                 next(button for button in app.button if button.key == "configure-demo-segmentation").click().run()
-                unseen = next(box for box in app.checkbox if box.label == "同时评测未见任务")
-                unseen.check().run()
-                self.assertTrue(next(box for box in app.checkbox if box.label == "同时评测未见任务").value)
-                head = next(box for box in app.selectbox if box.label == "输出头与任务信息")
-                head.select("task-specific").run()
-                unseen = next(box for box in app.checkbox if box.label == "同时评测未见任务")
-                self.assertFalse(unseen.value)
-                self.assertTrue(unseen.disabled)
-
-                app.text_input[0].set_value("task-specific state check").run()
-                benchmark = demo_protocol("segmentation")
-                data = pack_predictions(baseline_predictions(benchmark, ["T1", "T2", "T3"]), False)
-                app.file_uploader[0].set_value(("final.npz", data, "application/octet-stream")).run()
+                self.assertEqual([control.label for control in app.radio], ["评测方式"])
+                self.assertEqual([control.label for control in app.selectbox], ["任务"])
+                self.assertFalse(app.text_input or app.checkbox or app.toggle or app.expander or app.download_button)
+                visible = self.visible_text(app)
+                for removed in ("评测设置", "结果来源", "输出头", "归一化", "评测协议", "训练条件"):
+                    self.assertNotIn(removed, visible)
+                app.selectbox[0].set_value(4).run()
+                data = pack_predictions(baseline_predictions(benchmark, order[:4]), False)
+                app.file_uploader[0].set_value(("T4.npz", data, "application/octet-stream")).run()
                 heartbeat(root)
                 next(button for button in app.button if button.label == "提交并开始评测").click().run()
                 self.assertFalse(app.exception)
-                jobs = list_jobs(root)
-                self.assertEqual(len(jobs), 1)
-                self.assertFalse(jobs[0]["config"]["evaluate_unseen"])
+                run_worker(root, once=True)
+                job = get_job(list_jobs(root)[0]["id"], root)
+                self.assertEqual(job["status"], "completed", job["message"])
+                self.assertEqual(job["config"]["stages"], [4])
+                self.assertEqual({cell["task_id"] for cell in job["result"]["cells"]}, set(order[:4]))
+                self.assertEqual(job["config"]["clients"], 1)
+                self.assertFalse(job["config"]["evaluate_unseen"])
+                app.radio[0].set_value("提交模型").run()
+                self.assertFalse(app.selectbox)
+                self.assertEqual(len(app.file_uploader), 1)
+                self.assertEqual(app.file_uploader[0].label, "最终模型")
+                app.file_uploader[0].set_value(("final.safetensors", example_weights("segmentation"), "application/octet-stream")).run()
+                heartbeat(root)
+                next(button for button in app.button if button.label == "提交并开始评测").click().run()
+                self.assertFalse(app.exception)
+                run_worker(root, once=True)
+                job = get_job(list_jobs(root)[0]["id"], root)
+                self.assertEqual(job["status"], "completed", job["message"])
+                self.assertEqual(job["config"]["stages"], [6])
+                self.assertEqual({cell["task_id"] for cell in job["result"]["cells"]}, set(order))
 
     def test_required_task_segments_recover_after_deselection(self):
         with tempfile.TemporaryDirectory(prefix="medcl-ui-segment-") as directory:

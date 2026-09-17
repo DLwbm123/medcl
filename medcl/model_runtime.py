@@ -7,6 +7,26 @@ import re
 from collections.abc import Mapping
 
 
+def resolve_architecture(selector, keys):
+    """Recognize only registered structures; strict parameter loading still follows."""
+    keys = set(keys)
+    if keys and all(key.startswith("module.") for key in keys):
+        keys = {key[7:] for key in keys}
+    if selector == "auto-classification-v1":
+        if keys == {"weight", "bias"}:
+            return "linear-classifier-v1"
+        if {"conv1.weight", "fc.weight", "fc.bias"} <= keys:
+            return "resnet18-v1"
+    elif selector == "auto-segmentation-v1":
+        if keys == {"weight", "bias"}:
+            return "pixel-linear-v1"
+        if {"down.0.0.weight", "head.weight", "head.bias"} <= keys:
+            return "unet2d-v1"
+    elif selector == "auto-registration-v1" and keys == {"offset"}:
+        return "point-translation-v1"
+    raise ValueError("无法识别该任务支持的模型权重")
+
+
 def load_weights(path):
     import torch
     if tuple(int(x) for x in re.match(r"(\d+)\.(\d+)", torch.__version__).groups()) < (2, 6):

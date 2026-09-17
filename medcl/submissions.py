@@ -15,6 +15,7 @@ import numpy as np
 from medcl import EVALUATOR_VERSION, VIEWER_SCHEMA_VERSION
 from medcl.benchmarks import allowed_output_heads, freeze_assets, public_protocol, readiness
 from medcl.storage import create_job
+from medcl.model_runtime import resolve_architecture
 
 MAX_FILE = 128 * 1024 * 1024
 MAX_JSON = 16 * 1024 * 1024
@@ -155,9 +156,14 @@ def validate_weights(data: bytes, architecture: str) -> None:
     if not isinstance(header, dict):
         raise ValueError("safetensors 头部必须为对象")
     keys = set(header) - {"__metadata__"}
+    checked_keys = keys
+    if architecture.startswith("auto-"):
+        architecture = resolve_architecture(architecture, keys)
+        if keys and all(key.startswith("module.") for key in keys):
+            checked_keys = {key[7:] for key in keys}
     expected = {"offset"} if architecture == "point-translation-v1" else {"weight", "bias"}
     neural = architecture in ("resnet18-v1", "unet2d-v1")
-    if not keys or len(keys) > 2048 or (not neural and keys != expected):
+    if not keys or len(keys) > 2048 or (not neural and checked_keys != expected):
         raise ValueError("权重键与所选已审核结构不符")
     intervals = []
     for name in keys:
@@ -213,7 +219,7 @@ def validate_torch_archive(data: bytes) -> None:
 
 
 def validated_model_options(architecture, options=None):
-    defaults = {"input_size": 0, "normalization": "unit"} if architecture == "resnet18-v1" else {}
+    defaults = {"input_size": 0, "normalization": "unit"} if architecture in ("resnet18-v1", "auto-classification-v1") else {}
     if options is None:
         return defaults
     if not isinstance(options, dict) or set(options) != set(defaults):
@@ -232,7 +238,7 @@ def inspect_upload(name: str, data: bytes, mode: str, architecture: str | None =
     if mode == "model":
         if suffix not in (".safetensors", ".pt", ".pth"):
             raise ValueError("模型接受 .pth / .pt 的张量 state_dict 或 .safetensors")
-        if architecture not in {item for choices in ARCHITECTURES.values() for item in choices}:
+        if architecture not in {item for choices in ARCHITECTURES.values() for item in choices} | {f"auto-{kind}-v1" for kind in ARCHITECTURES}:
             raise ValueError("模型结构未在审核白名单中")
         if suffix == ".safetensors":
             validate_weights(data, architecture)
@@ -357,7 +363,7 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
     model_options = validated_model_options(architecture, model_options) if mode == "model" else {}
     if mode == "model":
         from medcl.sandbox import sandbox_available
-        if architecture not in ARCHITECTURES[benchmark["kind"]] or output_head != "shared":
+        if architecture not in {*ARCHITECTURES[benchmark["kind"]], f"auto-{benchmark['kind']}-v1"} or output_head != "shared":
             raise ValueError("所选模型结构或输出头尚未审核")
         if not sandbox_available():
             raise ValueError("本机尚未通过模型隔离检查，请改为上传预测")

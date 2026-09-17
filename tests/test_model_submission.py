@@ -32,10 +32,11 @@ class ModelSubmissionChecks(unittest.TestCase):
                 for suffix, data in (("pth", buffer.getvalue()), ("safetensors", save(state))):
                     weights = root / ("weights." + suffix)
                     weights.write_bytes(data)
-                    inspect_upload(weights.name, data, "model", architecture)
+                    selector = "auto-classification-v1" if architecture == "resnet18-v1" else "auto-segmentation-v1"
+                    inspect_upload(weights.name, data, "model", selector)
                     images = np.zeros((2, 28, 28, 3), np.uint8) if architecture == "resnet18-v1" else np.zeros((2, 17, 19), np.float32)
                     try:
-                        pred = model_predictions(architecture, weights, images, [0, 1], root, [0, 1, 2], validated_model_options(architecture))
+                        pred = model_predictions(selector, weights, images, [0, 1], root, [0, 1, 2], validated_model_options(selector))
                     except ValueError:
                         self.fail((root / "inference-error.txt").read_text())
                     self.assertEqual(pred.shape, (2,) if architecture == "resnet18-v1" else (2, 17, 19))
@@ -62,9 +63,9 @@ class ModelSubmissionChecks(unittest.TestCase):
             torch.save({"weight": torch.zeros((3, 1)), "bias": torch.zeros(3), "extra": Executable()}, buffer)
             path = root / "unsafe.pth"
             path.write_bytes(buffer.getvalue())
-            inspect_upload(path.name, path.read_bytes(), "model", "pixel-linear-v1")
+            inspect_upload(path.name, path.read_bytes(), "model", "auto-segmentation-v1")
             with self.assertRaisesRegex(ValueError, "隔离推理失败"):
-                model_predictions("pixel-linear-v1", path, np.zeros((1, 2, 2), np.float32), [0, 1, 2], root)
+                model_predictions("auto-segmentation-v1", path, np.zeros((1, 2, 2), np.float32), [0, 1, 2], root)
             self.assertFalse(marker.exists())
 
     def test_no_files_network_or_child_processes_escape(self):

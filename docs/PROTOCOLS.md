@@ -35,7 +35,7 @@
 | `pixel-linear-v1` | `weight[C,1]`, `bias[C]` | 单通道 `N×H×W`，逐像素线性 logits；输出同形标签 |
 | `point-translation-v1` | `offset[D]` | `N×K×D` 的固定空间 moving points；输出 points+offset；真实协议 D=3 |
 
-C 必须等于注册全局最大标签+1。参数完全从上传权重读取并严格匹配键和形状；平台不训练、估计或改写参数。支持 safetensors 或 PyTorch 2.6+ 的 `torch.save(state_dict)` ZIP，可包在 `state_dict` / `model_state_dict` / `model` 字段中，可移除统一的 `module.` 前缀。参数需为 float32；神经网络另允许 int64 计数张量。拒绝旧版 Pickle、完整模型对象、TorchScript 和上传代码，不回退到不受限反序列化。预处理选项随提交冻结，输出使用原有已见类别掩码。示例分类器/阈值器/零位移从未训练；其他 U-Net 变体、EfficientNet、SAMCL 和自定义结构仍需生成预测。
+C 必须等于注册全局最大标签+1。参数完全从上传权重读取并严格匹配键和形状；平台不训练、估计或改写参数。支持 safetensors 或 PyTorch 2.6+ 的 `torch.save(state_dict)` ZIP，可包在 `state_dict` / `model_state_dict` / `model` 字段中，可移除统一的 `module.` 前缀。参数需为 float32；神经网络另允许 int64 计数张量。拒绝旧版 Pickle、完整模型对象、TorchScript 和上传代码，不回退到不受限反序列化。结构化接口的预处理选项随提交冻结；网页自动识别结构，固定为原始尺寸、uint8 转 0–1。网页预测提交选择 Tn 后仅评测前 n 项，模型提交固定为最终阶段并覆盖当前协议全部任务。输出使用原有已见类别掩码。示例分类器/阈值器/零位移从未训练；其他 U-Net 变体、EfficientNet、SAMCL 和自定义结构仍需生成预测。
 
 预测 JSON 使用 `medcl.predictions.v1`；NPZ/ZIP 每个 task 为 `task__ids.npy`（一维字符串）和 `task__pred.npy`（纯数值）。分类形状 `[N]`；分割 `[N,H,W]`；标志点 `[N,K,D]`。每个样本 ID 一次，顺序可不同；平台对齐后严格检查形状/数值/输出类别。不接受概率图代替整数标签，不自动 argmax 或阈值化预测。`registration-volume` 只接受预测包，并可额外含 `task__registered.npy` 与 `task__warped_prediction.npy`，均为 `[N,Z,Y,X]` 且与 fixed display grid 完全同形；registered 是有限 scalar volume，warped prediction 是 uint16 范围内的整数预测 labelmap。它们只供定性查看，不参与 TRE。
 

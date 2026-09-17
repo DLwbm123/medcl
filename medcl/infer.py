@@ -59,9 +59,13 @@ if __name__ == "__main__":
     manifest_path, weight_path, input_path, output_path = sys.argv[1:]
     with open(manifest_path, encoding="utf-8") as handle:
         manifest = json.load(handle)
+    automatic = manifest["architecture"].startswith("auto-")
     neural = manifest["architecture"] in ("resnet18-v1", "unet2d-v1")
-    runtime = runpy.run_path(str(Path(__file__).with_name("model_runtime.py"))) if neural or not weight_path.endswith(".safetensors") else None
+    runtime = runpy.run_path(str(Path(__file__).with_name("model_runtime.py"))) if automatic or neural or not weight_path.endswith(".safetensors") else None
     weights = runtime["load_weights"](weight_path) if runtime else load_file(weight_path)
+    if automatic:
+        manifest["architecture"] = runtime["resolve_architecture"](manifest["architecture"], weights.keys())
+        neural = manifest["architecture"] in ("resnet18-v1", "unet2d-v1")
     with np.load(input_path, allow_pickle=False) as data:
         if neural:
             pred = runtime["predict_neural"](manifest["architecture"], weights, data["images"], manifest["active_classes"],

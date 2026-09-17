@@ -147,8 +147,8 @@ def model_predictions(architecture: str, weights: Path, images: np.ndarray, acti
             started = time.monotonic()
             try:
                 while process.poll() is None:
-                    if time.monotonic() - started > 120:
-                        raise ValueError("模型推理超过 120 秒限制")
+                    if time.monotonic() - started > 300:
+                        raise ValueError("模型推理超过 300 秒限制")
                     rss = subprocess.run(["/bin/ps", "-o", "rss=", "-p", str(process.pid)], capture_output=True, text=True, timeout=3)
                     if rss.stdout.strip().isdigit() and int(rss.stdout.strip()) > 2 * 1024 * 1024:
                         raise ValueError("模型推理超过 2 GiB 内存限制")

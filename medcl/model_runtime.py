@@ -6,6 +6,8 @@ contiguous tensors with safetensors.torch.save_file. Upload weights, never this 
 import re
 from collections.abc import Mapping
 
+NEURAL_ARCHITECTURES = ("resnet18-v1", "unet2d-v1", "pathmnist-resnet18-v1")
+
 
 def resolve_architecture(selector, keys):
     """Recognize only registered structures; strict parameter loading still follows."""
@@ -17,6 +19,8 @@ def resolve_architecture(selector, keys):
             return "linear-classifier-v1"
         if {"conv1.weight", "fc.weight", "fc.bias"} <= keys:
             return "resnet18-v1"
+        if {"conv1.weight", "linear.weight", "linear.bias"} <= keys:
+            return "pathmnist-resnet18-v1"
     elif selector == "auto-segmentation-v1":
         if keys == {"weight", "bias"}:
             return "pixel-linear-v1"
@@ -56,9 +60,13 @@ def load_weights(path):
 def build_model(architecture, classes):
     import torch
     from torch import nn
-    if architecture == "resnet18-v1":
+    if architecture in ("resnet18-v1", "pathmnist-resnet18-v1"):
         from torchvision.models import resnet18
-        return resnet18(weights=None, num_classes=classes)
+        model = resnet18(weights=None, num_classes=classes)
+        if architecture == "pathmnist-resnet18-v1":
+            model.conv1 = nn.Conv2d(3, 64, 3, stride=1, padding=1, bias=False)
+            model.maxpool = nn.Identity()
+        return model
     if architecture != "unet2d-v1":
         raise ValueError("unsupported neural architecture")
 
@@ -90,11 +98,44 @@ def build_model(architecture, classes):
     return UNet()
 
 
+def pathmnist_weights(state):
+    """Map the native CIFAR-style ResNet names to the identical torchvision graph."""
+    import torch
+    aliases = {"0": "conv1", "1": "bn1", "3": "layer1", "4": "layer2", "5": "layer3", "6": "layer4"}
+    result = {}
+    for key, value in state.items():
+        canonical = key
+        if key.startswith("_features."):
+            _, index, suffix = key.split(".", 2)
+            canonical = aliases.get(index, "invalid") + "." + suffix
+        elif key.startswith("classifier."):
+            canonical = "linear." + key.split(".", 1)[1]
+        if canonical != key:
+            if canonical not in state or not torch.equal(value, state[canonical]):
+                raise ValueError("模型重复参数不一致")
+            continue
+        if key.startswith("linear."):
+            canonical = "fc." + key.split(".", 1)[1]
+        canonical = canonical.replace(".shortcut.", ".downsample.")
+        result[canonical] = value
+    return result
+
+
 def predict_neural(architecture, weights, images, active_classes, all_classes, options):
     import numpy as np
     import torch
     import torch.nn.functional as F
-    torch.set_num_threads(1)
+    native_pathmnist = architecture == "pathmnist-resnet18-v1"
+    torch.set_num_threads(8 if native_pathmnist else 1)
+    if native_pathmnist:
+        if images.dtype != np.uint8 or images.shape[1:] != (28, 28, 3) or all_classes != list(range(9)):
+            raise ValueError("该 ResNet 权重适配仅支持 PathMNIST 28×28 RGB、9 类协议")
+        if options not in ({}, {"input_size": 0, "normalization": "unit"}):
+            raise ValueError("PathMNIST ResNet 使用固定 PIL 128×128 与 ToTensor 预处理")
+        weights = pathmnist_weights(weights)
+        from PIL import Image
+        from torchvision import transforms
+        transform = transforms.Compose([transforms.Resize((128, 128)), transforms.ToTensor()])
     model = build_model(architecture, max(all_classes) + 1)
     model.load_state_dict(weights, strict=True)
     model.eval()
@@ -105,7 +146,9 @@ def predict_neural(architecture, weights, images, active_classes, all_classes, o
         for start in range(0, len(images), 4):
             raw = images[start:start + 4]
             x = torch.from_numpy(raw.astype(np.float32))
-            if architecture == "resnet18-v1":
+            if native_pathmnist:
+                x = torch.stack([transform(Image.fromarray(item)) for item in raw])
+            elif architecture == "resnet18-v1":
                 if x.ndim != 4 or x.shape[-1] not in (1, 3):
                     raise ValueError("ResNet-18 expects NHWC images")
                 x = x.permute(0, 3, 1, 2)

@@ -6,7 +6,7 @@
 
 支持 `.pth` / `.pt` 的张量 state_dict 与 `.safetensors`。接受纯字典或 `state_dict` / `model_state_dict` / `model` 包装，统一 `module.` 前缀可移除；必须严格匹配结构和维度，不允许部分加载。PyTorch ZIP 在网页只检查有界元数据，随后在隔离子进程内使用 PyTorch ≥ 2.6 的 `weights_only=True`；不加载用户代码、完整模型对象、TorchScript 或旧版 Pickle。
 
-后台从张量键识别 torchvision ResNet-18、平台 U-Net 2D 或对应数值模型，随后严格匹配全部权重。网页使用原始输入尺寸，分类 uint8 转 0–1；不要求用户选择结构或预处理。结构定义位于 `medcl/model_runtime.py`。U-Net 使用原始单通道输入，保留空间尺寸，结构宽度为 32/64/128/256/512。原有线性分类、逐像素线性分割、标志点平移继续可用。输出按全局类别编码和原有已见类别掩码处理。
+后台从张量键识别 torchvision ResNet-18、PathMNIST 原生 ResNet-18、平台 U-Net 2D 或对应数值模型，随后严格匹配全部权重。PathMNIST 原生 ResNet 使用 3×3 stem、无 maxpool，重复的 `_features` / `classifier` 参数必须与主参数相同；在等价 torchvision 结构中严格加载，沿用原模型的 PIL Resize 128×128、ToTensor 预处理。此适配限 28×28 RGB、9 类 PathMNIST 协议，不自动猜测其他数据集的输入尺寸。通用结构仍使用原始输入尺寸，分类 uint8 转 0–1；不要求用户选择结构或预处理。结构定义位于 `medcl/model_runtime.py`。U-Net 使用原始单通道输入，保留空间尺寸，结构宽度为 32/64/128/256/512。原有线性分类、逐像素线性分割、标志点平移继续可用。输出按全局类别编码和原有已见类别掩码处理。
 
 其他 U-Net 变体、任意自定义结构、任务专用多头及体配准神经网络未接入；这些情况仍提交预测。模型模板不意味着任意同名网络的历史 checkpoint 均兼容。可选依赖见 `requirements-models.txt`，详细输入契约见 [PROTOCOLS.md](PROTOCOLS.md)。
 
@@ -14,7 +14,7 @@
 
 macOS 使用 Seatbelt；Linux 使用 Landlock 与 libseccomp，加载任何上传内容前收紧文件、网络和进程访问。只有运行库、受信任推理代码、该任务的无标签输入、权重、输出和隔离临时目录可用。运行时不能读取私有标签、联网或启动子进程。隔离检查失败时不执行模型。
 
-原资源边界继续生效：每文件 128 MiB、合计 256 MiB、展开 512 MiB；每任务 120 秒墙钟 / 90 秒 CPU / 2 GiB RSS 轮询，整个评测 10 分钟 / 4 GiB RSS 轮询。线程仅用于当前进程。RSS 轮询不是瞬时硬配额；未新增多租户认证、磁盘配额或任意代码执行服务。
+资源边界：每文件 128 MiB、合计 256 MiB、展开 512 MiB；每任务 300 秒墙钟 / 1,800 秒 CPU / 2 GiB RSS 轮询，整个评测 10 分钟 / 4 GiB RSS 轮询。原生 PathMNIST ResNet 使用最多 8 个 CPU 线程，其余模型仍为单线程。评分父进程保留 540 秒 CPU 软限制，硬限制设为 1,800 秒以允许推理子进程设置自身配额。扩大有界推理配额是为了原模型 128×128 预处理，不缩小测试集或改变输入尺寸。线程仅用于当前进程。RSS 轮询不是瞬时硬配额；未新增多租户认证、磁盘配额或任意代码执行服务。
 
 线上补齐受 supervisor 管理的评分 worker，并在私有配置中接入已有 PathMNIST 三阶段和前列腺六中心协议。六域仍为 1,030 切片 / 31 病例，PathMNIST 为 7,180 张 28×28 RGB 图像。数据、权重和私有配置不进入 Git。其他未就绪协议继续保持原状态。
 
@@ -29,3 +29,5 @@ macOS 使用 Seatbelt；Linux 使用 Landlock 与 libseccomp，加载任何上�
 
 - 六任务界面用例实际提交 T4 预测，后台仅产生 T1–T4 评分；切换至模型模式只出现一个最终模型上传框，后台产生全部六任务评分。提交页不含额外输入、勾选项、说明面板或来源声明。
 - 自动结构识别覆盖分类、分割的 PT/PTH 和 safetensors；沿用隔离和严格加载检查，不扩大模型执行范围。既有命名结构接口继续兼容。
+
+实际训练 checkpoint 与完整预测包的双入口验收、评分和覆盖边界见 [REAL_MODEL_VALIDATION.md](REAL_MODEL_VALIDATION.md)。

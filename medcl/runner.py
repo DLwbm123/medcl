@@ -343,7 +343,8 @@ if __name__ == "__main__":
     parser.add_argument("job_id")
     parser.add_argument("--state", type=Path, required=True)
     args = parser.parse_args()
-    resource.setrlimit(resource.RLIMIT_CPU, (540, 540))
+    # Keep the scorer's soft cap while allowing the bounded, threaded inference child.
+    resource.setrlimit(resource.RLIMIT_CPU, (540, 1800))
     resource.setrlimit(resource.RLIMIT_FSIZE, (768 * 1024**2, 768 * 1024**2))
     try:
         evaluate(args.job_id, args.state)

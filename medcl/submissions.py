@@ -15,7 +15,7 @@ import numpy as np
 from medcl import EVALUATOR_VERSION, VIEWER_SCHEMA_VERSION
 from medcl.benchmarks import allowed_output_heads, freeze_assets, public_protocol, readiness
 from medcl.storage import create_job
-from medcl.model_runtime import resolve_architecture
+from medcl.model_runtime import NEURAL_ARCHITECTURES, resolve_architecture
 
 MAX_FILE = 128 * 1024 * 1024
 MAX_JSON = 16 * 1024 * 1024
@@ -32,7 +32,7 @@ PROVENANCE = {
     "external_predictions_unknown": "外部预测来源未知；平台仅验证测试评分",
 }
 ARCHITECTURES = {
-    "classification": {"resnet18-v1": "ResNet-18 · 全局类别输出", "linear-classifier-v1": "线性分类器 · 固定全局类别输出"},
+    "classification": {"resnet18-v1": "ResNet-18 · 全局类别输出", "pathmnist-resnet18-v1": "PathMNIST ResNet-18", "linear-classifier-v1": "线性分类器 · 固定全局类别输出"},
     "segmentation": {"unet2d-v1": "U-Net 2D · 平台结构", "pixel-linear-v1": "逐像素线性分割器 · 共享输出头"},
     "registration": {"point-translation-v1": "标志点平移模型 · 固定空间毫米坐标"},
 }
@@ -162,7 +162,7 @@ def validate_weights(data: bytes, architecture: str) -> None:
         if keys and all(key.startswith("module.") for key in keys):
             checked_keys = {key[7:] for key in keys}
     expected = {"offset"} if architecture == "point-translation-v1" else {"weight", "bias"}
-    neural = architecture in ("resnet18-v1", "unet2d-v1")
+    neural = architecture in NEURAL_ARCHITECTURES
     if not keys or len(keys) > 2048 or (not neural and checked_keys != expected):
         raise ValueError("权重键与所选已审核结构不符")
     intervals = []

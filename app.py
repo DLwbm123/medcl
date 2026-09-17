@@ -572,10 +572,10 @@ def records():
         return
     options = [j["id"] for j in jobs]
     mapping = {j["id"]: j for j in jobs}
-    selected = st.session_state.get("selected_job", options[0])
-    job_id = st.selectbox("选择评测记录", options, index=options.index(selected) if selected in options else 0,
+    if st.session_state.get("selected_job") not in options:
+        st.session_state.selected_job = options[0]
+    job_id = st.selectbox("选择评测记录", options, key="selected_job",
                           format_func=lambda jid: f"{mapping[jid]['config']['method']} · {STATUS[mapping[jid]['status']]} · {jid[:8]}")
-    st.session_state.selected_job = job_id
     active = mapping[job_id]["status"] in ("queued", "running")
 
     @st.fragment(run_every="5s" if active else None)

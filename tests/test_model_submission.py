@@ -10,12 +10,34 @@ import numpy as np
 import torch
 from safetensors.torch import save
 
-from medcl.model_runtime import build_model
+from medcl.model_runtime import build_model, pathmnist_weights
 from medcl.sandbox import command_for, clean_env, model_predictions, sandbox_available
 from medcl.submissions import inspect_upload, validated_model_options
 
 
 class ModelSubmissionChecks(unittest.TestCase):
+    def test_native_pathmnist_upload_and_conflicting_alias(self):
+        model = build_model("pathmnist-resnet18-v1", 9)
+        with torch.no_grad():
+            for parameter in model.parameters():
+                parameter.zero_()
+            model.fc.bias.copy_(torch.arange(9, dtype=torch.float32))
+        state = {key.replace("fc.", "linear.").replace(".downsample.", ".shortcut."): value
+                 for key, value in model.state_dict().items()}
+        state["classifier.weight"] = state["linear.weight"].clone()
+        state["classifier.bias"] = state["linear.bias"].clone()
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            weights = root / "final.pt"
+            torch.save({"model": state, "stage": {"task": 4}}, weights)
+            inspect_upload(weights.name, weights.read_bytes(), "model", "auto-classification-v1")
+            pred = model_predictions("auto-classification-v1", weights, np.zeros((1, 28, 28, 3), np.uint8),
+                                     list(range(6)), root, list(range(9)), validated_model_options("auto-classification-v1"))
+            self.assertEqual(pred.tolist(), [5])
+        state["classifier.bias"][0] = -1
+        with self.assertRaisesRegex(ValueError, "重复参数不一致"):
+            pathmnist_weights(state)
+
     def test_neural_weights_and_class_mask_in_isolation(self):
         self.assertTrue(sandbox_available(), "model isolation must pass on the release host")
         with tempfile.TemporaryDirectory() as folder:

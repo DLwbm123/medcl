@@ -90,11 +90,16 @@ class BrowserAppCheck(unittest.TestCase):
                 pred_id = submit(b, method="equivalent prediction", order=["T1", "T2", "T3"],
                                  uploads=[{"stage": 3, "name": "final.json", "data": pack_predictions(baseline_predictions(b, ["T1", "T2", "T3"]), True)}],
                                  mode="predictions", architecture=None, clients=1, evaluate_unseen=False, root=root)
+                next(button for button in app.button if button.label == "查看此次评测").click().run()
                 prediction_result = evaluate(pred_id, root)
                 self.assertEqual(job["result"]["continual"], prediction_result["continual"])
-                next(button for button in app.button if button.label == "查看此次评测").click().run()
                 self.assertFalse(app.exception)
                 self.assertIn("模型提交", self.visible_text(app))
+                # The other record completed after this page rendered its old status label.
+                next(control for control in app.selectbox if control.label == "选择评测记录").set_value(pred_id).run()
+                self.assertFalse(app.exception)
+                self.assertEqual(app.session_state["selected_job"], pred_id)
+                self.assertIn("预测提交", self.visible_text(app))
 
     def test_upload_result_navigation_and_invalid_file(self):
         with tempfile.TemporaryDirectory(prefix="medcl-ui-test-") as directory:

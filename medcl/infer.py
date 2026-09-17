@@ -9,7 +9,7 @@ import sys
 
 # Applied before numerical libraries load. Importing the pure predictor does not change its caller's limits.
 if __name__ == "__main__":
-    resource.setrlimit(resource.RLIMIT_CPU, (90, 90))
+    resource.setrlimit(resource.RLIMIT_CPU, (1800, 1800))
     resource.setrlimit(resource.RLIMIT_FSIZE, (512 * 1024**2, 512 * 1024**2))
     resource.setrlimit(resource.RLIMIT_NOFILE, (64, 64))
     os.environ["OPENBLAS_NUM_THREADS"] = "1"
@@ -60,12 +60,12 @@ if __name__ == "__main__":
     with open(manifest_path, encoding="utf-8") as handle:
         manifest = json.load(handle)
     automatic = manifest["architecture"].startswith("auto-")
-    neural = manifest["architecture"] in ("resnet18-v1", "unet2d-v1")
+    neural = manifest["architecture"] in ("resnet18-v1", "unet2d-v1", "pathmnist-resnet18-v1")
     runtime = runpy.run_path(str(Path(__file__).with_name("model_runtime.py"))) if automatic or neural or not weight_path.endswith(".safetensors") else None
     weights = runtime["load_weights"](weight_path) if runtime else load_file(weight_path)
     if automatic:
         manifest["architecture"] = runtime["resolve_architecture"](manifest["architecture"], weights.keys())
-        neural = manifest["architecture"] in ("resnet18-v1", "unet2d-v1")
+        neural = manifest["architecture"] in runtime["NEURAL_ARCHITECTURES"]
     with np.load(input_path, allow_pickle=False) as data:
         if neural:
             pred = runtime["predict_neural"](manifest["architecture"], weights, data["images"], manifest["active_classes"],

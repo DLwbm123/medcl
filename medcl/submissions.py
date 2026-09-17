@@ -31,8 +31,8 @@ PROVENANCE = {
     "external_predictions_unknown": "外部预测来源未知；平台仅验证测试评分",
 }
 ARCHITECTURES = {
-    "classification": {"linear-classifier-v1": "线性分类器 · 固定全局类别输出"},
-    "segmentation": {"pixel-linear-v1": "逐像素线性分割器 · 共享输出头"},
+    "classification": {"resnet18-v1": "ResNet-18 · 全局类别输出", "linear-classifier-v1": "线性分类器 · 固定全局类别输出"},
+    "segmentation": {"unet2d-v1": "U-Net 2D · 平台结构", "pixel-linear-v1": "逐像素线性分割器 · 共享输出头"},
     "registration": {"point-translation-v1": "标志点平移模型 · 固定空间毫米坐标"},
 }
 
@@ -156,19 +156,20 @@ def validate_weights(data: bytes, architecture: str) -> None:
         raise ValueError("safetensors 头部必须为对象")
     keys = set(header) - {"__metadata__"}
     expected = {"offset"} if architecture == "point-translation-v1" else {"weight", "bias"}
-    if keys != expected:
+    neural = architecture in ("resnet18-v1", "unet2d-v1")
+    if not keys or len(keys) > 2048 or (not neural and keys != expected):
         raise ValueError("权重键与所选已审核结构不符")
     intervals = []
     for name in keys:
         item = header[name]
-        if not isinstance(item, dict) or item.get("dtype") != "F32":
-            raise ValueError("首版权重只接受 float32 纯张量")
+        if not isinstance(item, dict) or item.get("dtype") not in (("F32", "I64") if neural else ("F32",)):
+            raise ValueError("权重只接受 float32 参数与 int64 计数张量")
         shape, offsets = item.get("shape"), item.get("data_offsets")
-        if not isinstance(shape, list) or not 1 <= len(shape) <= 2 or any(type(d) is not int or not 0 < d <= 1048576 for d in shape):
+        if not isinstance(shape, list) or not (0 if neural else 1) <= len(shape) <= (4 if neural else 2) or any(type(d) is not int or not 0 < d <= 1048576 for d in shape):
             raise ValueError("权重维度无效")
         if not isinstance(offsets, list) or len(offsets) != 2 or any(type(i) is not int or i < 0 for i in offsets):
             raise ValueError("权重字节偏移无效")
-        if offsets[1] - offsets[0] != math.prod(shape) * 4:
+        if offsets[1] - offsets[0] != math.prod(shape) * (8 if item["dtype"] == "I64" else 4):
             raise ValueError("权重大小与维度不符")
         intervals.append(tuple(offsets))
     end = 0
@@ -180,17 +181,63 @@ def validate_weights(data: bytes, architecture: str) -> None:
         raise ValueError("权重数据截断或存在多余内容")
 
 
+def validate_torch_archive(data: bytes) -> None:
+    """Inspect ZIP metadata only. Deserialize tensor state_dicts in the sandbox."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            entries = archive.infolist()
+            if not 3 <= len(entries) <= 4096 or len({e.filename for e in entries}) != len(entries):
+                raise ValueError("PyTorch 权重包成员数量无效或重复")
+            if sum(e.file_size for e in entries) > MAX_EXPANDED:
+                raise ValueError("PyTorch 权重展开后超过 512 MiB")
+            prefixes, names = set(), set()
+            for entry in entries:
+                path = PurePosixPath(entry.filename)
+                if path.is_absolute() or ".." in path.parts or len(path.parts) < 2:
+                    raise ValueError("PyTorch 权重包路径无效")
+                prefixes.add(path.parts[0])
+                name = "/".join(path.parts[1:])
+                if not re.fullmatch(r"data/\d+|data.pkl|version|byteorder|\.data/serialization_id|\.format_version|\.storage_alignment", name):
+                    raise ValueError("仅接受 state_dict；不接受 TorchScript、代码或完整模型对象")
+                if entry.flag_bits & 1 or (entry.external_attr >> 16) & 0o170000 == 0o120000:
+                    raise ValueError("不接受加密或链接成员")
+                if entry.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
+                    raise ValueError("不支持该权重压缩算法")
+                if name == "data.pkl" and entry.file_size > MAX_JSON:
+                    raise ValueError("权重索引过大")
+                names.add(name)
+            if len(prefixes) != 1 or not {"data.pkl", "version"} <= names:
+                raise ValueError("不是 torch.save(state_dict) 权重包")
+    except (zipfile.BadZipFile, EOFError, OSError):
+        raise ValueError("PT/PTH 需为 torch.save(state_dict) 的 ZIP 格式；不接受旧版 Pickle") from None
+
+
+def validated_model_options(architecture, options=None):
+    defaults = {"input_size": 0, "normalization": "unit"} if architecture == "resnet18-v1" else {}
+    if options is None:
+        return defaults
+    if not isinstance(options, dict) or set(options) != set(defaults):
+        raise ValueError("模型预处理选项无效")
+    if defaults and (type(options["input_size"]) is not int or options["input_size"] not in (0, 28, 128, 224, 256)
+                     or options["normalization"] not in ("unit", "imagenet")):
+        raise ValueError("模型输入尺寸或归一化无效")
+    return dict(options)
+
+
 def inspect_upload(name: str, data: bytes, mode: str, architecture: str | None = None,
                    *, allow_registration_volumes: bool = False):
     if not isinstance(data, bytes) or not 0 < len(data) <= MAX_FILE:
         raise ValueError("每个文件需为 1 byte–128 MiB")
     suffix = Path(name).suffix.lower()
     if mode == "model":
-        if suffix != ".safetensors":
-            raise ValueError("模型仅接受 safetensors；禁止 Python、Pickle、PT/PTH")
+        if suffix not in (".safetensors", ".pt", ".pth"):
+            raise ValueError("模型接受 .pth / .pt 的张量 state_dict 或 .safetensors")
         if architecture not in {item for choices in ARCHITECTURES.values() for item in choices}:
             raise ValueError("模型结构未在审核白名单中")
-        validate_weights(data, architecture)
+        if suffix == ".safetensors":
+            validate_weights(data, architecture)
+        else:
+            validate_torch_archive(data)
         return None
     if mode != "predictions":
         raise ValueError("提交模式无效")
@@ -269,7 +316,7 @@ def align_registration_volumes(entry: dict, sample_ids: np.ndarray, volume_shape
 def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict],
            mode: str, architecture: str | None, clients: int, evaluate_unseen: bool,
            output_head: str = "shared", training_supervision: str | None = None,
-           provenance: str | None = None, root: Path | None = None) -> str:
+           provenance: str | None = None, root: Path | None = None, model_options: dict | None = None) -> str:
     ok, _ = readiness(benchmark)
     if not ok:
         raise ValueError("该基准资产尚未接入")
@@ -307,6 +354,7 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
         raise ValueError("阶段位置无效或重复")
     if sum(len(u["data"]) for u in uploads) > MAX_TOTAL:
         raise ValueError("全部上传合计不可超过 256 MiB")
+    model_options = validated_model_options(architecture, model_options) if mode == "model" else {}
     if mode == "model":
         from medcl.sandbox import sandbox_available
         if architecture not in ARCHITECTURES[benchmark["kind"]] or output_head != "shared":
@@ -326,7 +374,7 @@ def submit(benchmark: dict, *, method: str, order: list[str], uploads: list[dict
         "schema_version": 2, "evaluator_version": EVALUATOR_VERSION,
         "viewer_schema_version": VIEWER_SCHEMA_VERSION,
         "benchmark": public_protocol(benchmark), "method": method.strip(),
-        "order": list(order), "stages": sorted(stages), "mode": mode, "architecture": architecture,
+        "order": list(order), "stages": sorted(stages), "mode": mode, "architecture": architecture, "model_options": model_options,
         "clients": clients, "evaluate_unseen": bool(evaluate_unseen), "output_head": output_head,
         "training_supervision": supervision,
         "supervision_source": "提交者声明的外部训练监督类型；平台仅在同一冻结测试集评分，不读取训练集或训练日志" if benchmark["kind"] == "segmentation" else "不适用",

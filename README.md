@@ -39,7 +39,7 @@ Prostate 的 HDF5 未携带真实 spacing。确认首个训练病例在 **HDF5 �
 | 配准 | 对应标志点 TRE；fixed / moving / registered / 融合 / 可选 warped 三正交切面；预测三维体显示 | registered/warped 必须由提交者在外部生成并对齐 fixed 网格；平台不执行配准、重采样或形变场推理；隐藏 fixed points 与 fixed 真值分割不进入浏览器 |
 | 阶段 | 单个最终输入、多个或缺失阶段、自定义顺序 | 不推断缺失阶段，不把最后可见阶段当作最终阶段 |
 | 客户端 | 固定病例轮转划分，分类按图像；全局/各客户端矩阵、宏平均、加权分类准确率、最差与差异 | 仅逻辑客户端评分模拟，不代表真实跨医院联邦部署 |
-| 模型 | 三种已审核纯数值结构，float32 safetensors | 未接入 UNet / EfficientNet / SAMCL 或任意上传代码；这些方法可提交预测 |
+| 模型 | ResNet-18、平台 U-Net 2D 与三种数值结构；PyTorch state_dict 或 safetensors | 按阶段上传，由平台推理评分；任意自定义结构、任务专用多头和体配准模型仍提交预测 |
 | 输出 | 任务主指标、Final average / BWT / Forgetting / FWT / BWTR、分割/配准三维病例可视化、三类报告 | 条件不足显示不可计算；分类仅给任务和客户端聚合结果；报告/公开聚合不嵌入医学体数据 |
 
 客户端版本为 `case-round-robin-v1-cN`：每个任务的匿名病例序号 `mod N`，不会拆分同一病例。分类没有患者标识时按该任务图像列表轮转。它是平台新定义的测试划分，不是原论文的客户端划分。
@@ -72,10 +72,10 @@ python3 -m medcl.examples --benchmark demo-registration
 
 - 默认私有状态目录：`~/.local/state/medcl`；可用 `MEDCL_STATE_DIR` 改为独立目录。内含 SQLite、上传、冻结配置、结果、最多 3 个/任务的私有三维预览和错误日志；隐藏真值不进入预览。
 - `MEDCL_CONFIG` 可指定管理员配置文件；网页不接受任意本地路径。集中 schema 会拒绝合成/真实格式混标、非法指标组合、类别/坐标约定和缺失资产字段。测试资产只读、不复制入源码；提交时记录大小/修改时间，并在每个任务读取前检查。该轻量记录不是内容摘要：同大小且恢复原修改时间的替换仍可能漏检；按当前运维策略，无具体异常时不主动计算全量哈希。
-- 每文件 128 MiB、每次合计 256 MiB；JSON 单独限制为 16 MiB、200 万个预测数值和 100 万个样本 ID，超出时使用 NPZ。NPZ 展开后最多 512 MiB、最多 12 个任务。严格校验 JSON、数组和 safetensors 的内容、大小、映射。
-- 模型在原生 macOS 沙箱中运行：不提供标签，清空继承环境，禁止网络、其他用户文件和子进程；推理 120 秒墙钟/90 秒 CPU、2 GiB RSS 轮询限制。评分任务另有 10 分钟墙钟/4 GiB RSS 轮询上限。内存轮询不是瞬时硬配额。
-- 必须先通过实际隔离探针；不支持该沙箱的环境只开放预测评分，不降级执行模型。只测试了 macOS/Python 3.12；Linux 模型隔离未实现，Windows worker 不支持。
-- 这是本机单用户工具，不是公网多租户服务或临床系统。状态目录/任务目录使用 0700，数据库、上传、私有配置、结果、预览和日志使用 0600；旧分类结果会在数据库 schema 迁移时删除逐样本字段。没有身份认证、实例磁盘配额、自动保留清理或公开托管；请勿上传个人信息或敏感元数据。
+- 每文件 128 MiB、每次合计 256 MiB；JSON 单独限制为 16 MiB、200 万个预测数值和 100 万个样本 ID，超出时使用 NPZ。NPZ 展开后最多 512 MiB、最多 12 个任务。严格校验 JSON、数组、safetensors 与 PyTorch ZIP 元数据；PT/PTH 只在隔离子进程内以 `weights_only=True` 加载。
+- 模型在 macOS Seatbelt 或 Linux Landlock + seccomp 中运行（PyTorch 功能安装 `requirements-models.txt`）：不提供标签，清空继承环境，禁止网络、其他用户文件和子进程；推理 120 秒墙钟/90 秒 CPU、2 GiB RSS 轮询限制。评分任务另有 10 分钟墙钟/4 GiB RSS 轮询上限。内存轮询不是瞬时硬配额。
+- 必须先通过实际隔离探针；不支持该沙箱的环境只开放预测评分，不降级执行模型。已验证 macOS 和 Linux/Python 3.12；Linux 需 Landlock ABI ≥ 1 和 libseccomp，Windows worker 不支持。
+- 这是本机单用户工具，不是公网多租户服务或临床系统。状态目录/任务目录使用 0700，数据库、上传、私有配置、结果、预览和日志使用 0600；旧分类结果会在数据库 schema 迁移时删除逐样本字段。没有身份认证、实例磁盘配额或自动保留清理；请勿上传个人信息或敏感元数据。
 
 实现路径：`app.py` 界面；`medcl_cornerstone/` 为 Python 数据信封与预构建 TypeScript/Cornerstone3D 查看器；`medcl/benchmarks.py` 只读资产适配；`submissions.py` / `storage.py` 提交与冻结；`worker.py` / `runner.py` 独立评分；`sandbox.py` / `infer.py` 受限推理；`metrics.py` 指标；`reports.py` 导出。未引入额外数据库、Web 后端或训练服务。
 

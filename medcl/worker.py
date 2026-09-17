@@ -42,11 +42,16 @@ def run_worker(root: Path | None = None, once: bool = False) -> None:
             with log.open("ab") as handle:
                 log.chmod(0o600)
                 # The child inherits the lock: a killed parent cannot permit a second concurrent scorer.
-                process = subprocess.Popen([sys.executable, "-B", "-m", "medcl.runner", job["id"], "--state", str(root)],
-                                           cwd=PROJECT, stdout=handle, stderr=handle, stdin=subprocess.DEVNULL,
+                process = subprocess.Popen([sys.executable, "-B", "-"],
+                                           cwd=PROJECT, stdout=handle, stderr=handle, stdin=subprocess.PIPE,
                                            pass_fds=(lock.fileno(),), start_new_session=True,
                                            env={"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "LANG": "en_US.UTF-8",
                                                 "PYTHONDONTWRITEBYTECODE": "1", "OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1"})
+                bootstrap = ("import runpy,sys\n" +
+                             f"sys.argv = {['evaluate', job['id'], '--state', str(root)]!r}\n" +
+                             "runpy.run_module('medcl.runner', run_name='__main__')\n")
+                process.stdin.write(bootstrap.encode())
+                process.stdin.close()
                 start = time.monotonic()
                 failure = None
                 try:

@@ -3,6 +3,8 @@
 import json
 import os
 import resource
+import runpy
+from pathlib import Path
 import sys
 
 # Applied before numerical libraries load. Importing the pure predictor does not change its caller's limits.
@@ -57,7 +59,18 @@ if __name__ == "__main__":
     manifest_path, weight_path, input_path, output_path = sys.argv[1:]
     with open(manifest_path, encoding="utf-8") as handle:
         manifest = json.load(handle)
-    weights = load_file(weight_path)
+    neural = manifest["architecture"] in ("resnet18-v1", "unet2d-v1")
+    runtime = runpy.run_path(str(Path(__file__).with_name("model_runtime.py"))) if neural or not weight_path.endswith(".safetensors") else None
+    weights = runtime["load_weights"](weight_path) if runtime else load_file(weight_path)
     with np.load(input_path, allow_pickle=False) as data:
-        pred = predict(manifest["architecture"], weights, data["images"], manifest["active_classes"], manifest["all_classes"])
+        if neural:
+            pred = runtime["predict_neural"](manifest["architecture"], weights, data["images"], manifest["active_classes"],
+                                              manifest["all_classes"], manifest["model_options"])
+        else:
+            if runtime:
+                weights = {key: value.numpy() for key, value in weights.items()}
+            expected = {"offset"} if manifest["architecture"] == "point-translation-v1" else {"weight", "bias"}
+            if set(weights) != expected or any(value.dtype != np.float32 for value in weights.values()):
+                raise ValueError("weights do not match registered structure")
+            pred = predict(manifest["architecture"], weights, data["images"], manifest["active_classes"], manifest["all_classes"])
     np.save(output_path, pred, allow_pickle=False)

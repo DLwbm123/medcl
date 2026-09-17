@@ -246,7 +246,7 @@ def evaluate(job_id: str, root: Path | None = None) -> dict:
             else:
                 allowed = task.get("all_classes", [])
             if config["mode"] == "model":
-                pred = model_predictions(config["architecture"], path, data["images"], allowed, folder, task.get("all_classes", []))
+                pred = model_predictions(config["architecture"], path, data["images"], allowed, folder, task.get("all_classes", []), config.get("model_options"))
                 entry = {"ids": data["sample_ids"], "pred": pred}
             else:
                 entry = predictions[task_id]

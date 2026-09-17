@@ -53,6 +53,49 @@ class BrowserAppCheck(unittest.TestCase):
                 next(button for button in app.button if button.label == "查看评测记录").click().run()
                 self.assertEqual(next(control for control in app.segmented_control if control.label == "主导航").value, "评测记录")
 
+    def test_model_upload_queue_and_result(self):
+        import io
+        import torch
+        from safetensors.numpy import load
+        from medcl.examples import example_weights
+        from medcl.storage import get_job
+        from medcl.submissions import submit
+        from medcl.runner import evaluate
+        with tempfile.TemporaryDirectory(prefix="evaluation-ui-") as directory:
+            root = initialize(Path(directory))
+            with patch.dict(os.environ, {"MEDCL_STATE_DIR": str(root), "MEDCL_CONFIG": str(root / "no-assets.json"), "MEDCL_SHOW_DEMOS": "1"}):
+                heartbeat(root)
+                app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=20).run()
+                next(button for button in app.button if button.label == "进入分类任务").click().run()
+                next(button for button in app.button if button.key == "configure-demo-classification").click().run()
+                mode = next(control for control in app.radio if control.label == "提交类型")
+                self.assertEqual(mode.options, ["提交预测", "提交模型"])
+                mode.set_value("提交模型").run()
+                self.assertFalse(app.exception)
+                self.assertTrue(any(button.label == "下载模型结构模板" for button in app.download_button))
+                next(control for control in app.selectbox if control.label == "模型结构").set_value("linear-classifier-v1").run()
+                app.text_input[0].set_value("model upload acceptance").run()
+                buffer = io.BytesIO()
+                torch.save({key: torch.from_numpy(value.copy()) for key, value in load(example_weights("classification")).items()}, buffer)
+                app.file_uploader[0].set_value(("final.pth", buffer.getvalue(), "application/octet-stream")).run()
+                heartbeat(root)
+                next(button for button in app.button if button.label == "提交并开始评测").click().run()
+                self.assertFalse(app.exception)
+                self.assertEqual(len(list_jobs(root)), 1)
+                run_worker(root, once=True)
+                job = get_job(list_jobs(root)[0]["id"], root)
+                self.assertEqual(job["status"], "completed", job["message"])
+                self.assertEqual(job["config"]["mode"], "model")
+                b = demo_protocol("classification")
+                pred_id = submit(b, method="equivalent prediction", order=["T1", "T2", "T3"],
+                                 uploads=[{"stage": 3, "name": "final.json", "data": pack_predictions(baseline_predictions(b, ["T1", "T2", "T3"]), True)}],
+                                 mode="predictions", architecture=None, clients=1, evaluate_unseen=False, root=root)
+                prediction_result = evaluate(pred_id, root)
+                self.assertEqual(job["result"]["continual"], prediction_result["continual"])
+                next(button for button in app.button if button.label == "查看此次评测").click().run()
+                self.assertFalse(app.exception)
+                self.assertIn("模型提交", self.visible_text(app))
+
     def test_upload_result_navigation_and_invalid_file(self):
         with tempfile.TemporaryDirectory(prefix="medcl-ui-test-") as directory:
             root = initialize(Path(directory))

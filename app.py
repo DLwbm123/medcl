@@ -1,6 +1,7 @@
 """The local MedCL browser application. Long-running scoring belongs to the worker."""
 
 from html import escape
+from pathlib import Path
 import os
 
 # MedCL homepage fidelity pass v1 (presentation only).
@@ -361,9 +362,8 @@ def new_evaluation(benchmark_id, training_supervision=None):
         st.markdown("#### 提交内容")
         method = st.text_input("方法 / 本次评测名称", value="", placeholder="例如：方法名称 · 最终模型 · 随机种子 42", max_chars=80)
         registration_volume = b["kind"] == "registration" and any(t.get("format") == "registration-volume" for t in b["tasks"])
-        mode_options = ["预测文件"] if registration_volume else ["预测文件", "已支持结构的模型权重"]
-        mode_label = st.radio("提交类型", mode_options, horizontal=True)
-        mode = "predictions" if mode_label == "预测文件" else "model"
+        mode_label = st.radio("提交类型", ["提交预测", "提交模型"], horizontal=True, key=f"submission-mode-{benchmark_id}")
+        mode = "predictions" if mode_label == "提交预测" else "model"
         if b["synthetic"]:
             provenance = "synthetic"
             st.caption("结果来源固定为合成工程验收。")
@@ -373,53 +373,77 @@ def new_evaluation(benchmark_id, training_supervision=None):
                 "untrained_baseline": "未训练工程基线",
                 "trained_model_declared": "已训练模型（提交者声明）",
             }
-            provenance = st.selectbox("结果来源声明", list(provenance_labels), format_func=provenance_labels.get,
-                                      key=f"provenance-{benchmark_id}")
+            provenance_choices = list(provenance_labels) if mode == "predictions" else ["trained_model_declared", "untrained_baseline"]
+            provenance = st.selectbox("结果来源声明", provenance_choices, format_func=provenance_labels.get,
+                                      key=f"provenance-{benchmark_id}-{mode}")
             st.caption("平台验证测试评分，不验证训练过程。")
         architecture = None
+        model_options = {}
         model_ok = True
         if mode == "model":
-            model_ok = sandbox_available()
-            architecture = st.selectbox("已审核模型结构", list(ARCHITECTURES[b["kind"]]), format_func=ARCHITECTURES[b["kind"]].get)
-            st.caption("仅支持只读 float32 safetensors 与上列结构；其他模型请先生成预测。")
+            model_ok = sandbox_available() and not registration_volume and head == "shared"
+            architecture = st.selectbox("模型结构", list(ARCHITECTURES[b["kind"]]), format_func=ARCHITECTURES[b["kind"]].get, disabled=registration_volume)
+            st.caption("上传 .pth / .pt 张量权重或 .safetensors，平台自动推理并评分。权重需匹配所选结构。")
+            if architecture == "resnet18-v1":
+                size = st.selectbox("模型输入尺寸", [0, 28, 128, 224, 256], format_func=lambda x: "保留原始尺寸" if x == 0 else f"{x} × {x}")
+                normalization = st.selectbox("输入归一化", ["unit", "imagenet"], format_func=lambda x: "uint8 转 0–1" if x == "unit" else "0–1 后使用 ImageNet 均值 / 标准差")
+                model_options = {"input_size": size, "normalization": normalization}
+            elif architecture == "unet2d-v1":
+                st.caption("使用单通道原始像素值和原始尺寸；结构定义可在下方下载。")
             if head != "shared":
                 st.warning("已审核模型仅支持共享输出头；当前条件请上传预测文件。")
-            if model_ok:
-                st.caption("模型隔离检查已通过。")
-            else:
-                st.warning("当前环境不支持隔离模型运行，请上传预测文件。")
+            if registration_volume:
+                st.info("该体配准协议暂未开放模型推理，请切换至提交预测。")
+            elif not sandbox_available():
+                st.warning("模型运行服务暂不可用，请稍后重试或提交预测。")
         else:
             st.caption("支持 JSON 或 NPZ/ZIP 预测文件。客户端划分由平台完成。")
             if registration_volume:
                 st.caption("可附带对齐固定网格的配准后影像与变形标签，仅用于可视化。")
-    st.subheader("上传阶段结果")
+    st.subheader("上传阶段模型" if mode == "model" else "上传阶段预测")
     scope = st.radio("可提供的阶段", ["仅最终阶段", "多个 / 部分阶段"], horizontal=True)
     stages = [len(order)] if scope == "仅最终阶段" else st.multiselect("已有阶段位置", list(range(1, len(order) + 1)), default=[len(order)])
     st.caption("评分将输出任务主指标、最终平均、后向迁移、遗忘、前向迁移和相对后向迁移；条件不足时显示为不可计算。")
     files = []
     for stage in sorted(stages):
         seen_names = " → ".join(order[:stage])
-        up = st.file_uploader(f"阶段 {stage} · 已见任务 {seen_names}", type=["safetensors"] if mode == "model" else ["json", "npz", "zip"],
+        up = st.file_uploader(f"阶段 {stage} · 已见任务 {seen_names}", type=["pth", "pt", "safetensors"] if mode == "model" else ["json", "npz", "zip"],
                               accept_multiple_files=False, key=f"upload-{benchmark_id}-{mode}-{stage}", disabled=not model_ok)
         if up is not None:
             files.append({"stage": stage, "name": up.name, "data": up.getvalue()})
-    with st.expander("样本索引、文件格式与可下载文件"):
-        st.write("使用平台生成的匿名样本 ID；预测必须覆盖该阶段协议要求的全部任务与样本。隐藏标签不包含在索引中。")
-        if st.button("准备样本索引", key=f"manifest-{benchmark_id}"):
-            try:
-                st.session_state[f"manifest-data-{benchmark_id}"] = sample_manifest(b)
-            except Exception:
-                st.error("测试资产索引不可读，请管理员检查数据挂载。")
-        manifest_data = st.session_state.get(f"manifest-data-{benchmark_id}")
-        if manifest_data:
-            st.download_button("下载匿名样本索引 JSON", manifest_data, f"{benchmark_id}-sample-index.json", "application/json")
-        st.code('{"schema":"medcl.predictions.v1","tasks":{"T1":{"sample_ids":["T1-s000000"],"predictions":[0]}}}', language="json")
-        if b.get("synthetic"):
-            example = pack_predictions(baseline_predictions(b, standard), as_json=b["kind"] != "segmentation")
-            suffix = "npz" if b["kind"] == "segmentation" else "json"
-            st.download_button("下载最终阶段合成预测", example, f"{benchmark_id}-final.{suffix}", "application/octet-stream")
-            st.download_button("下载未训练的结构验收权重", example_weights(b["kind"]), f"{benchmark_id}-untrained.safetensors", "application/octet-stream")
-            st.caption("权重仅用于工程验收，从未训练；不能作为方法结果。")
+    if mode == "model":
+        st.caption("每阶段上传一个模型，该模型用于该阶段要求的所有任务；无需上传样本索引或预测文件。")
+        with st.expander("权重格式与模型结构模板"):
+            st.write("支持纯 state_dict，或含 state_dict / model_state_dict / model 的权重字典；参数为 float32，计数张量为 int64。不接受完整模型对象、TorchScript 或 Python 文件。")
+            if architecture in ("resnet18-v1", "unet2d-v1"):
+                st.download_button("下载模型结构模板", (Path(__file__).parent / "medcl/model_runtime.py").read_bytes(), "model_template.py", "text/x-python")
+                classes = max(c for task in b["tasks"] for c in task.get("all_classes", [0])) + 1
+                st.code(f"from model_template import build_model\nimport torch\nmodel = build_model({architecture!r}, classes={classes})\n# 完成训练或加载对应权重后导出\ntorch.save(model.cpu().state_dict(), 'final.pth')", language="python")
+            else:
+                keys = "offset: [D]" if architecture == "point-translation-v1" else "weight: [C, D], bias: [C]"
+                st.code(keys, language="text")
+            st.caption("每个文件最多 128 MiB，合计最多 256 MiB；每任务 CPU 推理限时 120 秒、内存 2 GiB。")
+            if b.get("synthetic") and architecture in ("linear-classifier-v1", "pixel-linear-v1", "point-translation-v1"):
+                st.download_button("下载结构验收权重", example_weights(b["kind"]), f"{benchmark_id}-untrained.safetensors", "application/octet-stream")
+                st.caption("该权重仅用于工程验收，从未训练。")
+    else:
+        with st.expander("样本索引、文件格式与可下载文件"):
+            st.write("使用平台生成的匿名样本 ID；预测必须覆盖该阶段协议要求的全部任务与样本。隐藏标签不包含在索引中。")
+            if st.button("准备样本索引", key=f"manifest-{benchmark_id}"):
+                try:
+                    st.session_state[f"manifest-data-{benchmark_id}"] = sample_manifest(b)
+                except Exception:
+                    st.error("测试资产索引不可读，请管理员检查数据挂载。")
+            manifest_data = st.session_state.get(f"manifest-data-{benchmark_id}")
+            if manifest_data:
+                st.download_button("下载匿名样本索引 JSON", manifest_data, f"{benchmark_id}-sample-index.json", "application/json")
+            st.code('{"schema":"medcl.predictions.v1","tasks":{"T1":{"sample_ids":["T1-s000000"],"predictions":[0]}}}', language="json")
+            if b.get("synthetic"):
+                example = pack_predictions(baseline_predictions(b, standard), as_json=b["kind"] != "segmentation")
+                suffix = "npz" if b["kind"] == "segmentation" else "json"
+                st.download_button("下载最终阶段合成预测", example, f"{benchmark_id}-final.{suffix}", "application/octet-stream")
+                st.download_button("下载未训练的结构验收权重", example_weights(b["kind"]), f"{benchmark_id}-untrained.safetensors", "application/octet-stream")
+                st.caption("权重仅用于工程验收，从未训练；不能作为方法结果。")
     st.subheader("开始评测")
     if clients > 1 and mode == "predictions":
         st.caption("预测模式由提交者声明同一阶段各客户端预测来自同一全局模型；平台不要求训练日志，也不伪称已验证模型来源。")
@@ -430,7 +454,7 @@ def new_evaluation(benchmark_id, training_supervision=None):
         try:
             job_id = submit(b, method=method, order=order, uploads=files, mode=mode, architecture=architecture,
                             clients=clients, evaluate_unseen=unseen, output_head=head,
-                            training_supervision=training_supervision, provenance=provenance)
+                            training_supervision=training_supervision, provenance=provenance, model_options=model_options)
         except ValueError as exc:
             st.error(str(exc))
         except Exception:
@@ -438,7 +462,7 @@ def new_evaluation(benchmark_id, training_supervision=None):
         else:
             st.session_state.selected_job = job_id
             st.session_state.submitted_notice = job_id
-            st.success("已提交，评分将在后台完成。")
+            st.success("已提交，模型推理与评分将在后台完成。" if mode == "model" else "已提交，评分将在后台完成。")
             st.button("查看此次评测", on_click=navigate, args=("评测记录",), type="primary")
 
 
@@ -486,6 +510,7 @@ def result_view(job):
     detail = f"{b['title']}" + (f" · {supervision}分割" if b["kind"] == "segmentation" else "")
     if SHOW_DEMOS:
         detail += f" · {b['version']} · {config['mode']} · 配置已冻结"
+    detail += " · " + ("模型提交" if config["mode"] == "model" else "预测提交")
     st.caption(detail)
     timeline(config["order"], b)
     if SHOW_DEMOS:

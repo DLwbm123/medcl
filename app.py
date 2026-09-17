@@ -41,7 +41,7 @@ h2 {font-size:1.7rem!important;font-weight:750!important;letter-spacing:-.015em!
 h3 {font-size:1.3rem!important;font-weight:700!important;color:var(--text)!important;}
 h4 {font-size:1.1rem!important;font-weight:700!important;color:#344054!important;letter-spacing:.01em!important;margin-top:.3rem!important;}
 p,li {line-height:1.65;} label p {color:#344054!important;font-size:1rem!important;font-weight:650!important;}
-[data-testid="stCaptionContainer"] p {color:var(--text-secondary)!important;font-size:.875rem!important;line-height:1.55!important;}
+[data-testid="stCaptionContainer"] p {color:var(--text-secondary)!important;font-size:.95rem!important;line-height:1.65!important;}
 .st-key-topbar {background:var(--surface);border-bottom:1px solid var(--border);padding:11px 18px;margin:0 calc(50% - 50vw) 18px;}
 .st-key-topbar>div {width:92vw;max-width:1760px;margin:auto;}
 .brand {display:flex;align-items:center;gap:12px;}
@@ -224,10 +224,10 @@ def heatmap(matrix, columns, rows, direction="higher", title_text=""):
                                 tooltip=["任务", "阶段 / 客户端", "显示", "状态"])
     rect = base.mark_rect(stroke="#ffffff", strokeWidth=3, cornerRadius=4).encode(
         color=alt.condition("isValid(datum.分数)", alt.Color("分数:Q", scale=alt.Scale(domain=domain, range=["#EDF4FB", "#355F8A"] if direction == "higher" else ["#355F8A", "#EDF4FB"]), legend=None), alt.value("#F2F4F7")))
-    text = base.mark_text(fontSize=14).encode(text="显示:N", color=alt.condition(
+    text = base.mark_text(fontSize=16).encode(text="显示:N", color=alt.condition(
         f"isValid(datum.分数) && datum.分数 {'>' if direction == 'higher' else '<'} {sum(domain)/2}", alt.value("white"), alt.value("#314957")))
     chart = (rect + text).properties(height=max(170, len(rows) * 52), title=title_text).configure_view(stroke=None).configure_axis(
-        domain=False, tickColor="#D4DBE5", labelColor="#475467", titleColor="#344054")
+        domain=False, tickColor="#D4DBE5", labelColor="#475467", titleColor="#344054", labelFontSize=15)
     st.altair_chart(chart, width="stretch")
 
 
@@ -331,8 +331,8 @@ def new_evaluation(benchmark_id, training_supervision=None):
     mode = "predictions" if mode_label == "提交预测" else "model"
     stage = len(order)
     if mode == "predictions":
-        stage = st.selectbox("任务", list(range(1, len(order) + 1)), index=len(order) - 1,
-                             format_func=lambda i: f"T{i} · {b['tasks'][i - 1]['name']}", key=f"prediction-task-{benchmark_id}")
+        stage = _home_ui.task_cards(st, "任务", {i: f"**T{i}**  \n{task['name']}" for i, task in enumerate(b['tasks'], 1)},
+                                    index=len(order) - 1, key=f"prediction-task-{benchmark_id}")
     head = "shared" if "shared" in allowed_output_heads(b) else allowed_output_heads(b)[0]
     model_ok = True
     if mode == "model":
@@ -458,13 +458,13 @@ def result_view(job):
         else:
             st.info("此阶段未提交，没有可展示的客户端统计。")
     with tab_cases:
-        stage_control, task_control = st.columns(2, gap="medium")
-        with stage_control:
-            stage = st.selectbox("可视化阶段", sorted(config["stages"]), index=len(config["stages"]) - 1, key=f"case-stage-{job['id']}")
+        stage = st.selectbox("可视化阶段", sorted(config["stages"]), index=len(config["stages"]) - 1, key=f"case-stage-{job['id']}")
         cases_result = result.get("cases", []) if b["kind"] != "classification" else []
         available_tasks = [tid for tid in config["order"] if any(c["task_id"] == tid and c["stage"] == stage for c in cases_result)]
-        with task_control:
-            task_id = st.selectbox("类别任务" if b["kind"] == "classification" else "病例任务", available_tasks or config["order"], key=f"case-task-{job['id']}")
+        names = {task["id"]: task["name"] for task in b["tasks"]}
+        task_id = _home_ui.task_cards(st, "类别任务" if b["kind"] == "classification" else "病例任务",
+                                     {tid: f"**{tid}**  \n{names[tid]}" for tid in available_tasks or config["order"]},
+                                     key=f"case-task-{job['id']}")
         cases = [c for c in cases_result if c["task_id"] == task_id and c["stage"] == stage]
         task = next(t for t in b["tasks"] if t["id"] == task_id)
         if b["kind"] == "classification":

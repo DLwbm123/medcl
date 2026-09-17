@@ -177,10 +177,10 @@ class ShowcaseTest(unittest.TestCase):
                     dataset = group if kind == "classification" else "pathmnist"
                     scenario = group if kind == "segmentation" else "domain"
                     specs = task_specs(kind, scenario=scenario, dataset=dataset)
-                    task_control = next(c for c in app.selectbox if c.label == "持续学习任务")
+                    task_control = next(c for c in app.radio if c.label == "持续学习任务")
                     self.assertEqual(len(task_control.options), len(specs))
                     for spec in specs:
-                        next(c for c in app.selectbox if c.label == "持续学习任务").set_value(spec["id"]).run()
+                        next(c for c in app.radio if c.label == "持续学习任务").set_value(spec["id"]).run()
                         for sample in (1, 2):
                             next(c for c in app.radio if c.label == "示例").set_value(sample).run()
                             self.assertFalse(app.exception)
@@ -212,7 +212,7 @@ class ShowcaseTest(unittest.TestCase):
                             visits += 1
                 if name == "segmentation-full":
                     next(c for c in app.selectbox if c.label == "持续学习场景").set_value("class").run()
-                    next(c for c in app.selectbox if c.label == "持续学习任务").set_value("T3").run()
+                    next(c for c in app.radio if c.label == "持续学习任务").set_value("T3").run()
                     next(c for c in app.radio if c.label == "示例").set_value(1).run()
                     next(c for c in app.checkbox if c.label == "查看最终七类完整心脏").check().run()
                     self.assertFalse(app.exception)

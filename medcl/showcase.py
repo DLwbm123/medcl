@@ -13,6 +13,7 @@ from PIL import Image
 
 from medcl.benchmarks import state_path
 from medcl.classification_showcase import DATASETS, card_html
+from medcl.homepage_ui import task_cards
 from medcl.showcase_tasks import SCENARIOS, task_specs
 from medcl_cornerstone import pack_envelope, render as render_volume
 
@@ -163,9 +164,8 @@ def render(st, example):
                                 key=f"showcase-scenario-{example}")
     specs = task_specs(kind, scenario=scenario, dataset=dataset)
     choices = {item["id"]: item for item in specs}
-    task_id = st.selectbox("持续学习任务", list(choices),
-        format_func=lambda value: f"{value} · {choices[value]['name']}",
-        key=f"showcase-task-{example}-{scenario}-{dataset}")
+    task_id = task_cards(st, "持续学习任务", {value: f"**{value}**  \n{item['name']}" for value, item in choices.items()},
+                         key=f"showcase-task-{example}-{scenario}-{dataset}")
     st.caption(f"共 {len(specs)} 个任务 · 当前 {task_id}：{choices[task_id]['name']}")
     sample = st.radio("示例", [1, 2], format_func=lambda value: f"示例 {value}", horizontal=True,
                       key=f"showcase-sample-{example}-{scenario}-{dataset}-{task_id}")

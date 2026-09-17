@@ -22,3 +22,4 @@ backgroundColor = "#F5F8FC"
 secondaryBackgroundColor = "#EDF4FB"
 textColor = "#172B43"
 font = "sans serif"
+baseFontSize = 18

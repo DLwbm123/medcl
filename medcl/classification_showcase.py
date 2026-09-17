@@ -37,21 +37,21 @@ def card_html(dataset, arrays):
     return f'''<style>
     .medcl-class-card {{display:grid;grid-template-columns:minmax(260px,1.05fr) minmax(260px,1fr);border:1px solid #e0e7ef;border-radius:22px;overflow:hidden;background:#fff;box-shadow:0 12px 40px #253d5810;color:#203349}}
     .medcl-class-visual {{padding:26px;background:linear-gradient(145deg,#edf1f7,#f8fafc);display:flex;flex-direction:column;gap:20px}}
-    .medcl-class-top {{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:1.8px;color:#516780;font-weight:650}}
+    .medcl-class-top {{display:flex;justify-content:space-between;align-items:center;font-size:15px;letter-spacing:1.8px;color:#516780;font-weight:650}}
     .medcl-class-rgb {{border:1px solid #ced8e3;border-radius:6px;padding:4px 8px;letter-spacing:1px}}
     .medcl-class-image {{display:block;width:min(100%,384px);height:auto;aspect-ratio:1;object-fit:contain;margin:auto;border-radius:12px;box-shadow:0 8px 24px #243a5420}}
-    .medcl-class-image-note {{display:flex;justify-content:space-between;color:#64758b;font-size:12px;gap:12px}}
+    .medcl-class-image-note {{display:flex;justify-content:space-between;color:#64758b;font-size:16px;gap:12px}}
     .medcl-class-info {{padding:38px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}}
-    .medcl-class-badge {{background:color-mix(in srgb,var(--accent) 10%,white);color:var(--accent);border-radius:7px;padding:6px 11px;font-size:12px;font-weight:650}}
+    .medcl-class-badge {{background:color-mix(in srgb,var(--accent) 10%,white);color:var(--accent);border-radius:7px;padding:6px 11px;font-size:16px;font-weight:650}}
     .medcl-class-info h2 {{font-size:30px;line-height:1.35;letter-spacing:-.7px;margin:20px 0 8px;padding:0;color:#203349}}
-    .medcl-class-info .medcl-class-description {{font-size:14px;line-height:1.8;color:#64758b;margin:0 0 25px}}
+    .medcl-class-info .medcl-class-description {{font-size:18px;line-height:1.8;color:#64758b;margin:0 0 25px}}
     .medcl-class-category {{border-left:3px solid var(--accent);padding:3px 0 3px 16px;margin:0 0 26px}}
-    .medcl-class-category small {{display:block;color:#64758b;font-size:12px;margin-bottom:7px}}
+    .medcl-class-category small {{display:block;color:#64758b;font-size:16px;margin-bottom:7px}}
     .medcl-class-category strong {{font-size:28px;line-height:1.4;font-weight:750;color:#203349}}
     .medcl-class-meta {{display:grid;grid-template-columns:1fr 1fr;gap:18px 30px;border-top:1px solid #e6ecf2;padding-top:23px;width:100%;margin:0}}
-    .medcl-class-meta dt {{font-size:12px;color:#64758b;margin-bottom:5px}}
-    .medcl-class-meta dd {{font-size:16px;font-weight:650;margin:0;color:#304963}}
-    .medcl-class-foot {{margin:20px 0 0;font-size:12px;color:#64758b;line-height:1.7}}
+    .medcl-class-meta dt {{font-size:16px;color:#64758b;margin-bottom:5px}}
+    .medcl-class-meta dd {{font-size:18px;font-weight:650;margin:0;color:#304963}}
+    .medcl-class-foot {{margin:20px 0 0;font-size:16px;color:#64758b;line-height:1.7}}
     @media(max-width:700px) {{.medcl-class-card {{grid-template-columns:1fr}} .medcl-class-info {{padding:25px}} .medcl-class-visual {{padding:20px}} .medcl-class-info h2 {{font-size:26px}}}}
     </style>
     <article class="medcl-class-card" style="--accent:{info['accent']}" aria-label="{name} 分类">

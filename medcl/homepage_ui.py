@@ -82,6 +82,15 @@ def install_styles(st: Any) -> None:
     st.html("<style>" + stylesheet() + "</style>")
 
 
+def task_cards(st: Any, label: str, choices: Mapping, key: str, index: int = 0):
+    """Native, keyboard-accessible single selection, displayed as a card grid."""
+    options = list(choices)
+    if st.session_state.get(key) not in options:
+        st.session_state[key] = options[index]
+    with st.container(key=f"medcl-task-cards-{len(options)}-{key}"):
+        return st.radio(label, options, format_func=choices.get, key=key, horizontal=True, width="stretch")
+
+
 def render_header(st: Any, nav: Sequence[str], control: Callable[..., str]) -> str:
     with st.container(key="topbar"):
         brand_column, nav_column = st.columns([1.08, 1], vertical_alignment="center")

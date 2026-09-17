@@ -151,6 +151,14 @@ class ShowcaseTest(unittest.TestCase):
                 cases[spec["file"]] = {"fixed": image + index, "moving": image // 2 + index,
                                        "registered": image + index, "spacing": np.ones(3)}
             self.assertEqual(len(cases), 50)  # 47 task entries and three legacy classification cards.
+            # Deliberately different test outputs make accidental reference reuse visible.
+            for name, arrays in list(cases.items()):
+                if "-T" not in name:
+                    continue
+                predicted = {key: value.copy() for key, value in arrays.items()}
+                field = "class_id" if "class_id" in arrays else "labels" if "labels" in arrays else "registered"
+                predicted[field] = arrays[field] + 1 if field == "class_id" else np.zeros_like(arrays[field])
+                cases[f"{name}-independent"] = predicted
             cardiac = np.zeros_like(image)
             for label in range(1, 8): cardiac[:, label * 2:label * 2 + 2, 3:12] = label
             cases["segmentation-cardiac"] = {"image": image, "labels": cardiac, "spacing": np.ones(3)}
@@ -173,32 +181,44 @@ class ShowcaseTest(unittest.TestCase):
                     self.assertEqual(len(task_control.options), len(specs))
                     for spec in specs:
                         next(c for c in app.selectbox if c.label == "持续学习任务").set_value(spec["id"]).run()
-                        self.assertFalse(app.exception)
-                        self.assertFalse(app.info)
-                        self.assertEqual(list_jobs(), [])
-                        self.assertTrue(any(f"当前 {spec['id']}：{spec['name']}" in c.value for c in app.caption))
-                        source = showcase.load_example(name, dataset=dataset, scenario=scenario, task_id=spec["id"])
-                        filename = spec["file"].replace("segmentation-", "segmentation-weak-", 1) if name == "segmentation-weak" else spec["file"]
-                        for field, expected in cases[filename].items(): np.testing.assert_array_equal(source[field], expected)
-                        if kind == "classification":
-                            html = card_html(dataset, source)
-                            pixels = np.asarray(Image.open(io.BytesIO(base64.b64decode(html.split("data:image/png;base64,")[1].split('"')[0]))))
-                            np.testing.assert_array_equal(pixels, source["image"])
-                            self.assertIn(DATASETS[dataset]["labels"][int(source["class_id"])], html)
-                        else:
-                            header, packed = unpack_envelope(showcase.volume_envelope(name, source, task_id=spec["id"], case_id=f"example-{filename}"))
-                            self.assertEqual(header["context"]["task_id"], spec["id"])
-                            self.assertNotIn("score", header["context"])
-                            if kind == "segmentation": np.testing.assert_array_equal(packed["prediction"], source["labels"])
-                        visits += 1
+                        for sample in (1, 2):
+                            next(c for c in app.radio if c.label == "示例").set_value(sample).run()
+                            self.assertFalse(app.exception)
+                            self.assertFalse(app.info)
+                            self.assertEqual(list_jobs(), [])
+                            self.assertTrue(any(f"当前 {spec['id']}：{spec['name']}" in c.value for c in app.caption))
+                            source = showcase.load_example(name, dataset=dataset, scenario=scenario, task_id=spec["id"], sample=sample)
+                            filename = spec["file"].replace("segmentation-", "segmentation-weak-", 1) if name == "segmentation-weak" else spec["file"]
+                            if sample == 2:
+                                filename += "-independent"
+                            self.assertEqual(next(c for c in app.radio if c.label == "示例").options, ["示例 1", "示例 2"])
+                            for field, expected in cases[filename].items(): np.testing.assert_array_equal(source[field], expected)
+                            if kind == "classification":
+                                html = card_html(dataset, source)
+                                self.assertIn(html, [item.proto.body for item in app.get("html")])
+                                pixels = np.asarray(Image.open(io.BytesIO(base64.b64decode(html.split("data:image/png;base64,")[1].split('"')[0]))))
+                                np.testing.assert_array_equal(pixels, source["image"])
+                                self.assertIn(DATASETS[dataset]["labels"][int(source["class_id"])], html)
+                            else:
+                                with patch.object(showcase, "render_volume", return_value={}) as render:
+                                    next(c for c in app.radio if c.label == "展示视图").set_value("三维浏览").run()
+                                    header, packed = unpack_envelope(render.call_args.args[0])
+                                    self.assertEqual("-sample-2" in render.call_args.kwargs["key"], sample == 2)
+                                next(c for c in app.radio if c.label == "展示视图").set_value("切片对比").run()
+                                self.assertEqual(header["context"]["task_id"], spec["id"])
+                                self.assertNotIn("score", header["context"])
+                                if kind == "segmentation": np.testing.assert_array_equal(packed["prediction"], source["labels"])
+                                else: np.testing.assert_array_equal(packed["registered"], source["registered"])
+                            visits += 1
                 if name == "segmentation-full":
                     next(c for c in app.selectbox if c.label == "持续学习场景").set_value("class").run()
                     next(c for c in app.selectbox if c.label == "持续学习任务").set_value("T3").run()
+                    next(c for c in app.radio if c.label == "示例").set_value(1).run()
                     next(c for c in app.checkbox if c.label == "查看最终七类完整心脏").check().run()
                     self.assertFalse(app.exception)
                     self.assertTrue(any("最终七类" in c.value for c in app.caption))
                 next(c for c in app.segmented_control if c.label == "主导航").set_value("首页").run()
-            self.assertEqual(visits, 47)
+            self.assertEqual(visits, 94)
             next(b for b in app.button if b.label == "进入分割任务").click().run()
             next(c for c in app.segmented_control if c.label == "增量场景").set_value("类别增量").run()
             next(b for b in app.button if b.label == "打开可视化").click().run()
@@ -210,11 +230,20 @@ class ShowcaseTest(unittest.TestCase):
             np.testing.assert_array_equal(pixels[0, 0], [80, 80, 80])
             np.testing.assert_array_equal(pixels[6, 6], showcase.COLORS[3])
             np.testing.assert_array_equal(pixels[2, 2], [220, 226, 235])
-            for kwargs in ({"task_id": "../private"}, {"scenario": "unknown", "task_id": "T1"}, {"dataset": "../private"}):
+            for kwargs in ({"task_id": "../private"}, {"scenario": "unknown", "task_id": "T1"}, {"dataset": "../private"},
+                           {"task_id": "T1", "sample": "../private"}, {"task_id": "T1", "sample": True}, {"sample": 2}):
                 with self.assertRaises(ValueError): showcase.load_example("classification", **kwargs)
             np.savez_compressed(folder / "classification-pathmnist-T1.npz", image=np.zeros((128,128,3), dtype=np.uint8), class_id=8)
             with self.assertRaisesRegex(ValueError, "task mismatch"):
                 showcase.load_example("classification", task_id="T1")
+            (folder / "segmentation-class-T1-independent.npz").unlink()
+            with self.assertRaises(FileNotFoundError):
+                showcase.load_example("segmentation-full", scenario="class", task_id="T1", sample=2)
+            next(c for c in app.radio if c.label == "示例").set_value(2).run()
+            self.assertFalse(app.exception)
+            self.assertTrue(any("此素材暂不可用" in c.value for c in app.info))
+            next(c for c in app.radio if c.label == "示例").set_value(1).run()
+            self.assertFalse(app.info)
             (folder / "segmentation-domain-T6.npz").unlink()
             with self.assertRaises(FileNotFoundError): showcase.load_example("segmentation-full", task_id="T6")
 

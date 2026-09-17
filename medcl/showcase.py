@@ -1,7 +1,8 @@
-"""Curated reference replays, kept separate from scoring and frozen test previews.
+"""Curated examples, kept separate from scoring and frozen test previews.
 
 Only the administrator-prepared, owner-only showcase files are read here. Source
-labels are intentionally used for this gallery, never as model predictions in jobs.
+labels belong to example 1; example 2 uses exported independent model outputs.
+Neither gallery source is used as model predictions in scored jobs.
 """
 
 from functools import lru_cache
@@ -31,11 +32,13 @@ COLORS = np.array([[38, 200, 122], [255, 181, 71], [96, 165, 250], [207, 122, 23
                    [255, 112, 137], [67, 217, 214], [232, 222, 85]], dtype=np.uint8)
 
 
-def load_example(example, *, dataset="pathmnist", scenario="domain", task_id=None):
+def load_example(example, *, dataset="pathmnist", scenario="domain", task_id=None, sample=1):
     if example not in EXAMPLES:
         raise ValueError("Unknown showcase")
     if dataset not in DATASETS:
         raise ValueError("Unknown classification dataset")
+    if type(sample) is not int or sample not in (1, 2) or (sample == 2 and task_id is None):
+        raise ValueError("Unknown showcase sample")
     filename = DATASETS[dataset]["file"] if example == "classification" else example
     if task_id is not None:
         if scenario not in SCENARIOS:
@@ -47,6 +50,8 @@ def load_example(example, *, dataset="pathmnist", scenario="domain", task_id=Non
         filename = spec["file"]
         if example == "segmentation-weak":
             filename = filename.replace("segmentation-", "segmentation-weak-", 1)
+    if sample == 2:
+        filename += "-independent"
     path = state_path() / "showcase" / f"{filename}.npz"
     arrays = _load(str(path), path.stat().st_mtime_ns)
     if ("class_id" in arrays) != (example == "classification") or (
@@ -161,14 +166,19 @@ def render(st, example):
     task_id = st.selectbox("持续学习任务", list(choices),
         format_func=lambda value: f"{value} · {choices[value]['name']}",
         key=f"showcase-task-{example}-{scenario}-{dataset}")
-    st.caption(f"共 {len(specs)} 个任务 · 每任务 1 组图像与结果 · 当前 {task_id}：{choices[task_id]['name']}")
-    whole_heart = kind == "segmentation" and scenario == "class" and task_id == "T3" and st.checkbox(
+    st.caption(f"共 {len(specs)} 个任务 · 当前 {task_id}：{choices[task_id]['name']}")
+    sample = st.radio("示例", [1, 2], format_func=lambda value: f"示例 {value}", horizontal=True,
+                      key=f"showcase-sample-{example}-{scenario}-{dataset}-{task_id}")
+    whole_heart = sample == 1 and kind == "segmentation" and scenario == "class" and task_id == "T3" and st.checkbox(
         "查看最终七类完整心脏", key=f"showcase-whole-heart-{example}")
     if whole_heart:
         example = "segmentation-cardiac"
     view_key = f"{example}-{scenario}-{dataset}-{task_id}"
+    if sample == 2:
+        view_key += "-sample-2"
     try:
-        arrays = load_example(example, dataset=dataset, scenario=scenario, task_id=None if whole_heart else task_id)
+        arrays = load_example(example, dataset=dataset, scenario=scenario, task_id=None if whole_heart else task_id,
+                              sample=sample)
     except (OSError, ValueError, KeyError, zipfile.BadZipFile):
         st.info("此素材暂不可用，请联系管理员准备展示病例。")
         return
@@ -227,13 +237,15 @@ def render(st, example):
             ("绿色", "橙色", "蓝色", "紫色", "粉色", "青色", "黄色"), 1) if label in arrays["labels"]) +
             (" · 浅灰：背景涂鸦" if "scribble" in arrays else ""))
     else:
-        panels = [("固定影像", cut("fixed")), ("移动影像", cut("moving")), ("对齐参考", cut("registered"))]
+        panels = [("固定影像", cut("fixed")), ("移动影像", cut("moving")),
+                  ("配准结果" if sample == 2 else "对齐参考", cut("registered"))]
     for column, (label, pixels) in zip(st.columns(len(panels), gap="medium"), panels):
         column.image(physical_slice(pixels, arrays["spacing"], axis), caption=label, width="stretch")
     if not segmentation:
         st.subheader("对齐细节")
         mode = st.radio("对比方式", ["棋盘格", "彩色融合"], horizontal=True)
-        for column, name, label in zip(st.columns(2), ("moving", "registered"), ("原始图像对", "参考对齐状态")):
+        for column, name, label in zip(st.columns(2), ("moving", "registered"),
+                                       ("原始图像对", "配准对齐状态" if sample == 2 else "参考对齐状态")):
             pixels = checkerboard(cut("fixed"), cut(name)) if mode == "棋盘格" else np.stack(
                 [cut("fixed"), cut(name), cut(name)], axis=-1)
             column.image(physical_slice(pixels, arrays["spacing"], axis), caption=label, width="stretch")

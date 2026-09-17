@@ -32,6 +32,7 @@
 | `resnet18-v1` | torchvision ResNet-18 state_dict | NHWC，uint8 / 255，灰度复制为 RGB；可选 28/128/224/256 双线性缩放和 ImageNet 归一化；输出全局标签 |
 | `pathmnist-resnet18-v1` | CIFAR 风格 ResNet-18，3×3 stem、无 maxpool、linear/shortcut 命名 | 限 PathMNIST 28×28 RGB uint8、9 类；PIL 双线性 Resize 到 128×128，再 ToTensor；严格检查重复参数一致性 |
 | `unet2d-v1` | 下载的 `model_template.py` 中 U-Net state_dict | NHW 单通道，原始数值和空间尺寸，至少 16×16；32/64/128/256/512 通道，双线性上采样，输出全局 labelmap |
+| `zs-domain-unet-v1` | ZS 域增量原生 U-Net，backbone/head 参数命名 | 限 NHW 256×256、全局类别 `[0,1]`；原始 float32 输入，padding 92、valid conv、跳接中心裁剪；softmax 后插值到输入尺寸，输出整数 labelmap |
 | `linear-classifier-v1` | `weight[C,D]`, `bias[C]` | `N×...` 按 C 顺序展开；uint8 除以 255，其余不额外标准化；输出 `N` 个全局整数标签 |
 | `pixel-linear-v1` | `weight[C,1]`, `bias[C]` | 单通道 `N×H×W`，逐像素线性 logits；输出同形标签 |
 | `point-translation-v1` | `offset[D]` | `N×K×D` 的固定空间 moving points；输出 points+offset；真实协议 D=3 |
@@ -41,6 +42,8 @@ C 必须等于注册全局最大标签+1。参数完全从上传权重读取并�
 预测 JSON 使用 `medcl.predictions.v1`；NPZ/ZIP 每个 task 为 `task__ids.npy`（一维字符串）和 `task__pred.npy`（纯数值）。分类形状 `[N]`；分割 `[N,H,W]`；标志点 `[N,K,D]`。每个样本 ID 一次，顺序可不同；平台对齐后严格检查形状/数值/输出类别。不接受概率图代替整数标签，不自动 argmax 或阈值化预测。`registration-volume` 只接受预测包，并可额外含 `task__registered.npy` 与 `task__warped_prediction.npy`，均为 `[N,Z,Y,X]` 且与 fixed display grid 完全同形；registered 是有限 scalar volume，warped prediction 是 uint16 范围内的整数预测 labelmap。它们只供定性查看，不参与 TRE。
 
 HDF5 管理员输入键为 `test_images`、`test_labels`（HWN）和 `patient_info_test`（每病例最后一张切片的 inclusive index）；边界必须是一维、非空、有限整数、首项非负、严格递增且末项覆盖最后一张切片，生成的每个半开区间都必须非空。标签读取后先按参考实现截断为整数，再仅对非背景应用可选 `label_shift`；实际标签必须属于 `{0} ∪ classes`，防止协议遗漏前景类。`voxel_spacing_zyx` 缺失时只按 `[1,1,1]` 索引空间展示，不声称物理尺寸或病人方向。分类 NPY/MedMNIST 仅用 test split；可按全局类分任务，匿名样本 ID 保留原 test 数组行号，但不会回写结果。
+
+当前真实分割协议保留 HDF5 原 test split：`prostate-domain6` 为六中心二分类；`mmwhs-class3` 顺序为 MYO/LV/LA、RA/RV、AO/PA，局部前景分别偏移 0、3、5，最终使用背景及 7 类共享输出，不按测试任务屏蔽已见类别；`organ-task4` 为左心房、前列腺、肝脏、脑肿瘤，每任务二分类，使用已知任务指定头。类别与器官原生 checkpoint 尚未接入模型上传，管理员可用 `scripts/export_evaluation_predictions.py` 调用原训练代码生成完整预测包；它不读取测试标签，也不进入上传执行路径。器官导出须先逐阶段实例化全部输出头，再严格加载最终 checkpoint。
 
 标志点配准 NPZ 使用且仅使用 `moving_points`、`fixed_points`。体数据配准管理员 NPZ 使用且仅使用 `fixed_volumes`、`moving_volumes`、`moving_points`、`fixed_points`，体数据为同形有限 `[N,Z,Y,X]`，点为 `[N,K,3]`。fixed points 只交给评分器；主指标始终为 TRE。registered 图像和 warped prediction 由提交者在平台外生成并重采样到 fixed display grid 后上传；平台不执行配准、插值、重采样或形变场推理。
 

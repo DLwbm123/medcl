@@ -28,6 +28,53 @@
       ]
     },
     {
+      "id": "mmwhs-class3",
+      "title": "心脏分割 · 三阶段类别增量",
+      "kind": "segmentation",
+      "incremental": "class",
+      "version": "example-mmwhs-class3-v1",
+      "synthetic": false,
+      "description": "MYO/LV/LA → RA/RV → AO/PA；管理员确认原始测试划分后接入。",
+      "source": "请填写有权使用的数据来源和固定测试划分版本",
+      "metric": "Dice (including background)",
+      "direction": "higher",
+      "unit": "fraction",
+      "allow_unseen": false,
+      "allowed_output_heads": ["shared"],
+      "output_semantics": "shared-eight-class-head-seen-label-mask",
+      "preprocessing": "HDF5 HWN 转 NHW float32；无额外标准化",
+      "label_rule": "astype(int64) 后仅非零标签分别加 0、3、5；背景保持 0",
+      "tasks": [
+        {"id": "T1", "name": "MYO/LV/LA", "format": "h5", "path": "/absolute/path/to/MMWHS/myo_lv_la.h5", "classes": [1, 2, 3], "all_classes": [0, 1, 2, 3, 4, 5, 6, 7], "label_shift": 0},
+        {"id": "T2", "name": "RA/RV", "format": "h5", "path": "/absolute/path/to/MMWHS/ra_rv.h5", "classes": [4, 5], "all_classes": [0, 1, 2, 3, 4, 5, 6, 7], "label_shift": 3},
+        {"id": "T3", "name": "AO/PA", "format": "h5", "path": "/absolute/path/to/MMWHS/ao_pa.h5", "classes": [6, 7], "all_classes": [0, 1, 2, 3, 4, 5, 6, 7], "label_shift": 5}
+      ]
+    },
+    {
+      "id": "organ-task4",
+      "title": "器官分割 · 四任务",
+      "kind": "segmentation",
+      "incremental": "task",
+      "version": "example-organ-task4-v1",
+      "synthetic": false,
+      "description": "左心房 → 前列腺 → 肝脏 → 脑肿瘤；管理员确认原始测试划分后接入。",
+      "source": "请填写有权使用的数据来源和固定测试划分版本",
+      "metric": "Dice (including background)",
+      "direction": "higher",
+      "unit": "fraction",
+      "allow_unseen": false,
+      "allowed_output_heads": ["task-specific"],
+      "output_semantics": "task-specific-binary-heads",
+      "preprocessing": "HDF5 HWN 转 NHW float32；无额外标准化",
+      "label_rule": "各任务保持背景 0、前景 1；任务指定相应二分类输出头",
+      "tasks": [
+        {"id": "T1", "name": "左心房", "format": "h5", "path": "/absolute/path/to/Task_incre/UtahI.h5", "classes": [1], "all_classes": [0, 1]},
+        {"id": "T2", "name": "前列腺", "format": "h5", "path": "/absolute/path/to/Task_incre/UCL.h5", "classes": [1], "all_classes": [0, 1]},
+        {"id": "T3", "name": "肝脏", "format": "h5", "path": "/absolute/path/to/Task_incre/Lits.h5", "classes": [1], "all_classes": [0, 1]},
+        {"id": "T4", "name": "脑肿瘤", "format": "h5", "path": "/absolute/path/to/Task_incre/brain.h5", "classes": [1], "all_classes": [0, 1]}
+      ]
+    },
+    {
       "id": "pathmnist-class3",
       "title": "PathMNIST · 三阶段类别增量",
       "public_title": "PathMNIST · 三阶段类别增量",

@@ -575,7 +575,7 @@ def records():
     if st.session_state.get("selected_job") not in options:
         st.session_state.selected_job = options[0]
     job_id = st.selectbox("选择评测记录", options, key="selected_job",
-                          format_func=lambda jid: f"{mapping[jid]['config']['method']} · {STATUS[mapping[jid]['status']]} · {jid[:8]}")
+                          format_func=lambda jid: f"{mapping[jid]['config']['method']} · {jid[:8]}")
     active = mapping[job_id]["status"] in ("queued", "running")
 
     @st.fragment(run_every="5s" if active else None)

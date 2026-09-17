@@ -60,7 +60,7 @@ if __name__ == "__main__":
     with open(manifest_path, encoding="utf-8") as handle:
         manifest = json.load(handle)
     automatic = manifest["architecture"].startswith("auto-")
-    neural = manifest["architecture"] in ("resnet18-v1", "unet2d-v1", "pathmnist-resnet18-v1")
+    neural = manifest["architecture"] in ("resnet18-v1", "unet2d-v1", "pathmnist-resnet18-v1", "zs-domain-unet-v1")
     runtime = runpy.run_path(str(Path(__file__).with_name("model_runtime.py"))) if automatic or neural or not weight_path.endswith(".safetensors") else None
     weights = runtime["load_weights"](weight_path) if runtime else load_file(weight_path)
     if automatic:

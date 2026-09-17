@@ -33,7 +33,7 @@ PROVENANCE = {
 }
 ARCHITECTURES = {
     "classification": {"resnet18-v1": "ResNet-18 · 全局类别输出", "pathmnist-resnet18-v1": "PathMNIST ResNet-18", "linear-classifier-v1": "线性分类器 · 固定全局类别输出"},
-    "segmentation": {"unet2d-v1": "U-Net 2D · 平台结构", "pixel-linear-v1": "逐像素线性分割器 · 共享输出头"},
+    "segmentation": {"unet2d-v1": "U-Net 2D · 平台结构", "zs-domain-unet-v1": "U-Net · 共享二分类输出", "pixel-linear-v1": "逐像素线性分割器 · 共享输出头"},
     "registration": {"point-translation-v1": "标志点平移模型 · 固定空间毫米坐标"},
 }
 

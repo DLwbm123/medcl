@@ -16,6 +16,22 @@ from medcl.submissions import inspect_upload, validated_model_options
 
 
 class ModelSubmissionChecks(unittest.TestCase):
+    def test_native_domain_weights_and_geometry_in_isolation(self):
+        model = build_model("zs-domain-unet-v1", 2)
+        with torch.no_grad():
+            for parameter in model.parameters():
+                parameter.zero_()
+            model.head.norm.bias[1] = 1
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            weights = root / "final.pt"
+            torch.save(model.state_dict(), weights)
+            inspect_upload(weights.name, weights.read_bytes(), "model", "auto-segmentation-v1")
+            pred = model_predictions("auto-segmentation-v1", weights, np.zeros((1, 256, 256), np.float32),
+                                     [0, 1], root, [0, 1])
+            self.assertEqual(pred.shape, (1, 256, 256))
+            self.assertTrue(np.all(pred == 1))
+
     def test_native_pathmnist_upload_and_conflicting_alias(self):
         model = build_model("pathmnist-resnet18-v1", 9)
         with torch.no_grad():

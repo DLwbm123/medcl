@@ -91,11 +91,15 @@ class BrowserAppCheck(unittest.TestCase):
                                  uploads=[{"stage": 3, "name": "final.json", "data": pack_predictions(baseline_predictions(b, ["T1", "T2", "T3"]), True)}],
                                  mode="predictions", architecture=None, clients=1, evaluate_unseen=False, root=root)
                 next(button for button in app.button if button.label == "查看此次评测").click().run()
+                record_options = next(control for control in app.selectbox if control.label == "选择评测记录").options
                 prediction_result = evaluate(pred_id, root)
                 self.assertEqual(job["result"]["continual"], prediction_result["continual"])
                 self.assertFalse(app.exception)
                 self.assertIn("模型提交", self.visible_text(app))
-                # The other record completed after this page rendered its old status label.
+                # Status changes must not replace the browser widget or reset its selection.
+                next(button for button in app.button if button.label == "刷新记录列表").click().run()
+                self.assertEqual(next(control for control in app.selectbox if control.label == "选择评测记录").options, record_options)
+                self.assertEqual(app.session_state["selected_job"], job['id'])
                 next(control for control in app.selectbox if control.label == "选择评测记录").set_value(pred_id).run()
                 self.assertFalse(app.exception)
                 self.assertEqual(app.session_state["selected_job"], pred_id)

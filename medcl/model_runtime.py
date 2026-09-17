@@ -6,7 +6,7 @@ contiguous tensors with safetensors.torch.save_file. Upload weights, never this 
 import re
 from collections.abc import Mapping
 
-NEURAL_ARCHITECTURES = ("resnet18-v1", "unet2d-v1", "pathmnist-resnet18-v1")
+NEURAL_ARCHITECTURES = ("resnet18-v1", "unet2d-v1", "pathmnist-resnet18-v1", "zs-domain-unet-v1")
 
 
 def resolve_architecture(selector, keys):
@@ -26,6 +26,8 @@ def resolve_architecture(selector, keys):
             return "pixel-linear-v1"
         if {"down.0.0.weight", "head.weight", "head.bias"} <= keys:
             return "unet2d-v1"
+        if {"backbone.Conv1.conv.0.weight", "head.conv.weight", "head.norm.running_mean"} <= keys:
+            return "zs-domain-unet-v1"
     elif selector == "auto-registration-v1" and keys == {"offset"}:
         return "point-translation-v1"
     raise ValueError("无法识别该任务支持的模型权重")
@@ -67,6 +69,8 @@ def build_model(architecture, classes):
             model.conv1 = nn.Conv2d(3, 64, 3, stride=1, padding=1, bias=False)
             model.maxpool = nn.Identity()
         return model
+    if architecture == "zs-domain-unet-v1":
+        return build_domain_unet(classes)
     if architecture != "unet2d-v1":
         raise ValueError("unsupported neural architecture")
 
@@ -98,6 +102,61 @@ def build_model(architecture, classes):
     return UNet()
 
 
+def build_domain_unet(classes):
+    """Inference graph matching ZScribbleSeg (Shangqi Gao, Fudan) DomainModel weights."""
+    import torch
+    from torch import nn
+    if classes != 2:
+        raise ValueError("ZS domain U-Net requires a shared binary head")
+
+    def conv(cin, cout):
+        layer = nn.Module()
+        layer.conv = nn.Sequential(nn.Conv2d(cin, cout, 3), nn.ReLU(inplace=True), nn.BatchNorm2d(cout),
+                                   nn.Conv2d(cout, cout, 3), nn.ReLU(inplace=True),
+                                   nn.BatchNorm2d(cout, eps=1e-3, momentum=.01))
+        return layer
+
+    class DomainUNet(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.backbone = nn.Module()
+            for index, (cin, cout) in enumerate(zip((1, 64, 128, 256, 512), (64, 128, 256, 512, 1024)), 1):
+                setattr(self.backbone, f"Conv{index}", conv(cin, cout))
+            for index, cin, projected, skip, cout in ((4, 1024, 4, 512, 512), (3, 512, 4, 256, 256),
+                                                    (2, 256, 128, 128, 128), (1, 128, 64, 64, 64)):
+                layer = nn.Module()
+                layer.up = nn.Sequential(nn.Upsample(scale_factor=2), nn.Conv2d(cin, projected, 3, padding=1),
+                                         nn.ReLU(inplace=True), nn.BatchNorm2d(projected, eps=1e-3, momentum=.01))
+                setattr(self.backbone, f"Up{index}", layer)
+                setattr(self.backbone, f"Up_conv{index}", conv(projected + skip, cout))
+            self.head = nn.Module()
+            self.head.conv = nn.Conv2d(64, 2, 1)
+            self.head.norm = nn.BatchNorm2d(2, eps=1e-3, momentum=.01)
+
+        def forward(self, image):
+            size = image.shape[-2:]
+            x = nn.functional.pad(image, (92, 92, 92, 92))
+            skips = []
+            for index in range(1, 6):
+                if index > 1:
+                    x = nn.functional.max_pool2d(x, 2)
+                x = getattr(self.backbone, f"Conv{index}").conv(x)
+                skips.append(x)
+            for index in range(4, 0, -1):
+                x = getattr(self.backbone, f"Up{index}").up(x)
+                skip = skips[index - 1]
+                top, left = (skip.shape[-2] - x.shape[-2]) // 2, (skip.shape[-1] - x.shape[-1]) // 2
+                skip = skip[:, :, top:top + x.shape[-2], left:left + x.shape[-1]]
+                x = getattr(self.backbone, f"Up_conv{index}").conv(torch.cat((x, skip), dim=1))
+            probabilities = self.head.norm(self.head.conv(x)).softmax(1)
+            if probabilities.shape[-2:] != size:
+                probabilities = nn.functional.interpolate(probabilities, size=size, mode="bilinear", align_corners=False)
+                probabilities = probabilities / probabilities.sum(1, keepdim=True).clamp_min(1e-12)
+            return probabilities
+
+    return DomainUNet()
+
+
 def pathmnist_weights(state):
     """Map the native CIFAR-style ResNet names to the identical torchvision graph."""
     import torch
@@ -126,7 +185,10 @@ def predict_neural(architecture, weights, images, active_classes, all_classes, o
     import torch
     import torch.nn.functional as F
     native_pathmnist = architecture == "pathmnist-resnet18-v1"
-    torch.set_num_threads(8 if native_pathmnist else 1)
+    native_domain = architecture == "zs-domain-unet-v1"
+    torch.set_num_threads(8 if native_pathmnist or native_domain else 1)
+    if native_domain and (images.ndim != 3 or images.shape[1:] != (256, 256) or all_classes != [0, 1]):
+        raise ValueError("ZS domain U-Net expects 256×256 single-channel binary segmentation")
     if native_pathmnist:
         if images.dtype != np.uint8 or images.shape[1:] != (28, 28, 3) or all_classes != list(range(9)):
             raise ValueError("该 ResNet 权重适配仅支持 PathMNIST 28×28 RGB、9 类协议")
@@ -143,8 +205,9 @@ def predict_neural(architecture, weights, images, active_classes, all_classes, o
     allowed = torch.tensor(active_classes, dtype=torch.int64)
     with torch.inference_mode():
         # Bounded batches keep original image geometry and avoid all-test-set logits.
-        for start in range(0, len(images), 4):
-            raw = images[start:start + 4]
+        batch_size = 1 if native_domain else 4
+        for start in range(0, len(images), batch_size):
+            raw = images[start:start + batch_size]
             x = torch.from_numpy(raw.astype(np.float32))
             if native_pathmnist:
                 x = torch.stack([transform(Image.fromarray(item)) for item in raw])

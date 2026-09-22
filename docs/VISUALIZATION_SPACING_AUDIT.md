@@ -1,5 +1,10 @@
 # Cross-dataset visualization spacing audit
 
+2026-09-22 UI simplification: removed the gallery's spacing/Z-ratio expander,
+manual calibration controls, and associated calibration prompt. Both slice
+and 3D views continue using the stored asset geometry. The audit below records
+the original geometry repair; its manual-control description is historical.
+
 Checked on 2026-09-14 after the prostate geometry repair. Scope: the other 19 volume gallery files, their preparation paths, and shared gallery/result rendering. Classification galleries contain 2D RGB images and have no slice-spacing axis.
 
 ## Findings

@@ -190,22 +190,6 @@ def render(st, example):
         st.caption("类增量最终七类 · 保留原始标签编号 1–7 · 0 为背景")
 
     view = st.radio("展示视图", ["切片对比", "三维浏览"], horizontal=True, key=f"showcase-view-{view_key}")
-    source = str(arrays.get("spacing_source", "index-space-default"))
-    with st.expander("体素间距与 Z 轴比例"):
-        st.caption("填写当前预览网格的 Z/Y/X 间距（mm），二维切片、三视图和三维表面会同步更新。Z 应使用相邻切片中心的距离；存在层间隙时不能只填层厚。原图经 resize 或下采样后，间距也需相应换算。")
-        calibrated = st.checkbox("手动校准间距", key=f"showcase-spacing-enabled-{view_key}")
-        if calibrated:
-            spacing = [column.number_input(label, min_value=0.001, value=float(value), step=0.1,
-                       format="%.4f", key=f"showcase-spacing-{view_key}-{axis}")
-                       for axis, (column, label, value) in enumerate(zip(st.columns(3),
-                           ("Z 层间距（mm）", "Y 像素间距（mm）", "X 像素间距（mm）"), arrays["spacing"]))]
-            arrays = {**arrays, "spacing": np.asarray(spacing), "spacing_source": np.asarray("manual")}
-            st.caption("当前为手动校准值，未经原始影像验证；仅影响本次显示。取消勾选可恢复素材间距。")
-        else:
-            st.caption("当前 Z/Y/X：" + " / ".join(f"{v:g}" for v in arrays["spacing"]) +
-                       (" mm（素材记录）" if source == "protocol" else "（索引间距，无毫米标定）"))
-    if source == "index-space-default" and not calibrated:
-        st.warning("此病例缺少真实体素间距，当前按索引比例显示，Z 轴可能被压扁。请根据对应病例的影像信息校准。")
     if view == "三维浏览":
         try:
             state = render_volume(volume_envelope(example, arrays, case_id=f"example-{view_key}", task_id=task_id),

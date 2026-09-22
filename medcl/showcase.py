@@ -27,7 +27,7 @@ EXAMPLES = {
     "segmentation-weak": {"kind": "segmentation", "title": "弱监督分割",
                           "description": "稀疏涂鸦、完整分割区域与三维结构浏览。"},
     "registration": {"kind": "registration", "title": "医学影像配准",
-                     "description": "固定影像、移动影像、对齐参考与融合对比。"},
+                     "description": "固定影像、移动影像与对齐结果浏览。"},
 }
 COLORS = np.array([[38, 200, 122], [255, 181, 71], [96, 165, 250], [207, 122, 232],
                    [255, 112, 137], [67, 217, 214], [232, 222, 85]], dtype=np.uint8)
@@ -114,11 +114,6 @@ def overlay(image, labels, opacity=0.5, *, scribble=False, ignore=4):
     if scribble:
         result[labels == 0] = [220, 226, 235]
     return result
-
-
-def checkerboard(fixed, other, tile=12):
-    y, x = np.indices(fixed.shape)
-    return np.where((y // tile + x // tile) % 2 == 0, fixed, other)
 
 
 def physical_slice(pixels, spacing_zyx, axis):
@@ -225,11 +220,3 @@ def render(st, example):
                   ("配准结果" if sample == 2 else "对齐参考", cut("registered"))]
     for column, (label, pixels) in zip(st.columns(len(panels), gap="medium"), panels):
         column.image(physical_slice(pixels, arrays["spacing"], axis), caption=label, width="stretch")
-    if not segmentation:
-        st.subheader("对齐细节")
-        mode = st.radio("对比方式", ["棋盘格", "彩色融合"], horizontal=True)
-        for column, name, label in zip(st.columns(2), ("moving", "registered"),
-                                       ("原始图像对", "配准对齐状态" if sample == 2 else "参考对齐状态")):
-            pixels = checkerboard(cut("fixed"), cut(name)) if mode == "棋盘格" else np.stack(
-                [cut("fixed"), cut(name), cut(name)], axis=-1)
-            column.image(physical_slice(pixels, arrays["spacing"], axis), caption=label, width="stretch")
